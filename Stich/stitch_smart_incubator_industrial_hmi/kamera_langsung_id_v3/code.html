@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OVO-INCUBATOR-PRO - Kamera Langsung</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#5f5e5e",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-tertiary-fixed-variant": "#005313",
+                        "on-primary": "#313030",
+                        "tertiary-container": "#001702",
+                        "on-tertiary-fixed": "#002204",
+                        "surface-bright": "#38393a",
+                        "on-surface-variant": "#c4c7c7",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#94f990",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "inverse-on-surface": "#2f3131",
+                        "surface": "#121414",
+                        "on-surface": "#e2e2e2",
+                        "on-secondary": "#303030",
+                        "on-error": "#690005",
+                        "surface-variant": "#333535",
+                        "on-tertiary": "#00390a",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "surface-container-lowest": "#0d0e0f",
+                        "outline": "#8e9192",
+                        "background": "#121414",
+                        "outline-variant": "#444748",
+                        "error-container": "#93000a",
+                        "surface-container": "#1e2020",
+                        "secondary": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#474746",
+                        "tertiary": "#78dc77",
+                        "on-secondary-container": "#b6b5b4",
+                        "surface-container-low": "#1a1c1c",
+                        "secondary-container": "#474746",
+                        "on-background": "#e2e2e2",
+                        "primary-container": "#121212",
+                        "surface-tint": "#c8c6c5",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-dim": "#121414",
+                        "on-tertiary-container": "#2a9035",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-primary-container": "#7e7d7d",
+                        "primary-fixed": "#e5e2e1",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#282a2b",
+                        "surface-container-highest": "#333535",
+                        "tertiary-fixed-dim": "#78dc77",
+                        "primary": "#c8c6c5",
+                        "inverse-surface": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "touch-target-min": "48px",
+                        "panel-margin": "24px",
+                        "element-gap": "8px",
+                        "bezel-width": "2px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "readout-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "readout-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "readout-md": ["48px", { "lineHeight": "56px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "readout-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Skeuomorphic utilities */
+        .industrial-panel {
+            background-color: #2A2A2A;
+            box-shadow: inset 0px 2px 4px rgba(255, 255, 255, 0.05), 
+                        0px 4px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444748;
+        }
+        .recessed-well {
+            background-color: #1A1A1A;
+            box-shadow: inset 0px 4px 8px rgba(0,0,0,0.8),
+                        inset 0px -1px 2px rgba(255,255,255,0.05);
+            border: 1px solid #0d0e0f;
+        }
+        .tactile-btn {
+            background: linear-gradient(180deg, #333535 0%, #1e2020 100%);
+            box-shadow: inset 2px 2px 2px rgba(255, 255, 255, 0.1),
+                        3px 3px 6px rgba(0, 0, 0, 0.5),
+                        -1px -1px 2px rgba(255, 255, 255, 0.05);
+            border: 1px solid #444748;
+            transition: all 0.1s ease;
+        }
+        .tactile-btn:active {
+            background: linear-gradient(180deg, #1e2020 0%, #121414 100%);
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.6),
+                        inset -1px -1px 2px rgba(255, 255, 255, 0.05);
+            transform: translateY(1px);
+        }
+        .led-active {
+            box-shadow: 0 0 10px rgba(120, 220, 119, 0.8), inset 0 0 5px rgba(255,255,255,0.5);
+            background: radial-gradient(circle, #94f990 0%, #78dc77 100%);
+        }
+        .led-inactive {
+            background-color: #002204;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        /* Grid Layout */
+        .hmi-layout {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #121414;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-sm antialiased select-none">
+<div class="hmi-layout relative">
+<!-- TopAppBar -->
+<header class="bg-surface-container dark:bg-surface-container border-b-2 border-outline-variant shadow-[inset_0px_2px_4px_rgba(255,255,255,0.1)] shadow-md docked full-width top-0 flex justify-between items-center w-full px-panel-margin h-touch-target-min z-40">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight">
+                OVO-INCUBATOR-PRO
+            </div>
+<div class="flex items-center gap-element-gap">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-bright transition-colors rounded">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">cloud_done</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-bright transition-colors rounded">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings_ethernet</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-bright transition-colors rounded text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">emergency</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas (Camera View & Controls) -->
+<main class="p-panel-margin overflow-hidden flex gap-gutter">
+<!-- Camera Feed Area (Recessed) -->
+<div class="flex-grow recessed-well rounded-lg relative overflow-hidden flex flex-col">
+<!-- Status Overlay -->
+<div class="absolute top-4 left-4 z-10 flex gap-4">
+<div class="flex items-center gap-2 bg-surface-container-high/80 px-3 py-1 rounded backdrop-blur-sm border border-outline-variant">
+<div class="w-3 h-3 rounded-full led-active"></div>
+<span class="font-label-caps text-label-caps text-tertiary">LIVE FEED</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high/80 px-3 py-1 rounded backdrop-blur-sm border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface">CAM 1: INCUBATOR CORE</span>
+</div>
+</div>
+<!-- Fake Camera Feed Image -->
+<div class="w-full h-full relative" data-alt="A gritty, high-contrast industrial skeuomorphic view of the inside of a complex mechanical incubator machine. Dark, metallic surfaces illuminated by stark, moody green and white LED lights. The aesthetic is rugged, reliable, and slightly sinister, resembling a high-stakes control room display. The camera view is slightly distorted with a subtle lens flare and digital noise overlay." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbQyw29a1ksHzzkr_x-KBOhKI42K-9vy1JMp7LiyrEc9Ysg2ACrqWpiIH4ePOh_--pa3Tn5OjtQfKk9eId90kKJ7WwpZ5qyOQJBuaSK_L_lKn7-_wBeWa6LjAyFUVK3Sya0fylRO9AXXzl2qvRPPJm7R4Wm2n7DhycLyRQ3m8lc324bH0fmLGyhMuLFMz1Rsu5Tdi_jIuACOFaHR2Rvc2ykIEUJpruv7kS6vxZ-9Aj2aP-aNIW1T9eFA')">
+<!-- Overlay Grid for "Technical" feel -->
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0zOSAzOUgxVjFoMzh2Mzh6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] pointer-events-none"></div>
+<!-- Center Crosshair -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-16 h-16 border-2 border-tertiary/50 rounded-full flex items-center justify-center">
+<div class="w-2 h-2 bg-tertiary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Telemetry Overlay -->
+<div class="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-end font-label-caps text-label-caps text-on-surface-variant">
+<div class="flex flex-col gap-1 bg-surface-container-highest/80 p-2 rounded border border-outline-variant/50 backdrop-blur-md">
+<div>TEMP: <span class="text-tertiary">37.5°C</span></div>
+<div>HUM: <span class="text-tertiary">55%</span></div>
+</div>
+<div class="flex flex-col gap-1 text-right bg-surface-container-highest/80 p-2 rounded border border-outline-variant/50 backdrop-blur-md">
+<div>ZOOM: <span class="text-on-surface" id="zoom-readout">1.0x</span></div>
+<div>PTZ: <span class="text-on-surface">0, 45</span></div>
+</div>
+</div>
+</div>
+<!-- Controls Side Panel (Raised) -->
+<aside class="w-80 industrial-panel rounded-lg p-gutter flex flex-col gap-gutter shrink-0 overflow-y-auto">
+<h2 class="font-headline-md text-headline-md text-primary border-b border-outline-variant pb-2">PTZ CONTROL</h2>
+<!-- D-Pad (Pan/Tilt) -->
+<div class="flex justify-center my-4">
+<div class="grid grid-cols-3 grid-rows-3 gap-2 w-48 h-48 bg-surface-container-low p-2 rounded-full shadow-[inset_0px_2px_4px_rgba(0,0,0,0.5)] border border-outline-variant/30">
+<div></div>
+<button aria-label="Tilt Up" class="tactile-btn rounded-t-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">arrow_drop_up</span>
+</button>
+<div></div>
+<button aria-label="Pan Left" class="tactile-btn rounded-l-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">arrow_left</span>
+</button>
+<div class="flex items-center justify-center">
+<button class="w-10 h-10 tactile-btn rounded-full border-2 border-outline flex items-center justify-center text-xs font-label-caps text-on-surface-variant">
+                                RST
+                            </button>
+</div>
+<button aria-label="Pan Right" class="tactile-btn rounded-r-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">arrow_right</span>
+</button>
+<div></div>
+<button aria-label="Tilt Down" class="tactile-btn rounded-b-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">arrow_drop_down</span>
+</button>
+<div></div>
+</div>
+</div>
+<!-- Zoom Controls -->
+<div class="bg-surface-container p-3 rounded border border-outline-variant flex flex-col gap-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ZOOM</span>
+<div class="flex gap-2">
+<button class="tactile-btn flex-1 h-touch-target-min rounded flex items-center justify-center" onclick="updateZoom(-0.5)">
+<span class="material-symbols-outlined">zoom_out</span>
+</button>
+<button class="tactile-btn flex-1 h-touch-target-min rounded flex items-center justify-center" onclick="updateZoom(0.5)">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-auto flex gap-gutter">
+<button class="tactile-btn flex-1 h-touch-target-min rounded flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">CAPTURE</span>
+</button>
+<button class="tactile-btn flex-1 h-touch-target-min rounded flex flex-col items-center justify-center gap-1 group" id="record-btn">
+<span class="material-symbols-outlined text-error" id="record-icon" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">RECORD</span>
+</button>
+</div>
+</aside>
+</main>
+<!-- BottomNavBar (Hidden on md, visible on smaller? Wait, spec says use full nav cluster in TopAppBar for Web, hide BottomNavBar. BUT the user explicitly requested "dengan tab KAMERA aktif di navbar bawah". I will render it and use fixed positioning as per JSON, but ensure it shows up to satisfy the prompt's explicit requirement.) -->
+<nav class="bg-surface-container-high dark:bg-surface-container-high border-t-2 border-outline-variant shadow-[0px_-4px_8px_rgba(0,0,0,0.5)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 h-24">
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">home</span>
+<span class="font-label-caps text-label-caps">HOME</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">tune</span>
+<span class="font-label-caps text-label-caps">CONTROL</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">account_tree</span>
+<span class="font-label-caps text-label-caps">RULEBASE</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">layers</span>
+<span class="font-label-caps text-label-caps">BATCH</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">grid_view</span>
+<span class="font-label-caps text-label-caps">RACK</span>
+</button>
+<!-- ACTIVE TAB -->
+<button class="flex flex-col items-center justify-center bg-secondary-container text-tertiary rounded-xl border-2 border-tertiary shadow-[inset_0px_2px_4px_rgba(0,0,0,0.6)] hover:brightness-110 w-20 h-20">
+<span class="material-symbols-outlined text-3xl mb-1" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="font-label-caps text-label-caps">CAMERA</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 w-20 h-20 rounded-lg">
+<span class="material-symbols-outlined text-3xl mb-1">settings</span>
+<span class="font-label-caps text-label-caps">SETTINGS</span>
+</button>
+</nav>
+<!-- Padding for Bottom Nav in Grid layout to prevent overlap if content scrolls -->
+<div class="h-24"></div>
+</div>
+<script>
+        // Simple interactions
+        let currentZoom = 1.0;
+        function updateZoom(delta) {
+            currentZoom = Math.max(1.0, Math.min(5.0, currentZoom + delta));
+            document.getElementById('zoom-readout').textContent = currentZoom.toFixed(1) + 'x';
+        }
+
+        const recordBtn = document.getElementById('record-btn');
+        const recordIcon = document.getElementById('record-icon');
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', () => {
+            isRecording = !isRecording;
+            if (isRecording) {
+                recordIcon.classList.add('led-active');
+                recordIcon.classList.remove('text-error');
+                recordIcon.style.color = '#ffb4ab'; // light red for active
+                recordBtn.style.boxShadow = 'inset 2px 2px 4px rgba(0, 0, 0, 0.6)'; // look pressed
+            } else {
+                recordIcon.classList.remove('led-active');
+                recordIcon.classList.add('text-error');
+                recordIcon.style.color = '';
+                recordBtn.style.boxShadow = ''; // restore normal
+            }
+        });
+    </script>
+</body></html>

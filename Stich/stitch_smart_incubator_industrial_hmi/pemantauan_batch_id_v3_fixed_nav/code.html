@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Batch Monitoring - OVO-INCUBATOR-PRO</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#5f5e5e",
+                    "secondary-fixed": "#e4e2e1",
+                    "on-tertiary-fixed-variant": "#005313",
+                    "on-primary": "#313030",
+                    "tertiary-container": "#001702",
+                    "on-tertiary-fixed": "#002204",
+                    "surface-bright": "#38393a",
+                    "on-surface-variant": "#c4c7c7",
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#94f990",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "inverse-on-surface": "#2f3131",
+                    "surface": "#121414",
+                    "on-surface": "#e2e2e2",
+                    "on-secondary": "#303030",
+                    "on-error": "#690005",
+                    "surface-variant": "#333535",
+                    "on-tertiary": "#00390a",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "surface-container-lowest": "#0d0e0f",
+                    "outline": "#8e9192",
+                    "background": "#121414",
+                    "outline-variant": "#444748",
+                    "error-container": "#93000a",
+                    "surface-container": "#1e2020",
+                    "secondary": "#c8c6c5",
+                    "on-secondary-fixed-variant": "#474746",
+                    "tertiary": "#78dc77",
+                    "on-secondary-container": "#b6b5b4",
+                    "surface-container-low": "#1a1c1c",
+                    "secondary-container": "#474746",
+                    "on-background": "#e2e2e2",
+                    "primary-container": "#121212",
+                    "surface-tint": "#c8c6c5",
+                    "on-primary-fixed-variant": "#474646",
+                    "surface-dim": "#121414",
+                    "on-tertiary-container": "#2a9035",
+                    "on-primary-fixed": "#1c1b1b",
+                    "on-primary-container": "#7e7d7d",
+                    "primary-fixed": "#e5e2e1",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#282a2b",
+                    "surface-container-highest": "#333535",
+                    "tertiary-fixed-dim": "#78dc77",
+                    "primary": "#c8c6c5",
+                    "inverse-surface": "#e2e2e2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "touch-target-min": "48px",
+                    "panel-margin": "24px",
+                    "element-gap": "8px",
+                    "bezel-width": "2px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "readout-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-caps": ["JetBrains Mono"],
+                    "readout-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "readout-md": ["48px", {"lineHeight": "56px", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "readout-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Custom Skeuomorphic Utilities */
+        .recessed-panel {
+            box-shadow: inset 0px 4px 8px rgba(0,0,0,0.8), inset 0px -1px 2px rgba(255,255,255,0.05);
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+        }
+        .raised-button {
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.5), -1px -1px 2px rgba(255,255,255,0.1), inset 1px 1px 1px rgba(255,255,255,0.1);
+        }
+        .raised-button:active, .raised-button.active-toggle {
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(255,255,255,0.05);
+            transform: translateY(1px);
+        }
+        .led-glow-green {
+            filter: drop-shadow(0 0 8px rgba(120, 220, 119, 0.8));
+        }
+        .led-glow-blue {
+            filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.8));
+        }
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(142, 145, 146, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(142, 145, 146, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1c1c] text-on-surface font-body-lg h-screen flex flex-col overflow-hidden selection:bg-tertiary selection:text-tertiary-container">
+<!-- TopAppBar -->
+<header class="bg-surface-container-high border-b-2 border-outline-variant shadow-[0px_4px_8px_rgba(0,0,0,0.5)] z-50 px-4 py-3 flex items-center justify-between shrink-0 h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-tertiary-container border border-tertiary flex items-center justify-center shadow-[inset_0px_0px_8px_rgba(120,220,119,0.3)]">
+<span class="material-symbols-outlined text-tertiary text-sm led-glow-green" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface tracking-widest">OVO-INCUBATOR-PRO</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-[10px] text-tertiary flex items-center gap-1 border border-tertiary/30 px-2 py-1 rounded bg-tertiary/10">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary led-glow-green animate-pulse"></div>
+            SYSTEM NOMINAL
+        </span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-panel-margin overflow-y-auto bg-[#1a1c1c]">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-gutter">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-wide flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary led-glow-green" style="font-variation-settings: 'FILL' 1;">trip_origin</span>
+                    BATCH MONITORING
+                </h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">ID: BATCH-2023-X99-PRO</p>
+</div>
+<!-- Time Filter Toggle Bank (Industrial Switch Style) -->
+<div class="flex bg-surface-container p-1 rounded-lg border-2 border-outline-variant shadow-[inset_0px_2px_4px_rgba(0,0,0,0.5)]">
+<button class="raised-button px-6 py-2 rounded font-label-caps text-label-caps text-on-surface-variant bg-surface transition-all duration-75">1H</button>
+<button class="raised-button active-toggle px-6 py-2 rounded font-label-caps text-label-caps text-tertiary bg-secondary-container transition-all duration-75 relative overflow-hidden">
+                    6H
+                    <div class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-tertiary led-glow-green"></div>
+</button>
+<button class="raised-button px-6 py-2 rounded font-label-caps text-label-caps text-on-surface-variant bg-surface transition-all duration-75">24H</button>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-panel-margin h-[calc(100%-80px)]">
+<!-- Left Column: Status Readouts -->
+<div class="xl:col-span-1 flex flex-col gap-panel-margin">
+<!-- Temperature Module -->
+<div class="bg-surface-container rounded-xl p-4 border border-outline-variant flex-1 flex flex-col shadow-[2px_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-tertiary led-glow-green opacity-50"></div>
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TEMP / ZONE A</span>
+<span class="material-symbols-outlined text-tertiary">device_thermostat</span>
+</div>
+<div class="recessed-panel flex-1 rounded-lg flex items-center justify-center bg-surface-container-lowest border border-[#0d0e0f]">
+<div class="text-center">
+<span class="font-readout-lg text-readout-lg text-tertiary led-glow-green block">37.5°</span>
+<span class="font-label-caps text-label-caps text-tertiary opacity-80">TARGET: 37.8°</span>
+</div>
+</div>
+</div>
+<!-- Humidity Module -->
+<div class="bg-surface-container rounded-xl p-4 border border-outline-variant flex-1 flex flex-col shadow-[2px_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#64b4ff] led-glow-blue opacity-50"></div>
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">HUMIDITY / ZONE A</span>
+<span class="material-symbols-outlined text-[#64b4ff]">water_drop</span>
+</div>
+<div class="recessed-panel flex-1 rounded-lg flex items-center justify-center bg-surface-container-lowest border border-[#0d0e0f]">
+<div class="text-center">
+<span class="font-readout-lg text-readout-lg text-[#64b4ff] led-glow-blue block">65.2%</span>
+<span class="font-label-caps text-label-caps text-[#64b4ff] opacity-80">TARGET: 65.0%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Trend Graph (Skeuomorphic Display) -->
+<div class="xl:col-span-3 bg-surface-container rounded-xl p-4 border border-outline-variant shadow-[2px_2px_8px_rgba(0,0,0,0.5)] flex flex-col">
+<div class="flex justify-between items-center mb-4 px-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">monitoring</span>
+                        REAL-TIME TELEMETRY (6H WINDOW)
+                    </span>
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-tertiary flex items-center gap-1">
+<div class="w-3 h-1 bg-tertiary led-glow-green"></div> TEMP
+                        </span>
+<span class="font-label-caps text-label-caps text-[#64b4ff] flex items-center gap-1">
+<div class="w-3 h-1 bg-[#64b4ff] led-glow-blue"></div> HUM
+                        </span>
+</div>
+</div>
+<!-- Graph Canvas Recess -->
+<div class="recessed-panel flex-1 rounded-lg border border-[#0d0e0f] bg-surface-container-lowest relative overflow-hidden grid-bg">
+<!-- Y Axis Labels -->
+<div class="absolute left-2 top-0 bottom-0 py-4 flex flex-col justify-between font-label-caps text-[10px] text-outline opacity-50 z-10">
+<span class="">100</span>
+<span class="">80</span>
+<span class="">60</span>
+<span class="">40</span>
+<span class="">20</span>
+<span class="">0</span>
+</div>
+<!-- X Axis Labels -->
+<div class="absolute bottom-1 left-12 right-4 flex justify-between font-label-caps text-[10px] text-outline opacity-50 z-10">
+<span class="">-6H</span>
+<span class="">-4H</span>
+<span class="">-2H</span>
+<span class="">NOW</span>
+</div>
+<!-- SVG Chart Lines -->
+<svg class="absolute inset-0 w-full h-full pb-6 pl-12 pr-4 pt-4" preserveaspectratio="none" viewbox="0 0 1000 100">
+<!-- Humidity Line (Blue) -->
+<path class="led-glow-blue" d="M0,40 Q100,45 200,35 T400,38 T600,30 T800,35 T1000,34" fill="none" stroke="#64b4ff" stroke-linejoin="round" stroke-width="2"></path>
+<!-- Temperature Line (Green) -->
+<path class="led-glow-green" d="M0,60 Q100,58 200,62 T400,60 T600,65 T800,62 T1000,62.5" fill="none" stroke="#78dc77" stroke-linejoin="round" stroke-width="2"></path>
+<!-- Current Time Marker (Scanner Line effect) -->
+<line opacity="0.3" stroke="#c8c6c5" stroke-dasharray="2,2" stroke-width="1" x1="98%" x2="98%" y1="0" y2="100"></line>
+<circle class="led-glow-blue" cx="98%" cy="34" fill="#64b4ff" r="3"></circle>
+<circle class="led-glow-green" cx="98%" cy="62.5" fill="#78dc77" r="3"></circle>
+</svg>
+<!-- CRT Scanline overlay effect -->
+<div class="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,20,20,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-20"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Shell, Web Hidden by rule, but forced visible md:hidden) -->
+<nav class="bg-surface-container-high border-t-2 border-outline-variant shadow-[0px_-4px_8px_rgba(0,0,0,0.5)] flex shrink-0 justify-around items-center px-4 py-2 h-24 w-full z-50">
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">home</span>
+<span class="font-label-caps text-[10px]">HOME</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">tune</span>
+<span class="font-label-caps text-[10px]">CONTROL</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">rule</span>
+<span class="font-label-caps text-[10px]">RULEBASE</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-tertiary rounded-xl border-2 border-tertiary shadow-[inset_0px_2px_4px_rgba(0,0,0,0.6)] scale-95 transition-transform duration-75 h-16 w-16 relative overflow-hidden">
+<div class="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-tertiary led-glow-green"></div>
+<span class="material-symbols-outlined text-tertiary mb-1" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label-caps text-[10px] text-tertiary">BATCH</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">grid_view</span>
+<span class="font-label-caps text-[10px]">RACK</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">videocam</span>
+<span class="font-label-caps text-[10px]">CAMERA</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-16 w-16 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-1">settings</span>
+<span class="font-label-caps text-[10px]">SETTINGS</span>
+</button>
+</nav>
+</body></html>

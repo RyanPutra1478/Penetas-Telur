@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Alarm &amp; Diagnostik</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-primary": "#5f5e5e",
+                      "secondary-fixed": "#e4e2e1",
+                      "on-tertiary-fixed-variant": "#005313",
+                      "on-primary": "#313030",
+                      "tertiary-container": "#001702",
+                      "on-tertiary-fixed": "#002204",
+                      "surface-bright": "#38393a",
+                      "on-surface-variant": "#c4c7c7",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed": "#94f990",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "inverse-on-surface": "#2f3131",
+                      "surface": "#121414",
+                      "on-surface": "#e2e2e2",
+                      "on-secondary": "#303030",
+                      "on-error": "#690005",
+                      "surface-variant": "#333535",
+                      "on-tertiary": "#00390a",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "secondary-fixed-dim": "#c8c6c5",
+                      "surface-container-lowest": "#0d0e0f",
+                      "outline": "#8e9192",
+                      "background": "#121414",
+                      "outline-variant": "#444748",
+                      "error-container": "#93000a",
+                      "surface-container": "#1e2020",
+                      "secondary": "#c8c6c5",
+                      "on-secondary-fixed-variant": "#474746",
+                      "tertiary": "#78dc77",
+                      "on-secondary-container": "#b6b5b4",
+                      "surface-container-low": "#1a1c1c",
+                      "secondary-container": "#474746",
+                      "on-background": "#e2e2e2",
+                      "primary-container": "#121212",
+                      "surface-tint": "#c8c6c5",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-dim": "#121414",
+                      "on-tertiary-container": "#2a9035",
+                      "on-primary-fixed": "#1c1b1b",
+                      "on-primary-container": "#7e7d7d",
+                      "primary-fixed": "#e5e2e1",
+                      "error": "#ffb4ab",
+                      "surface-container-high": "#282a2b",
+                      "surface-container-highest": "#333535",
+                      "tertiary-fixed-dim": "#78dc77",
+                      "primary": "#c8c6c5",
+                      "inverse-surface": "#e2e2e2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "touch-target-min": "48px",
+                      "panel-margin": "24px",
+                      "element-gap": "8px",
+                      "bezel-width": "2px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "readout-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "readout-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "readout-md": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "readout-lg": [
+                              "64px",
+                              {
+                                      "lineHeight": "72px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .skeuo-bevel {
+            box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.1), 3px 3px 5px 0px rgba(0,0,0,0.5);
+        }
+        .skeuo-bevel:active {
+            box-shadow: inset 2px 2px 5px 0px rgba(0,0,0,0.6);
+            transform: translate(1px, 1px);
+        }
+        .skeuo-recessed {
+            box-shadow: inset 0px 4px 8px rgba(0,0,0,0.6);
+            background-color: #1A1A1A;
+        }
+        .led-glow-red {
+            filter: drop-shadow(0 0 8px rgba(255,180,171, 0.8));
+        }
+        .led-glow-green {
+            filter: drop-shadow(0 0 8px rgba(120,220,119, 0.8));
+        }
+        .led-glow-yellow {
+            filter: drop-shadow(0 0 8px rgba(255,215,0, 0.8));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-lg min-h-screen flex flex-col pt-touch-target-min pb-24 overflow-x-hidden selection:bg-tertiary selection:text-tertiary-container">
+<!-- TopAppBar -->
+<header class="fixed bg-surface-container dark:bg-surface-container docked full-width top-0 bg-surface-container border-b-2 border-outline-variant shadow-[inset_0px_2px_4px_rgba(255,255,255,0.1)] shadow-md flex justify-between items-center w-full px-panel-margin h-touch-target-min z-50">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight">OVO-INCUBATOR-PRO</div>
+<div class="flex gap-element-gap text-on-surface-variant">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined" data-icon="cloud_done">cloud_done</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined" data-icon="settings_ethernet">settings_ethernet</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center rounded hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-error led-glow-red" data-icon="emergency">emergency</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow p-panel-margin grid grid-cols-1 md:grid-cols-2 gap-panel-margin">
+<!-- Active Alarms Panel -->
+<section class="skeuo-recessed rounded-xl p-gutter border border-outline-variant flex flex-col gap-gutter">
+<h2 class="font-headline-md text-headline-md text-error border-b border-outline-variant pb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-error led-glow-red" data-icon="warning">warning</span>
+                ALARM AKTIF
+            </h2>
+<div class="flex flex-col gap-element-gap overflow-y-auto max-h-[500px]">
+<div class="bg-surface-container-high border-l-4 border-error p-gutter rounded shadow-sm flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-error bg-error-container px-2 py-1 rounded">KRITIS</span>
+<span class="text-on-surface-variant text-sm ml-2">14:02:15</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ID: ERR-T09</span>
+</div>
+<div class="font-body-lg text-on-surface">Temperatur Rak A melebihi ambang batas (39.5°C).</div>
+<div class="flex justify-end mt-2">
+<button class="skeuo-bevel bg-surface-variant text-on-surface font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            KONFIRMASI
+                        </button>
+</div>
+</div>
+<div class="bg-surface-container-high border-l-4 border-yellow-500 p-gutter rounded shadow-sm flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-yellow-500 bg-yellow-900/30 px-2 py-1 rounded">PERINGATAN</span>
+<span class="text-on-surface-variant text-sm ml-2">13:45:00</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ID: WRN-M02</span>
+</div>
+<div class="font-body-lg text-on-surface">Torsi Motor Penggerak B tinggi. Cek pelumasan.</div>
+<div class="flex justify-end mt-2">
+<button class="skeuo-bevel bg-surface-variant text-on-surface font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            KONFIRMASI
+                        </button>
+</div>
+</div>
+<div class="bg-surface-container-high border-l-4 border-outline p-gutter rounded shadow-sm flex flex-col gap-2 opacity-60">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-outline bg-surface-variant px-2 py-1 rounded">INFO</span>
+<span class="text-on-surface-variant text-sm ml-2">10:15:33</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ID: INF-C01</span>
+</div>
+<div class="font-body-lg text-on-surface line-through">Sinkronisasi Cloud tertunda (Telah dipulihkan).</div>
+<div class="flex justify-end mt-2">
+<span class="font-label-caps text-label-caps text-tertiary">DIKONFIRMASI OLEH OP1</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Diagnostics Panel -->
+<section class="skeuo-recessed rounded-xl p-gutter border border-outline-variant flex flex-col gap-gutter">
+<h2 class="font-headline-md text-headline-md text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="troubleshoot">troubleshoot</span>
+                STATUS KESEHATAN SISTEM
+            </h2>
+<div class="grid grid-cols-1 gap-gutter">
+<!-- Sensor Node -->
+<div class="bg-surface-container border border-outline-variant rounded p-gutter flex items-center justify-between">
+<div class="flex items-center gap-gutter">
+<div class="w-12 h-12 rounded-full bg-surface-variant skeuo-bevel flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary led-glow-green" data-icon="sensors">sensors</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md">Jaringan Sensor</div>
+<div class="font-body-sm text-on-surface-variant">48/48 Aktif | Latensi 12ms</div>
+</div>
+</div>
+<div class="font-label-caps text-label-caps text-tertiary">OPTIMAL</div>
+</div>
+<!-- Motor Control -->
+<div class="bg-surface-container border border-outline-variant rounded p-gutter flex items-center justify-between relative overflow-hidden">
+<div class="absolute inset-0 bg-yellow-900/10 opacity-50 z-0"></div>
+<div class="flex items-center gap-gutter relative z-10">
+<div class="w-12 h-12 rounded-full bg-surface-variant skeuo-bevel flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-500 led-glow-yellow" data-icon="settings_b_roll">settings_b_roll</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md">Aktuator &amp; Motor</div>
+<div class="font-body-sm text-on-surface-variant">Motor B Torsi Tinggi | Beban 85%</div>
+</div>
+</div>
+<div class="font-label-caps text-label-caps text-yellow-500 relative z-10">PERINGATAN</div>
+</div>
+<!-- Cloud Sync -->
+<div class="bg-surface-container border border-outline-variant rounded p-gutter flex items-center justify-between">
+<div class="flex items-center gap-gutter">
+<div class="w-12 h-12 rounded-full bg-surface-variant skeuo-bevel flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary led-glow-green" data-icon="cloud_sync">cloud_sync</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md">Koneksi Cloud</div>
+<div class="font-body-sm text-on-surface-variant">Sinkronisasi Terakhir: 2 mnt lalu</div>
+</div>
+</div>
+<div class="font-label-caps text-label-caps text-tertiary">STABIL</div>
+</div>
+<!-- System Load Meter (Skeuomorphic representation) -->
+<div class="bg-surface-container-high rounded p-gutter mt-4">
+<div class="flex justify-between mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">BEBAN CPU SISTEM</span>
+<span class="font-label-caps text-label-caps text-primary">42%</span>
+</div>
+<div class="h-4 w-full bg-surface-container-lowest rounded-full skeuo-recessed overflow-hidden relative">
+<!-- Segmented LED Bar effect -->
+<div class="absolute top-0 left-0 h-full w-[42%] bg-gradient-to-r from-tertiary to-tertiary-fixed border-r border-background shadow-[0_0_10px_rgba(120,220,119,0.8)]" style="background-image: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.5) 4px, rgba(0,0,0,0.5) 6px);"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bg-surface-container-high dark:bg-surface-container-high docked full-width bottom-0 h-24 bg-surface-container-high border-t-2 border-outline-variant shadow-[0px_-4px_8px_rgba(0,0,0,0.5)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 font-label-caps text-label-caps text-secondary dark:text-secondary">
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="home">home</span>
+<span>HOME</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="tune">tune</span>
+<span>CONTROL</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="account_tree">account_tree</span>
+<span>RULEBASE</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="layers">layers</span>
+<span>BATCH</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="grid_view">grid_view</span>
+<span>RACK</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] w-20 h-20 rounded-xl hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="videocam">videocam</span>
+<span>CAMERA</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-tertiary rounded-xl border-2 border-tertiary shadow-[inset_0px_2px_4px_rgba(0,0,0,0.6)] w-20 h-20 hover:brightness-110">
+<span class="material-symbols-outlined text-[32px] mb-1" data-icon="settings">settings</span>
+<span>SETTINGS</span>
+</button>
+</nav>
+</body></html>

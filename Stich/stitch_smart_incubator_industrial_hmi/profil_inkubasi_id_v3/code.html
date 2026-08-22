@@ -1,0 +1,340 @@
+<!DOCTYPE html><html class="dark" lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Profil Inkubasi - OVO-INCUBATOR-PRO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-primary": "#5f5e5e",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-tertiary-fixed-variant": "#005313",
+                        "on-primary": "#313030",
+                        "tertiary-container": "#001702",
+                        "on-tertiary-fixed": "#002204",
+                        "surface-bright": "#38393a",
+                        "on-surface-variant": "#c4c7c7",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#94f990",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "inverse-on-surface": "#2f3131",
+                        "surface": "#121414",
+                        "on-surface": "#e2e2e2",
+                        "on-secondary": "#303030",
+                        "on-error": "#690005",
+                        "surface-variant": "#333535",
+                        "on-tertiary": "#00390a",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "surface-container-lowest": "#0d0e0f",
+                        "outline": "#8e9192",
+                        "background": "#121414",
+                        "outline-variant": "#444748",
+                        "error-container": "#93000a",
+                        "surface-container": "#1e2020",
+                        "secondary": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#474746",
+                        "tertiary": "#78dc77",
+                        "on-secondary-container": "#b6b5b4",
+                        "surface-container-low": "#1a1c1c",
+                        "secondary-container": "#474746",
+                        "on-background": "#e2e2e2",
+                        "primary-container": "#121212",
+                        "surface-tint": "#c8c6c5",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-dim": "#121414",
+                        "on-tertiary-container": "#2a9035",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-primary-container": "#7e7d7d",
+                        "primary-fixed": "#e5e2e1",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#282a2b",
+                        "surface-container-highest": "#333535",
+                        "tertiary-fixed-dim": "#78dc77",
+                        "primary": "#c8c6c5",
+                        "inverse-surface": "#e2e2e2"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "gutter": "16px",
+                        "touch-target-min": "48px",
+                        "panel-margin": "24px",
+                        "element-gap": "8px",
+                        "bezel-width": "2px"
+                    },
+                    fontFamily: {
+                        "headline-md": ["Inter"],
+                        "readout-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "readout-lg": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "readout-md": ["48px", { lineHeight: "56px", fontWeight: "600" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "body-lg": ["18px", { lineHeight: "26px", fontWeight: "400" }],
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.1em", fontWeight: "700" }],
+                        "readout-lg": ["64px", { lineHeight: "72px", letterSpacing: "-0.02em", fontWeight: "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #121414; /* Match bg-surface */
+            color: #e2e2e2; /* Match text-on-surface */
+        }
+        
+        .skeuo-panel {
+            background-color: #1e2020;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), -1px -1px 2px rgba(255, 255, 255, 0.05);
+        }
+
+        .skeuo-recessed {
+            background-color: #1a1c1c;
+            box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.6);
+            border: 1px solid #333535;
+        }
+
+        .skeuo-button {
+            background: linear-gradient(145deg, #2a2c2d, #1a1b1b);
+            box-shadow:  2px 2px 5px #070808, -2px -2px 5px #1d2020;
+            transition: all 0.1s ease;
+        }
+        
+        .skeuo-button:active {
+            background: #121414;
+            box-shadow: inset 2px 2px 5px #070808, inset -2px -2px 5px #1d2020;
+        }
+
+        .skeuo-led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #00390a;
+            box-shadow: inset 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        
+        .skeuo-led.active {
+            background-color: #78dc77;
+            box-shadow: 0 0 10px #78dc77, inset 0px 1px 3px rgba(255,255,255,0.5);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen overflow-x-hidden font-body-lg">
+<!-- TopAppBar -->
+<header class="bg-surface-container border-b-2 border-outline-variant shadow-[inset_0px_2px_4px_rgba(255,255,255,0.1)] shadow-md flex justify-between items-center w-full px-panel-margin h-touch-target-min fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">OVO-INCUBATOR-PRO</span>
+</div>
+<div class="flex items-center gap-element-gap">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary hover:bg-surface-bright transition-colors rounded">
+<span class="material-symbols-outlined">cloud_done</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary hover:bg-surface-bright transition-colors rounded">
+<span class="material-symbols-outlined">settings_ethernet</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary hover:bg-surface-bright transition-colors rounded">
+<span class="material-symbols-outlined">emergency</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 mt-[48px] mb-[96px] p-panel-margin pb-32">
+<div class="max-w-[1200px] mx-auto">
+<div class="mb-gutter flex items-center justify-between">
+<h1 class="font-headline-md text-headline-md text-on-surface">PILIH PROFIL INKUBASI</h1>
+<div class="flex items-center gap-2 skeuo-recessed px-4 py-2 rounded">
+<span class="skeuo-led active"></span>
+<span class="font-label-caps text-label-caps text-tertiary">SYSTEM READY</span>
+</div>
+</div>
+<!-- Profile Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- AYAM -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A detailed digital illustration of a chicken egg in an industrial setting. The egg is perfectly smooth, lit by harsh, cool white overhead lights against a dark, metallic grated background. Deep shadows emphasize the egg's curvature. The overall aesthetic is gritty, functional, and hyper-realistic, suited for an industrial control panel interface. Muted colors with sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6jH-zNi_GqqxW_84VKQ-ArbQF31k5T9MfooulOMIo6CxFtqtqLO2s_GGnsJpiOywKykVwGP_L9wdlVmondH_RgPXNPxboQUJu5jjQkKqLhBLyS54gaWIWUmW6_WGHvDIt5s8mpD2TuhlSDyJV8A07wzc5UflKO43JnPoLvQnoKm9xL-xihNNEaBAIIrhZb5I5PsZapkDH79ZhV_wp9j8m_ikxsw-5Nuf4Y7L1OE_IFkBkI3y0kxORsg">
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">AYAM</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">DURASI: 21 HARI</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">37.8°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">55%</span>
+</div>
+</div>
+</div>
+</button>
+<!-- BEBEK -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A detailed digital illustration of a duck egg in an industrial setting. The egg is slightly larger and off-white, lit by harsh, cool white overhead lights against a dark, metallic grated background. Deep shadows emphasize the egg's curvature. The overall aesthetic is gritty, functional, and hyper-realistic, suited for an industrial control panel interface. Muted colors with sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwf48cK7ebdY3LBfX7SScvU4g9UGuTANDS0ipueRAOAUoCUNOkgO1x8qtmx3QFw24KZGz6C8SnCKy4aln3WnLzIEcXmpFNw2JuLMwbiYURu8hs5MoeBUZZjgbiCHoHcjeAb8KDQwNwbxCm__alV656NmDqB7DGVbj1mOfYRnHuI2SDVuE7EuoWzofcuimqlF4GaVjJV8kFhjudnOA04EFHHiWIFd6ebdpRjsfIMbvAq3iQlDzA28pgdQ">
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">BEBEK</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">DURASI: 28 HARI</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">37.5°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">60%</span>
+</div>
+</div>
+</div>
+</button>
+<!-- PUYUH -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A detailed digital illustration of a speckled quail egg in an industrial setting. The egg is small with distinct dark spots, lit by harsh, cool white overhead lights against a dark, metallic grated background. Deep shadows emphasize the egg's curvature. The overall aesthetic is gritty, functional, and hyper-realistic, suited for an industrial control panel interface. Muted colors with sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-xltQWW11ofvi1JhMt43k5l6TlliO0J5Wo0pov_bObzrQSh_j4PdOxQuKAGoV8eRw1VdqKEc35-n3OfF6okIkCdys6n5nO24RSwSGjPStP1mJfnvEKS4dulr4gtfLTc_JPjJJAiF_b0m0MJWoTdSIw7JFJGgtKXEKQT5vQx8JBTTezWS3Mopr5qsupeLyrWC5YbJ89kBgs6hrj9z0J4jO659GxBam43JBqBds2k1MJunHX_DoW5d88w">
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">PUYUH</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">DURASI: 18 HARI</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">37.7°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">50%</span>
+</div>
+</div>
+</div>
+</button>
+<!-- KALKUN -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A detailed digital illustration of a large turkey egg in an industrial setting. The egg is noticeably large with a slightly textured shell, lit by harsh, cool white overhead lights against a dark, metallic grated background. Deep shadows emphasize the egg's curvature. The overall aesthetic is gritty, functional, and hyper-realistic, suited for an industrial control panel interface. Muted colors with sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2aWto45vtOFf2-uEeMD9sh_h_iW0aSJ6Uo4bA9Z-2F-a-rlbZzlViEpWnmyfOMwpJDWRRQQyo8dWhdAJU_aAwDvSVHt00-fQM2VIwIskDRcy0-yfu1I8u6bUhOOMjLEm4RmsykhaWKQ1CQUpBoE8Os5QKltZe-Nb2AjRH-4Hi1x3h22zhKisKn54eG3Agos3JpyNr4W2F3-GsKQXem-kzo5olkhH6Kl6aDBXRgWrh-oJ4Y9_QXlbPWw">
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">KALKUN</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">DURASI: 28 HARI</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">37.5°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">55%</span>
+</div>
+</div>
+</div>
+</button>
+<!-- ANGSA -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A detailed digital illustration of a large goose egg in an industrial setting. The egg is stark white and substantial, lit by harsh, cool white overhead lights against a dark, metallic grated background. Deep shadows emphasize the egg's curvature. The overall aesthetic is gritty, functional, and hyper-realistic, suited for an industrial control panel interface. Muted colors with sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPoynGajy7cvEw6RdQNZfwpRHTR4MFkLEJs32yJFzcisxnrZLE3ZrxHuMjteidUkMVlJkZjbiGkVLD9C4jDByxqS52cg1D6i1YOpGXWyxiBJt9NDA3Gk9PbDrETk6J911858EwTOdgNQANL8e9DQASC2GcSz8hmdLUuJKAWF2tPHSGTxHPXhBqyRVZR2GIC9-7Ppq8bXcAycPgyItP15jADpArWqxMKaZgTdkt_z6jWNBvHl6kG0DCrQ">
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">ANGSA</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">DURASI: 30 HARI</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">37.6°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">65%</span>
+</div>
+</div>
+</div>
+</button>
+<!-- KUSTOM -->
+<button class="skeuo-button p-gutter rounded-xl flex flex-col items-center justify-center gap-4 group border-2 border-dashed border-outline-variant hover:border-tertiary">
+<div class="w-24 h-24 rounded-full skeuo-recessed flex items-center justify-center bg-surface-container-low">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-tertiary transition-colors">tune</span>
+</div>
+<div class="text-center">
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">KUSTOM</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-2">TENTUKAN MANUAL</div>
+<div class="flex justify-center gap-4 mt-4 opacity-50">
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">TEMP</span>
+<span class="font-label-caps text-label-caps text-on-surface">--.-°C</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">HUM</span>
+<span class="font-label-caps text-label-caps text-on-surface">--%</span>
+</div>
+</div>
+</div>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<!-- The user requested "tab PROFIL aktif" but the provided JSON doesn't have a "PROFILE" tab. 
+         Based on the context of selecting an incubation profile (settings/configuration for the run), 
+         "SETTINGS" or "CONTROL" or "RULEBASE" might be the closest semantic match if we strictly follow the JSON.
+         However, let's map the conceptual "Profile" to the closest available in JSON. 
+         "RULEBASE" (Rulebase/Profiles) is the best semantic match for selecting a set of rules (chicken, duck, etc). -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-high border-t-2 border-outline-variant shadow-[0px_-4px_8px_rgba(0,0,0,0.5)] h-24"><div class="max-w-[1200px] mx-auto w-full flex justify-around items-center gap-1 h-full">
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-caps text-label-caps">BERANDA</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">tune</span>
+<span class="font-label-caps text-label-caps">KONTROL</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-tertiary rounded-xl border-2 border-tertiary shadow-[inset_0px_2px_4px_rgba(0,0,0,0.6)] transition-transform duration-75 hover:brightness-110 h-full flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1 fill text-tertiary drop-shadow-[0_0_10px_rgba(120,220,119,0.8)]">account_tree</span>
+<span class="font-label-caps text-label-caps text-tertiary drop-shadow-[0_0_10px_rgba(120,220,119,0.8)]">RULEBASE</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">layers</span>
+<span class="font-label-caps text-label-caps">BATCH</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">grid_view</span>
+<span class="font-label-caps text-label-caps">RACK</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">videocam</span>
+<span class="font-label-caps text-label-caps">KAMERA</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant bg-surface-container border-2 border-transparent shadow-[2px_2px_4px_rgba(0,0,0,0.5),-1px_-1px_2px_rgba(255,255,255,0.05)] hover:brightness-110 h-full rounded flex-1 min-w-0">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-caps text-label-caps">SETTINGS</span>
+</button>
+</div></nav>
+
+
+</body></html>
