@@ -20,11 +20,11 @@ const BottomNavBar = () => {
       borderTop: '1px solid #E2E8F0',
       boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
       zIndex: 50,
-      padding: '4px 16px',
+      padding: '2px 14px',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      height: 64,
+      height: 58,
       flexShrink: 0,
     }}>
       {navItems.map((item) => {
@@ -35,12 +35,12 @@ const BottomNavBar = () => {
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
-              height: 52,
+              height: 48,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 3,
+              gap: 2,
               borderRadius: 12,
               border: 'none',
               cursor: 'pointer',
@@ -60,7 +60,7 @@ const BottomNavBar = () => {
             </span>
             <span style={{
               fontSize: 10,
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: '0.06em',
               color: isActive ? item.color : '#94A3B8',
               fontFamily: "'JetBrains Mono', monospace",

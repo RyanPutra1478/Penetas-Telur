@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
 /* ================================================
-   Slider Toggle — ukuran pas, tidak akan terpotong
+   Slider Toggle — Ramah Layar Sentuh 7 Inci
    ================================================ */
 const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', disabled = false }) => {
-  const W = 48, H = 25, THUMB = 17, INSET = (H - THUMB) / 2;
+  const W = 54, H = 28, THUMB = 20, INSET = (H - THUMB) / 2;
   return (
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 8,
+      display: 'inline-flex', alignItems: 'center', gap: 9,
       opacity: disabled ? 0.4 : 1,
       pointerEvents: disabled ? 'none' : 'auto',
     }}>
@@ -20,8 +20,8 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
           border: 'none', cursor: 'pointer',
           background: value ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.32)',
           boxShadow: value
-            ? 'inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 2px rgba(255,255,255,0.7)'
-            : 'inset 0 1px 4px rgba(0,0,0,0.35)',
+            ? 'inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 2px rgba(255,255,255,0.75)'
+            : 'inset 0 1px 4px rgba(0,0,0,0.4)',
           transition: 'all 0.25s cubic-bezier(0.34,1.3,0.64,1)',
           flexShrink: 0, padding: 0,
         }}
@@ -33,14 +33,14 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
           width: THUMB, height: THUMB,
           borderRadius: '50%',
           background: '#FFFFFF',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.35)',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.35)',
           transition: 'left 0.25s cubic-bezier(0.34,1.3,0.64,1)',
         }} />
       </button>
       <span style={{
-        fontSize: 12, fontWeight: 800, letterSpacing: '0.08em',
+        fontSize: 14, fontWeight: 900, letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.65)',
+        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
         fontFamily: "'JetBrains Mono', monospace",
         transition: 'color 0.25s',
       }}>
@@ -51,19 +51,19 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
 };
 
 /* ================================================
-   Control Card — font besar, layout rapat & fit 100%
+   Control Card — Font Besar, Padat, Zero Clipping
    ================================================ */
 const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => (
   <div style={{
     background: gradient,
-    borderRadius: 16,
-    padding: '9px 16px',
+    borderRadius: 18,
+    padding: '11px 18px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
     position: 'relative',
     overflow: 'hidden',
-    boxShadow: `0 4px 14px ${colorOn}30`,
+    boxShadow: `0 5px 16px ${colorOn}32`,
     boxSizing: 'border-box',
     height: '100%',
   }}>
@@ -75,8 +75,8 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
         right: 6,
         top: '50%',
         transform: 'translateY(-50%)',
-        fontSize: 84,
-        color: 'rgba(255,255,255,0.15)',
+        fontSize: 88,
+        color: 'rgba(255,255,255,0.16)',
         pointerEvents: 'none',
         lineHeight: 1,
         userSelect: 'none',
@@ -85,25 +85,25 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       {icon}
     </span>
 
-    {/* Header info — font tegas dan terbaca jelas */}
+    {/* Header info — font tegas & besar untuk layar 7 inci */}
     <div style={{ position: 'relative', zIndex: 1 }}>
-      <div style={{ fontSize: 18, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.15 }}>
+      <div style={{ fontSize: 22, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
         {label}
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>
         {sublabel}
       </div>
     </div>
 
-    {/* Slider Section — di bawah kiri, bebas terpotong */}
-    <div style={{ position: 'relative', zIndex: 1, paddingBottom: 1 }}>
+    {/* Slider Section — di bawah kiri */}
+    <div style={{ position: 'relative', zIndex: 1 }}>
       {children}
     </div>
   </div>
 );
 
 /* ================================================
-   DASBOR UTAMA — 50/50 Seimbang Sempurna
+   DASBOR UTAMA — Tipografi Besar & Padat (50/50)
    ================================================ */
 const DasborUtama = () => {
   const [pemanas,  setPemanas]  = useState(true);
@@ -120,29 +120,29 @@ const DasborUtama = () => {
       boxSizing: 'border-box',
     }}>
 
-      {/* ===== 3 SENSOR CARDS (50% TINGGI) — ICON SERAGAM DI TENGAH ===== */}
+      {/* ===== 3 SENSOR CARDS (50% TINGGI) ===== */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1.1fr 1.1fr 1.6fr',
+        gridTemplateColumns: '1.15fr 1.15fr 1.6fr',
         gap: 10,
-        flex: 1,                    /* 50% tinggi layar */
+        flex: 1,                    /* 50% tinggi layar seimbang */
         minHeight: 0,
       }}>
 
         {/* SUHU INTERNAL */}
         <div style={{
           background: 'linear-gradient(145deg, #FFFDF9 0%, #FFEDD5 100%)',
-          borderRadius: 18,
-          padding: '13px 18px',
+          borderRadius: 20,
+          padding: '14px 18px',
           border: '2px solid #FED7AA',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          boxShadow: '0 6px 16px rgba(249,115,22,0.1)',
+          boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
         }}>
-          {/* Background Icon — tepat di tengah kanan */}
+          {/* Background Icon — seragam di tengah vertikal */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
             right: 6,
@@ -159,15 +159,15 @@ const DasborUtama = () => {
 
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#C2410C', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Suhu Internal
               </span>
               <span style={{
-                fontSize: 10, fontWeight: 700,
+                fontSize: 11, fontWeight: 800,
                 background: '#FFEDD5', color: '#EA580C',
-                padding: '2px 8px', borderRadius: 999,
+                padding: '3px 9px', borderRadius: 999,
                 fontFamily: "'JetBrains Mono', monospace",
-                border: '1px solid #FED7AA',
+                border: '1.5px solid #FED7AA',
               }}>
                 TARGET 37.8°C
               </span>
@@ -175,7 +175,7 @@ const DasborUtama = () => {
 
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 4 }}>
               <span style={{
-                fontSize: 44,
+                fontSize: 52,
                 fontWeight: 900,
                 color: '#EA580C',
                 lineHeight: 0.95,
@@ -184,24 +184,24 @@ const DasborUtama = () => {
               }}>
                 {pemanas ? '37.5' : '36.2'}
               </span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: '#FB923C', marginBottom: 2 }}>°C</span>
+              <span style={{ fontSize: 22, fontWeight: 900, color: '#FB923C', marginBottom: 2 }}>°C</span>
             </div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: pemanas ? 'rgba(34,197,94,0.16)' : 'rgba(148,163,184,0.18)',
-              padding: '4px 11px', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              background: pemanas ? 'rgba(34,197,94,0.18)' : 'rgba(148,163,184,0.2)',
+              padding: '5px 12px', borderRadius: 999,
             }}>
               <div style={{
-                width: 7, height: 7, borderRadius: '50%',
+                width: 8, height: 8, borderRadius: '50%',
                 background: pemanas ? '#22C55E' : '#94A3B8',
-                boxShadow: pemanas ? '0 0 6px #22C55E' : 'none',
+                boxShadow: pemanas ? '0 0 8px #22C55E' : 'none',
               }} />
               <span style={{
-                fontSize: 11, fontWeight: 700,
-                color: pemanas ? '#15803D' : '#64748B',
+                fontSize: 12, fontWeight: 800,
+                color: pemanas ? '#15803D' : '#475569',
               }}>
                 {pemanas ? 'Pemanas Aktif · Menghangatkan' : 'Pemanas Siaga · Suhu Stabil'}
               </span>
@@ -212,17 +212,17 @@ const DasborUtama = () => {
         {/* KELEMBABAN */}
         <div style={{
           background: 'linear-gradient(145deg, #F8FAFF 0%, #DBEAFE 100%)',
-          borderRadius: 18,
-          padding: '13px 18px',
+          borderRadius: 20,
+          padding: '14px 18px',
           border: '2px solid #BFDBFE',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          boxShadow: '0 6px 16px rgba(59,130,246,0.1)',
+          boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
         }}>
-          {/* Background Icon — tepat di tengah kanan seragam */}
+          {/* Background Icon — seragam di tengah vertikal */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
             right: 6,
@@ -239,15 +239,15 @@ const DasborUtama = () => {
 
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#1D4ED8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: '#1D4ED8', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Kelembaban
               </span>
               <span style={{
-                fontSize: 10, fontWeight: 700,
+                fontSize: 11, fontWeight: 800,
                 background: '#DBEAFE', color: '#2563EB',
-                padding: '2px 8px', borderRadius: 999,
+                padding: '3px 9px', borderRadius: 999,
                 fontFamily: "'JetBrains Mono', monospace",
-                border: '1px solid #BFDBFE',
+                border: '1.5px solid #BFDBFE',
               }}>
                 TARGET 60%
               </span>
@@ -255,7 +255,7 @@ const DasborUtama = () => {
 
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 4 }}>
               <span style={{
-                fontSize: 44,
+                fontSize: 52,
                 fontWeight: 900,
                 color: '#2563EB',
                 lineHeight: 0.95,
@@ -264,26 +264,26 @@ const DasborUtama = () => {
               }}>
                 {pelembab ? '65' : '55'}
               </span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: '#60A5FA', marginBottom: 2 }}>% RH</span>
+              <span style={{ fontSize: 22, fontWeight: 900, color: '#60A5FA', marginBottom: 2 }}>% RH</span>
             </div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: pelembab ? 'rgba(34,197,94,0.16)' : 'rgba(148,163,184,0.18)',
-              padding: '4px 11px', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              background: pelembab ? 'rgba(34,197,94,0.18)' : 'rgba(148,163,184,0.2)',
+              padding: '5px 12px', borderRadius: 999,
             }}>
               <div style={{
-                width: 7, height: 7, borderRadius: '50%',
+                width: 8, height: 8, borderRadius: '50%',
                 background: pelembab ? '#22C55E' : '#94A3B8',
-                boxShadow: pelembab ? '0 0 6px #22C55E' : 'none',
+                boxShadow: pelembab ? '0 0 8px #22C55E' : 'none',
               }} />
               <span style={{
-                fontSize: 11, fontWeight: 700,
-                color: pelembab ? '#15803D' : '#64748B',
+                fontSize: 12, fontWeight: 800,
+                color: pelembab ? '#15803D' : '#475569',
               }}>
-                {pelembab ? 'Pelembab Aktif · Spray ON' : 'Pelembab Siaga · Kelembaban Cukup'}
+                {pelembab ? 'Pelembab Aktif · Spray ON' : 'Pelembab Siaga · Stabil'}
               </span>
             </div>
           </div>
@@ -292,16 +292,16 @@ const DasborUtama = () => {
         {/* BATCH AKTIF */}
         <div style={{
           background: 'linear-gradient(140deg, #22C55E 0%, #16A34A 60%, #15803D 100%)',
-          borderRadius: 18,
-          padding: '13px 20px',
-          boxShadow: '0 8px 20px rgba(34,197,94,0.3)',
+          borderRadius: 20,
+          padding: '14px 20px',
+          boxShadow: '0 8px 24px rgba(34,197,94,0.34)',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
         }}>
-          {/* Background Icon — tepat di tengah kanan seragam */}
+          {/* Background Icon — seragam di tengah vertikal */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
             right: 6,
@@ -319,12 +319,12 @@ const DasborUtama = () => {
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: 13, fontWeight: 900, color: 'rgba(255,255,255,0.92)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                   Batch Aktif
                 </span>
                 <span style={{
-                  fontSize: 9, fontWeight: 800,
-                  background: 'rgba(255,255,255,0.24)', color: '#FFFFFF',
+                  fontSize: 10, fontWeight: 800,
+                  background: 'rgba(255,255,255,0.25)', color: '#FFFFFF',
                   padding: '2px 8px', borderRadius: 999,
                   fontFamily: "'JetBrains Mono', monospace",
                   letterSpacing: '0.06em',
@@ -333,9 +333,9 @@ const DasborUtama = () => {
                 </span>
               </div>
               <span style={{
-                fontSize: 10, fontWeight: 800,
-                color: '#FFFFFF', background: 'rgba(0,0,0,0.22)',
-                padding: '2px 8px', borderRadius: 999,
+                fontSize: 11, fontWeight: 800,
+                color: '#FFFFFF', background: 'rgba(0,0,0,0.24)',
+                padding: '2px 9px', borderRadius: 999,
               }}>
                 Ayam Kampung
               </span>
@@ -343,7 +343,7 @@ const DasborUtama = () => {
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
               <span style={{
-                fontSize: 44,
+                fontSize: 52,
                 fontWeight: 900,
                 color: '#FFFFFF',
                 lineHeight: 0.95,
@@ -352,24 +352,24 @@ const DasborUtama = () => {
               }}>
                 Hari 7
               </span>
-              <span style={{ fontSize: 19, fontWeight: 800, color: 'rgba(255,255,255,0.72)' }}>
+              <span style={{ fontSize: 22, fontWeight: 900, color: 'rgba(255,255,255,0.75)' }}>
                 / 21 Hari
               </span>
             </div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#FFFFFF' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: '#FFFFFF' }}>
                 33.3% Selesai
               </span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontFamily: "'JetBrains Mono', monospace" }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.9)', fontFamily: "'JetBrains Mono', monospace" }}>
                 14 Hari Tersisa
               </span>
             </div>
             <div style={{
-              height: 8,
-              background: 'rgba(0,0,0,0.22)',
+              height: 9,
+              background: 'rgba(0,0,0,0.25)',
               borderRadius: 999,
               overflow: 'hidden',
               padding: 1.5,
@@ -379,7 +379,7 @@ const DasborUtama = () => {
                 height: '100%',
                 background: '#FFFFFF',
                 borderRadius: 999,
-                boxShadow: '0 0 8px rgba(255,255,255,0.9)',
+                boxShadow: '0 0 10px rgba(255,255,255,0.9)',
                 transition: 'width 0.4s ease',
               }} />
             </div>
@@ -388,7 +388,7 @@ const DasborUtama = () => {
 
       </div>
 
-      {/* ===== 4 CONTROL CARDS (50% TINGGI) — FONT BESAR, FIT SEMPURNA ===== */}
+      {/* ===== 4 CONTROL CARDS (50% TINGGI) — FONT BESAR, PADAT, ZERO CLIPPING ===== */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -439,7 +439,7 @@ const DasborUtama = () => {
           gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
           colorOn="#8B5CF6"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <SliderToggle
               value={rakGerak}
               onChange={setRakGerak}
@@ -449,8 +449,8 @@ const DasborUtama = () => {
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 17,
-                color: rakGerak ? '#FFFFFF' : 'rgba(255,255,255,0.4)',
+                fontSize: 18,
+                color: rakGerak ? '#FFFFFF' : 'rgba(255,255,255,0.45)',
                 animation: rakGerak ? 'spin-slow 2.5s linear infinite' : 'none',
                 marginLeft: 2,
               }}
