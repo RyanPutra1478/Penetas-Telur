@@ -9,19 +9,19 @@ const EditField = ({ label, value, onChange, icon, color, bg, border, unit = '' 
     <div style={{
       background: bg,
       border: `1.5px solid ${border}`,
-      borderRadius: 14,
-      padding: '12px 14px',
-      display: 'flex', alignItems: 'center', gap: 12,
+      borderRadius: 12,
+      padding: '7px 12px',
+      display: 'flex', alignItems: 'center', gap: 10,
     }}>
       <div style={{
-        width: 40, height: 40, borderRadius: 11,
+        width: 32, height: 32, borderRadius: 8,
         background: color + '18',
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>
-        <span className="material-symbols-rounded" style={{ fontSize: 20, color }}>{icon}</span>
+        <span className="material-symbols-rounded" style={{ fontSize: 19, color }}>{icon}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>{label}</div>
+        <div style={{ fontSize: 10, fontWeight: 800, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 1 }}>{label}</div>
         {editing ? (
           <input
             autoFocus
@@ -32,21 +32,21 @@ const EditField = ({ label, value, onChange, icon, color, bg, border, unit = '' 
             style={{
               width: '100%', border: 'none', outline: 'none',
               background: 'transparent',
-              fontSize: 15, fontWeight: 700, color: '#0F172A',
+              fontSize: 15, fontWeight: 800, color: '#0F172A',
               fontFamily: 'Inter, sans-serif',
             }}
           />
         ) : (
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>{value}{unit}</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>{value}{unit}</div>
         )}
       </div>
       <button onClick={() => { setDraft(value); setEditing(!editing); }} style={{
-        width: 34, height: 34, borderRadius: 9, border: 'none', cursor: 'pointer',
+        width: 30, height: 30, borderRadius: 8, border: 'none', cursor: 'pointer',
         background: editing ? color + '18' : '#F1F5F9',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
-        <span className="material-symbols-rounded" style={{ fontSize: 16, color: editing ? color : '#94A3B8' }}>
+        <span className="material-symbols-rounded" style={{ fontSize: 16, color: editing ? color : '#64748B' }}>
           {editing ? 'check' : 'edit'}
         </span>
       </button>
@@ -54,28 +54,28 @@ const EditField = ({ label, value, onChange, icon, color, bg, border, unit = '' 
   );
 };
 
-/* ---- Health card ---- */
+/* ---- Health card (Compact 2x2 style) ---- */
 const HealthCard = ({ icon, title, detail, status, color, bg, border }) => (
   <div style={{
-    background: bg, border: `1.5px solid ${border}`, borderRadius: 14,
-    padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12,
+    background: bg, border: `1.5px solid ${border}`, borderRadius: 12,
+    padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 8,
   }}>
     <div style={{
-      width: 42, height: 42, borderRadius: 12,
+      width: 32, height: 32, borderRadius: 8,
       background: color + '18',
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}>
-      <span className="material-symbols-rounded" style={{ fontSize: 22, color }}>{icon}</span>
+      <span className="material-symbols-rounded" style={{ fontSize: 18, color }}>{icon}</span>
     </div>
     <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 2 }}>{title}</div>
-      <div style={{ fontSize: 10, fontWeight: 500, color: '#64748B' }}>{detail}</div>
+      <div style={{ fontSize: 12, fontWeight: 800, color: '#0F172A', lineHeight: 1.1 }}>{title}</div>
+      <div style={{ fontSize: 10, fontWeight: 600, color: '#64748B', marginTop: 1 }}>{detail}</div>
     </div>
     <span style={{
-      padding: '3px 12px', borderRadius: 999,
-      background: color + '18', color,
-      fontSize: 9, fontWeight: 800,
-      fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.08em',
+      padding: '2px 8px', borderRadius: 999,
+      background: color + '22', color,
+      fontSize: 9, fontWeight: 900,
+      fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em',
       textTransform: 'uppercase', flexShrink: 0,
     }}>{status}</span>
   </div>
@@ -85,26 +85,26 @@ const HealthCard = ({ icon, title, detail, status, color, bg, border }) => (
 const AlarmRow = ({ level, time, id, msg, color, bg, border }) => (
   <div style={{
     background: bg, border: `1.5px solid ${border}`, borderRadius: 12,
-    padding: '10px 14px',
+    padding: '7px 12px',
   }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+      <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
         <span style={{
-          padding: '2px 10px', borderRadius: 999,
+          padding: '2px 8px', borderRadius: 999,
           background: color, color: '#FFF',
-          fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
+          fontSize: 9, fontWeight: 900, letterSpacing: '0.08em',
           fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase',
         }}>{level}</span>
-        <span style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8', fontFamily: "'JetBrains Mono', monospace" }}>{time}</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', fontFamily: "'JetBrains Mono', monospace" }}>{time}</span>
       </div>
-      <span style={{ fontSize: 9, fontWeight: 700, color, fontFamily: "'JetBrains Mono', monospace" }}>{id}</span>
+      <span style={{ fontSize: 10, fontWeight: 800, color, fontFamily: "'JetBrains Mono', monospace" }}>{id}</span>
     </div>
-    <p style={{ fontSize: 12, color: '#374151', fontWeight: 500, lineHeight: 1.4, margin: 0 }}>{msg}</p>
+    <p style={{ fontSize: 12, color: '#1E293B', fontWeight: 600, lineHeight: 1.3, margin: 0 }}>{msg}</p>
   </div>
 );
 
 /* ================================================
-   PROFIL SISTEM — Farmer profile + system health
+   PROFIL SISTEM — Tipografi Bolder & Padat
    ================================================ */
 const ProfilSistem = () => {
   const [namaPeternak,  setNamaPeternak]  = useState('Ahmad Fauzi');
@@ -114,10 +114,10 @@ const ProfilSistem = () => {
   const [kapasitas,     setKapasitas]     = useState('1200');
 
   const health = [
-    { icon: 'sensors',                 title: 'Jaringan Sensor',  detail: '48/48 Aktif · Latensi 12ms',       status: 'OPTIMAL',    color: '#22C55E', bg: '#F0FDF4', border: '#BBF7D0' },
-    { icon: 'precision_manufacturing', title: 'Aktuator & Motor', detail: 'Motor B Torsi Tinggi · Beban 85%', status: 'PERINGATAN', color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
-    { icon: 'cloud_sync',              title: 'Koneksi Cloud',    detail: 'Sinkronisasi 2 mnt lalu',           status: 'STABIL',     color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },
-    { icon: 'memory',                  title: 'CPU Sistem',       detail: 'Load 42% · Temp MCU 48°C',         status: 'NORMAL',     color: '#6366F1', bg: '#EEF2FF', border: '#C7D2FE' },
+    { icon: 'sensors',                 title: 'Jaringan Sensor',  detail: '48/48 Aktif · 12ms',        status: 'OPTIMAL',    color: '#22C55E', bg: '#F0FDF4', border: '#BBF7D0' },
+    { icon: 'precision_manufacturing', title: 'Aktuator & Motor', detail: 'Motor B · Beban 85%',       status: 'PERINGATAN', color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
+    { icon: 'cloud_sync',              title: 'Koneksi Cloud',    detail: 'Sinkron 2 mnt lalu',        status: 'STABIL',     color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },
+    { icon: 'memory',                  title: 'CPU Sistem',       detail: 'Load 42% · Temp 48°C',      status: 'NORMAL',     color: '#6366F1', bg: '#EEF2FF', border: '#C7D2FE' },
   ];
 
   const alarms = [
@@ -126,39 +126,37 @@ const ProfilSistem = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', gap: 14, height: '100%' }}>
+    <div style={{ display: 'flex', gap: 10, height: '100%', boxSizing: 'border-box' }}>
 
       {/* ===== LEFT: Farmer Profile ===== */}
-      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', gap: 12, flexShrink: 0 }}>
+      <div style={{ width: '42%', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
 
         {/* Profile card header */}
         <div style={{
           background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
-          borderRadius: 20, padding: '18px 20px',
-          display: 'flex', alignItems: 'center', gap: 16,
-          boxShadow: '0 8px 24px rgba(139,92,246,0.35)',
+          borderRadius: 18, padding: '12px 16px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 6px 18px rgba(139,92,246,0.35)',
           position: 'relative', overflow: 'hidden', flexShrink: 0,
         }}>
-          {/* Blob */}
-          <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', pointerEvents: 'none' }} />
           {/* Avatar */}
           <div style={{
-            width: 64, height: 64, borderRadius: '50%',
+            width: 50, height: 50, borderRadius: '50%',
             background: 'rgba(255,255,255,0.22)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '3px solid rgba(255,255,255,0.4)',
+            border: '2.5px solid rgba(255,255,255,0.45)',
             flexShrink: 0,
           }}>
-            <span className="material-symbols-rounded" style={{ fontSize: 36, color: '#FFF' }}>person</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 30, color: '#FFF' }}>person</span>
           </div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 900, color: '#FFF', lineHeight: 1.1 }}>{namaPeternak}</div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.75)', marginTop: 3 }}>{namaFarm}</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.18)', padding: '3px 10px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>{namaFarm}</div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,0.95)', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>
                 PETERNAK
               </span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.18)', padding: '3px 10px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>
+              <span style={{ fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,0.95)', background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>
                 {kapasitas} TELUR
               </span>
             </div>
@@ -166,7 +164,7 @@ const ProfilSistem = () => {
         </div>
 
         {/* Editable fields */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, overflow: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, justifyContent: 'space-between' }}>
           <EditField label="Nama Peternak"  value={namaPeternak}  onChange={setNamaPeternak}  icon="person"        color="#8B5CF6" bg="#F5F3FF" border="#DDD6FE" />
           <EditField label="Nama Farm"      value={namaFarm}      onChange={setNamaFarm}      icon="agriculture"   color="#22C55E" bg="#F0FDF4" border="#BBF7D0" />
           <EditField label="No. Telepon"    value={noHP}          onChange={setNoHP}          icon="phone"         color="#3B82F6" bg="#EFF6FF" border="#BFDBFE" />
@@ -175,53 +173,46 @@ const ProfilSistem = () => {
         </div>
       </div>
 
-      {/* ===== RIGHT: System Health + Alarms ===== */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto' }}>
+      {/* ===== RIGHT: System Health (2x2 Grid) + Alarms ===== */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'space-between' }}>
 
-        {/* System Health */}
-        <div style={{ background: '#FFFFFF', borderRadius: 20, border: '1.5px solid #E2E8F0', padding: '16px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        {/* System Health — 2x2 Grid Layout */}
+        <div style={{ background: '#FFFFFF', borderRadius: 18, border: '2px solid #E2E8F0', padding: '10px 14px', boxShadow: '0 3px 10px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{
-              width: 40, height: 40, borderRadius: 11,
+              width: 28, height: 28, borderRadius: 8,
               background: 'linear-gradient(135deg, #6EE7B7, #22C55E)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 3px 8px rgba(34,197,94,0.3)',
+              boxShadow: '0 2px 6px rgba(34,197,94,0.3)',
             }}>
-              <span className="material-symbols-rounded" style={{ fontSize: 22, color: '#FFF' }}>health_and_safety</span>
+              <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>health_and_safety</span>
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Kesehatan Sistem</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8' }}>4 subsistem terpantau</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: '#0F172A' }}>Kesehatan Sistem</div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
             {health.map((h, i) => <HealthCard key={i} {...h} />)}
           </div>
         </div>
 
         {/* Alarm Log */}
-        <div style={{ background: '#FFFFFF', borderRadius: 20, border: '1.5px solid #E2E8F0', padding: '16px', flex: 1, minHeight: 0, overflow: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{ background: '#FFFFFF', borderRadius: 18, border: '2px solid #E2E8F0', padding: '10px 14px', flex: 1, display: 'flex', flexDirection: 'column', boxShadow: '0 3px 10px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{
-              width: 40, height: 40, borderRadius: 11,
+              width: 28, height: 28, borderRadius: 8,
               background: 'linear-gradient(135deg, #FCA5A5, #EF4444)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 3px 8px rgba(239,68,68,0.3)',
+              boxShadow: '0 2px 6px rgba(239,68,68,0.3)',
             }}>
-              <span className="material-symbols-rounded" style={{ fontSize: 22, color: '#FFF' }}>notifications_active</span>
+              <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>notifications_active</span>
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Alarm Aktif</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8' }}>{alarms.length} alarm terdaftar</div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: '#0F172A' }}>Alarm Aktif ({alarms.length})</div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, justifyContent: 'center' }}>
             {alarms.map((a, i) => <AlarmRow key={i} {...a} />)}
-            {alarms.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#94A3B8', fontSize: 13, fontWeight: 600 }}>
-                Tidak ada alarm aktif ✓
-              </div>
-            )}
           </div>
         </div>
       </div>
