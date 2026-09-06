@@ -62,12 +62,11 @@ const HealthCard = ({ icon, title, value, detail, percent, status, color, bg, bo
   <div style={{
     background: bg,
     border: `1.5px solid ${border}`,
-    borderRadius: 12,
+    borderRadius: 11,
     padding: '7px 10px',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: 4,
+    gap: 3,
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -84,7 +83,7 @@ const HealthCard = ({ icon, title, value, detail, percent, status, color, bg, bo
     </div>
 
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
         <span style={{ fontSize: 11, fontWeight: 800, color, fontFamily: "'JetBrains Mono', monospace" }}>{value}</span>
         <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B' }}>{detail}</span>
       </div>
@@ -102,10 +101,10 @@ const AlarmCard = ({ level, time, id, msg, action, color, bg, border }) => (
     border: `1.5px solid ${border}`,
     borderLeft: `4px solid ${color}`,
     borderRadius: 10,
-    padding: '6px 10px',
+    padding: '5px 10px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 3,
+    gap: 2,
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
@@ -133,7 +132,7 @@ const AlarmCard = ({ level, time, id, msg, action, color, bg, border }) => (
 );
 
 /* ================================================
-   PROFIL SISTEM — Desain Padat & Pas 100%
+   PROFIL SISTEM — Konten Berada di Atas (Top-Aligned)
    ================================================ */
 const ProfilSistem = () => {
   const [namaPeternak,  setNamaPeternak]  = useState('Ahmad Fauzi');
@@ -155,18 +154,19 @@ const ProfilSistem = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', gap: 10, height: '100%', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', gap: 10, height: '100%', boxSizing: 'border-box', alignItems: 'flex-start' }}>
 
-      {/* ===== LEFT: Unified Farmer Profile Card ===== */}
+      {/* ===== LEFT: Farmer Profile Card (Semua konten di atas rapat) ===== */}
       <div style={{
-        width: 360,
+        width: 350,
         background: '#FFFFFF',
         borderRadius: 18,
         border: '2px solid #E2E8F0',
         padding: '10px 12px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',   /* Rapat di atas, bukan di bawah/tengah */
+        gap: 6,                         /* Jarak rapat konsisten antar baris */
         boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
         flexShrink: 0,
         boxSizing: 'border-box',
@@ -176,7 +176,7 @@ const ProfilSistem = () => {
         <div style={{
           background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
           borderRadius: 14,
-          padding: '10px 12px',
+          padding: '9px 12px',
           display: 'flex',
           alignItems: 'center',
           gap: 10,
@@ -210,41 +210,39 @@ const ProfilSistem = () => {
           </div>
         </div>
 
-        {/* 5 Editable fields — Tightly spaced & solid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          <EditField label="Nama Peternak"  value={namaPeternak}  onChange={setNamaPeternak}  icon="person"        color="#8B5CF6" bg="#F5F3FF" border="#DDD6FE" />
-          <EditField label="Nama Farm"      value={namaFarm}      onChange={setNamaFarm}      icon="agriculture"   color="#22C55E" bg="#F0FDF4" border="#BBF7D0" />
-          <EditField label="No. Telepon"    value={noHP}          onChange={setNoHP}          icon="phone"         color="#3B82F6" bg="#EFF6FF" border="#BFDBFE" />
-          <EditField label="Lokasi"         value={lokasi}        onChange={setLokasi}        icon="location_on"   color="#EF4444" bg="#FEF2F2" border="#FECACA" />
-          <EditField label="Kapasitas Maks" value={kapasitas}     onChange={setKapasitas}     icon="egg"           color="#F59E0B" bg="#FFFBEB" border="#FDE68A" unit=" telur" />
-        </div>
+        {/* 5 Editable fields — Tepat di bawah header, rapat & teratur */}
+        <EditField label="Nama Peternak"  value={namaPeternak}  onChange={setNamaPeternak}  icon="person"        color="#8B5CF6" bg="#F5F3FF" border="#DDD6FE" />
+        <EditField label="Nama Farm"      value={namaFarm}      onChange={setNamaFarm}      icon="agriculture"   color="#22C55E" bg="#F0FDF4" border="#BBF7D0" />
+        <EditField label="No. Telepon"    value={noHP}          onChange={setNoHP}          icon="phone"         color="#3B82F6" bg="#EFF6FF" border="#BFDBFE" />
+        <EditField label="Lokasi"         value={lokasi}        onChange={setLokasi}        icon="location_on"   color="#EF4444" bg="#FEF2F2" border="#FECACA" />
+        <EditField label="Kapasitas Maks" value={kapasitas}     onChange={setKapasitas}     icon="egg"           color="#F59E0B" bg="#FFFBEB" border="#FDE68A" unit=" telur" />
       </div>
 
-      {/* ===== RIGHT: System Health (2x2 Grid) + Alarms ===== */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, justifyContent: 'space-between' }}>
+      {/* ===== RIGHT: System Health & Alarms (Semua konten di atas rapat) ===== */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, justifyContent: 'flex-start' }}>
 
         {/* Panel 1: Kesehatan Sistem */}
         <div style={{
           background: '#FFFFFF',
           borderRadius: 18,
           border: '2px solid #E2E8F0',
-          padding: '10px 14px',
+          padding: '9px 14px',
           boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 7,
+          gap: 6,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
               <div style={{
-                width: 28, height: 28, borderRadius: 7,
+                width: 26, height: 26, borderRadius: 7,
                 background: 'linear-gradient(135deg, #6EE7B7, #22C55E)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 2px 6px rgba(34,197,94,0.3)',
               }}>
-                <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>health_and_safety</span>
+                <span className="material-symbols-rounded" style={{ fontSize: 17, color: '#FFF' }}>health_and_safety</span>
               </div>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#0F172A' }}>Kesehatan Subsistem</span>
+              <span style={{ fontSize: 14, fontWeight: 900, color: '#0F172A' }}>Kesehatan Subsistem</span>
             </div>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>4/4 Modul Terpantau</span>
           </div>
@@ -254,53 +252,50 @@ const ProfilSistem = () => {
           </div>
         </div>
 
-        {/* Panel 2: Alarm & Peringatan Aktif */}
+        {/* Panel 2: Alarm & Peringatan Aktif (Rapat di atas) */}
         <div style={{
           background: '#FFFFFF',
           borderRadius: 18,
           border: '2px solid #E2E8F0',
-          padding: '10px 14px',
+          padding: '9px 14px',
           boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
-          flex: 1,
-          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
+          gap: 6,
+          justifyContent: 'flex-start',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
               <div style={{
-                width: 28, height: 28, borderRadius: 7,
+                width: 26, height: 26, borderRadius: 7,
                 background: 'linear-gradient(135deg, #FCA5A5, #EF4444)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 2px 6px rgba(239,68,68,0.3)',
               }}>
-                <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>notifications_active</span>
+                <span className="material-symbols-rounded" style={{ fontSize: 17, color: '#FFF' }}>notifications_active</span>
               </div>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#0F172A' }}>Log Alarm & Peringatan ({alarms.length})</span>
+              <span style={{ fontSize: 14, fontWeight: 900, color: '#0F172A' }}>Log Alarm & Peringatan ({alarms.length})</span>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button style={{
-                padding: '3px 9px', borderRadius: 7,
-                border: '1px solid #E2E8F0', background: '#F8FAFC',
-                fontSize: 10, fontWeight: 800, color: '#64748B', cursor: 'pointer',
-                fontFamily: "'JetBrains Mono', monospace",
-              }}>
-                MUTE BUZZER
-              </button>
-            </div>
+            <button style={{
+              padding: '3px 10px', borderRadius: 7,
+              border: '1px solid #E2E8F0', background: '#F8FAFC',
+              fontSize: 10, fontWeight: 800, color: '#64748B', cursor: 'pointer',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              MUTE BUZZER
+            </button>
           </div>
 
-          {/* Alarm Cards list */}
+          {/* Alarm Cards list — tepat di bawah header, rapat */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             {alarms.map((a, i) => <AlarmCard key={i} {...a} />)}
           </div>
 
-          {/* Bottom security assurance pill */}
+          {/* Security assurance pill — langsung di bawah daftar alarm */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '5px 10px', background: '#F8FAFC', borderRadius: 8,
-            border: '1px solid #F1F5F9', marginTop: 2,
+            border: '1px solid #F1F5F9', marginTop: 1,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
