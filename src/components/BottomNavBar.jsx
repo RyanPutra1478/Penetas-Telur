@@ -16,17 +16,16 @@ const BottomNavBar = () => {
 
   return (
     <nav style={{
-      position: 'fixed',
-      bottom: 0, left: 0, right: 0,
       background: '#FFFFFF',
       borderTop: '1px solid #E2E8F0',
-      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
       zIndex: 50,
-      padding: '6px 16px 4px',
+      padding: '4px 16px',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      height: 68,
+      height: 64,
+      flexShrink: 0,
     }}>
       {navItems.map((item) => {
         const isActive = path === item.path;
@@ -36,13 +35,13 @@ const BottomNavBar = () => {
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
-              height: 56,
+              height: 52,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 4,
-              borderRadius: 14,
+              gap: 3,
+              borderRadius: 12,
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
@@ -52,7 +51,7 @@ const BottomNavBar = () => {
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 24,
+                fontSize: 22,
                 color: isActive ? item.color : '#94A3B8',
                 transition: 'color 0.2s',
               }}

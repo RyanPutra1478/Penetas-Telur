@@ -7,17 +7,19 @@ const Layout = () => (
   <div style={{
     display: 'flex',
     flexDirection: 'column',
-    width: '100%',
-    height: '100%',
+    width: '100vw',
+    height: '100vh',
     overflow: 'hidden',
     background: '#F0F4FF',
+    boxSizing: 'border-box',
   }}>
     <TopAppBar />
     <main style={{
       flex: 1,
-      overflow: 'auto',
-      padding: '12px 14px',
-      paddingBottom: 82,
+      minHeight: 0,
+      overflow: 'hidden',
+      padding: '10px 14px',
+      boxSizing: 'border-box',
     }}>
       <Outlet />
     </main>
