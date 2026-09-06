@@ -4,11 +4,9 @@ import './App.css';
 import Layout from './components/Layout';
 import DasborUtama from './pages/DasborUtama';
 import KontrolLingkungan from './pages/KontrolLingkungan';
-
 import PemantauanBatch from './pages/PemantauanBatch';
-import KontrolRak from './pages/KontrolRak';
 import KameraLangsung from './pages/KameraLangsung';
-import StatusSistem from './pages/StatusSistem';
+import ProfilSistem from './pages/ProfilSistem';
 
 function App() {
   return (
@@ -17,11 +15,9 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<DasborUtama />} />
           <Route path="control" element={<KontrolLingkungan />} />
-
           <Route path="batch" element={<PemantauanBatch />} />
-          <Route path="rack" element={<KontrolRak />} />
           <Route path="camera" element={<KameraLangsung />} />
-          <Route path="settings" element={<StatusSistem />} />
+          <Route path="profil" element={<ProfilSistem />} />
         </Route>
       </Routes>
     </HashRouter>

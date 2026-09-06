@@ -1,282 +1,289 @@
 import React, { useState } from 'react';
 
-// Reusable retro section header label
-const SectionLabel = ({ children }) => (
-  <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-    <div style={{ flex: 1, height: '2px', background: 'linear-gradient(to right, #9A8C78, transparent)' }} />
-    <span className="font-label-caps" style={{ color: '#6B5D48', fontSize: '10px' }}>{children}</span>
-    <div style={{ flex: 1, height: '2px', background: 'linear-gradient(to left, #9A8C78, transparent)' }} />
-  </div>
-);
-
-const RackCell = ({ id, status, onClick }) => {
-  const isError = status === 'error';
-  const isOff = status === 'off';
-  const isOk = status === 'ok';
-
+/* ================================================
+   Slider — selalu di bawah-kiri, konsisten
+   ================================================ */
+const SliderToggle = ({ value, onChange, labelOff = 'OFF', labelOn = 'ON', disabled = false }) => {
+  const W = 60, H = 32, THUMB = 24, INSET = (H - THUMB) / 2;
   return (
-    <button
-      onClick={onClick}
-      style={{
-        background: isOff
-          ? 'linear-gradient(145deg, #DDD5C5 0%, #C4BAA8 100%)'
-          : isError
-          ? 'linear-gradient(145deg, #F5E8E8 0%, #E8D0D0 100%)'
-          : 'linear-gradient(145deg, #E8E0D0 0%, #D0C8B8 100%)',
-        boxShadow: isOff
-          ? 'inset 2px 2px 5px rgba(0,0,0,0.25), inset -1px -1px 2px rgba(255,255,255,0.4)'
-          : `
-            inset 2px 2px 0px rgba(255,255,255,0.8),
-            inset -2px -2px 0px #9A8C78,
-            2px 2px 6px rgba(0,0,0,0.2)
-          `,
-        border: `2px solid ${isError ? '#CC2200' : isOk ? '#2A8A2A' : '#B8A890'}`,
-        borderRadius: '6px',
-        padding: '10px 8px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '6px',
-        cursor: 'pointer',
-        transition: 'all 0.15s ease',
-        transform: isOff ? 'translateY(1px)' : 'none',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', padding: '0 4px' }}>
-        <span className="font-label-caps" style={{ color: isError ? '#CC2200' : isOff ? '#8A8070' : '#4A3E2E', fontSize: '12px' }}>
-          R{id}
-        </span>
-        <span className="font-label-sm" style={{ fontSize: '8px', color: isError ? '#CC2200' : isOff ? '#8A8070' : '#2A8A2A' }}>
-          {isError ? 'ERR' : isOff ? 'OFF' : 'ON'}
-        </span>
-      </div>
-      <div className="led-housing" style={{ width: '20px', height: '20px' }}>
-        <div
-          className={`led ${isError ? 'led-on-red animate-blink' : isOff ? 'led-off-green' : 'led-on-green'}`}
-          style={{ width: '11px', height: '11px' }}
-        />
-      </div>
-    </button>
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      opacity: disabled ? 0.4 : 1,
+      pointerEvents: disabled ? 'none' : 'auto',
+    }}>
+      <button
+        onClick={e => { e.stopPropagation(); onChange(!value); }}
+        style={{
+          position: 'relative',
+          width: W, height: H,
+          borderRadius: 999,
+          border: 'none', cursor: 'pointer',
+          background: value ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.28)',
+          boxShadow: value
+            ? 'inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 2px rgba(255,255,255,0.5)'
+            : 'inset 0 1px 4px rgba(0,0,0,0.35)',
+          transition: 'all 0.3s cubic-bezier(0.34,1.3,0.64,1)',
+          flexShrink: 0, padding: 0,
+        }}
+      >
+        <div style={{
+          position: 'absolute',
+          top: INSET,
+          left: value ? W - THUMB - INSET : INSET,
+          width: THUMB, height: THUMB,
+          borderRadius: '50%',
+          background: '#FFFFFF',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+          transition: 'left 0.3s cubic-bezier(0.34,1.3,0.64,1)',
+        }} />
+      </button>
+      <span style={{
+        fontSize: 13, fontWeight: 800, letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        color: value ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.45)',
+        fontFamily: "'JetBrains Mono', monospace",
+        transition: 'color 0.25s',
+      }}>
+        {value ? labelOn : labelOff}
+      </span>
+    </div>
   );
 };
 
-const ActuatorBtn = ({ icon, label, active, onClick, activeColor = '#2A8A2A' }) => (
-  <button
-    onClick={onClick}
-    className="btn-raised"
-    style={{
-      padding: '12px 18px',
-      borderRadius: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      height: '68px',
-      cursor: 'pointer',
-      transition: 'all 0.15s ease',
-      border: active ? `2px solid ${activeColor}` : '1px solid var(--border-mid)',
-      background: active
-        ? 'linear-gradient(160deg, #F5EFE4 0%, #E6DEC8 50%, #D8CEB8 100%)'
-        : 'linear-gradient(160deg, #DED6C4 0%, #D0C6B2 100%)',
-      boxShadow: active
-        ? `
-          inset 2px 2px 0px rgba(255,255,255,0.9),
-          inset -2px -2px 0px #A09078,
-          3px 3px 8px rgba(0,0,0,0.25)
-        `
-        : `
-          inset 3px 3px 6px rgba(0,0,0,0.25),
-          inset -1px -1px 0px rgba(255,255,255,0.5),
-          1px 1px 2px rgba(0,0,0,0.1)
-        `,
-      transform: active ? 'none' : 'translate(1px, 1px)',
-    }}
-  >
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div style={{
-        width: '36px',
-        height: '36px',
-        borderRadius: '6px',
-        background: active ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.12)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: active ? 'inset 1px 1px 2px rgba(0,0,0,0.15)' : 'inset 2px 2px 4px rgba(0,0,0,0.3)',
-      }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            fontSize: '22px',
-            color: active ? activeColor : '#8A8070',
-            transition: 'color 0.15s ease',
-          }}
-        >
-          {icon}
-        </span>
+/* ================================================
+   Control Card — icon besar di kanan, slider kiri
+   ================================================ */
+const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => (
+  <div style={{
+    background: gradient,
+    borderRadius: 22,
+    padding: '16px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',   /* top: label, bottom: slider */
+    position: 'relative',
+    overflow: 'hidden',
+    flex: 1,
+    boxShadow: `0 8px 24px ${colorOn}40, 0 4px 10px ${colorOn}18`,
+  }}>
+    {/* ICON — sebesar tinggi kartu, semi-transparan, di kanan */}
+    <span
+      className="material-symbols-rounded"
+      style={{
+        position: 'absolute',
+        right: -10,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        fontSize: 130,           /* icon sangat besar */
+        color: 'rgba(255,255,255,0.12)',
+        pointerEvents: 'none',
+        lineHeight: 1,
+        userSelect: 'none',
+      }}
+    >
+      {icon}
+    </span>
+
+    {/* Label section — atas */}
+    <div style={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
+        {label}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-        <span className="font-label-caps" style={{ color: active ? '#2C2416' : '#7A6E5D', fontSize: '12px' }}>
-          {label}
-        </span>
-        <span className="font-label-sm" style={{ fontSize: '8px', color: active ? activeColor : '#8A8070', marginTop: '2px' }}>
-          {active ? 'AKTIF (ON)' : 'NONAKTIF (OFF)'}
-        </span>
+      <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.68)', marginTop: 4 }}>
+        {sublabel}
       </div>
     </div>
-    <div className="led-housing" style={{ width: '24px', height: '24px' }}>
-      <div
-        className={`led ${active ? 'led-on-green' : 'led-off-green'}`}
-        style={{ width: '13px', height: '13px' }}
-      />
+
+    {/* Slider section — bawah kiri (selalu) */}
+    <div style={{ position: 'relative', zIndex: 1 }}>
+      {children}
     </div>
-  </button>
+  </div>
 );
 
+/* ================================================
+   DASBOR UTAMA
+   ================================================ */
 const DasborUtama = () => {
-  // State for actuators (Pemanas, Kipas, Pelembab)
-  const [actuators, setActuators] = useState({
-    pemanas: true,
-    kipas: true,
-    pelembab: false,
-  });
-
-  // State for 8 racks (ok, off, error)
-  const [racks, setRacks] = useState([
-    { id: 1, status: 'ok' },
-    { id: 2, status: 'ok' },
-    { id: 3, status: 'ok' },
-    { id: 4, status: 'error' },
-    { id: 5, status: 'ok' },
-    { id: 6, status: 'ok' },
-    { id: 7, status: 'off' },
-    { id: 8, status: 'off' },
-  ]);
-
-  const toggleActuator = (name) => {
-    setActuators((prev) => ({ ...prev, [name]: !prev[name] }));
-  };
-
-  const toggleRack = (id) => {
-    setRacks((prev) =>
-      prev.map((r) => {
-        if (r.id !== id) return r;
-        // Cycle states: ok -> off -> error -> ok (or ok -> off -> ok)
-        if (r.status === 'ok') return { ...r, status: 'off' };
-        if (r.status === 'off') return { ...r, status: 'ok' };
-        if (r.status === 'error') return { ...r, status: 'ok' };
-        return { ...r, status: 'ok' };
-      })
-    );
-  };
+  const [pemanas,  setPemanas]  = useState(true);
+  const [kipas,    setKipas]    = useState(true);
+  const [pelembab, setPelembab] = useState(false);
+  const [rakGerak, setRakGerak] = useState(false);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
 
-      {/* Primary Readouts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      {/* ===== SENSOR CARDS — Batch lebih dominan ===== */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1.55fr',   /* Batch lebih lebar */
+        gap: 10,
+        flexShrink: 0,
+      }}>
 
-        {/* Temperature Readout */}
-        <div className="panel-section" style={{ padding: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-            <span className="font-label-caps" style={{ color: '#6B5D48', fontSize: '10px' }}>SUHU INTERNAL</span>
-            <div className="led-housing" style={{ width: '20px', height: '20px' }}>
-              <div className={`led ${actuators.pemanas ? 'led-on-green' : 'led-off-green'}`} style={{ width: '12px', height: '12px' }} />
+        {/* Suhu */}
+        <div style={{
+          background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
+          borderRadius: 18, padding: '14px 16px',
+          border: '1.5px solid #FED7AA',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          {/* Big background icon */}
+          <span className="material-symbols-rounded" style={{
+            position: 'absolute', right: -8, top: '50%', transform: 'translateY(-50%)',
+            fontSize: 96, color: 'rgba(249,115,22,0.12)', pointerEvents: 'none', lineHeight: 1,
+          }}>thermometer</span>
+
+          <div style={{ position: 'relative' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#C2410C', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Suhu Internal</span>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, marginTop: 4 }}>
+              <span style={{ fontSize: 44, fontWeight: 900, color: '#EA580C', lineHeight: 1, fontFamily: "'JetBrains Mono', monospace" }}>
+                {pemanas ? '37.5' : '36.2'}
+              </span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#FB923C', marginBottom: 5 }}>°C</span>
             </div>
-          </div>
-          <div className="display-recess" style={{ padding: '12px 16px', borderRadius: '6px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-            <span className="font-readout-lg phosphor-green animate-glow">
-              {actuators.pemanas ? '37.5' : '36.8'}
-            </span>
-            <span className="font-label-caps phosphor-amber" style={{ fontSize: '16px', marginBottom: '6px' }}>°C</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: pemanas ? '#22C55E' : '#94A3B8', flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: pemanas ? '#166534' : '#64748B', fontWeight: 600 }}>
+                {pemanas ? 'Pemanas aktif' : 'Pemanas mati'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Humidity Readout */}
-        <div className="panel-section" style={{ padding: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-            <span className="font-label-caps" style={{ color: '#6B5D48', fontSize: '10px' }}>KELEMBABAN</span>
-            <div className="led-housing" style={{ width: '20px', height: '20px' }}>
-              <div className={`led ${actuators.pelembab ? 'led-on-green' : 'led-off-green'}`} style={{ width: '12px', height: '12px' }} />
+        {/* Kelembaban */}
+        <div style={{
+          background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+          borderRadius: 18, padding: '14px 16px',
+          border: '1.5px solid #BFDBFE',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <span className="material-symbols-rounded" style={{
+            position: 'absolute', right: -8, top: '50%', transform: 'translateY(-50%)',
+            fontSize: 96, color: 'rgba(59,130,246,0.12)', pointerEvents: 'none', lineHeight: 1,
+          }}>water_drop</span>
+
+          <div style={{ position: 'relative' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#1D4ED8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kelembaban</span>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, marginTop: 4 }}>
+              <span style={{ fontSize: 44, fontWeight: 900, color: '#2563EB', lineHeight: 1, fontFamily: "'JetBrains Mono', monospace" }}>
+                {pelembab ? '65' : '55'}
+              </span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: '#60A5FA', marginBottom: 5 }}>%</span>
             </div>
-          </div>
-          <div className="display-recess" style={{ padding: '12px 16px', borderRadius: '6px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-            <span className="font-readout-lg" style={{ color: '#50C8FF', textShadow: '0 0 8px rgba(80,200,255,0.7), 0 0 20px rgba(80,200,255,0.3)' }}>
-              {actuators.pelembab ? '62' : '55'}
-            </span>
-            <span className="font-label-caps" style={{ fontSize: '16px', marginBottom: '6px', color: '#50C8FF' }}>%</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: pelembab ? '#22C55E' : '#94A3B8', flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: pelembab ? '#166534' : '#64748B', fontWeight: 600 }}>
+                {pelembab ? 'Pelembab aktif' : 'Pelembab mati'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Batch Progress */}
-        <div className="panel-section" style={{ padding: '16px' }}>
-          <span className="font-label-caps" style={{ color: '#6B5D48', fontSize: '10px' }}>BATCH AKTIF — B24-09</span>
-          <div className="display-recess" style={{ padding: '12px 16px', marginTop: '10px', borderRadius: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '10px' }}>
-              <span className="font-readout-md phosphor-green">Hari 7</span>
-              <span className="font-label-caps" style={{ color: '#78A878', fontSize: '14px' }}>/ 21</span>
+        {/* BATCH — lebih dominan, icon setinggi panel */}
+        <div style={{
+          background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
+          borderRadius: 18, padding: '14px 20px',
+          boxShadow: '0 8px 24px rgba(34,197,94,0.35)',
+          position: 'relative', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        }}>
+          {/* Icon setinggi panel */}
+          <span className="material-symbols-rounded" style={{
+            position: 'absolute', right: -10, top: '50%', transform: 'translateY(-50%)',
+            fontSize: 130, color: 'rgba(255,255,255,0.15)', pointerEvents: 'none', lineHeight: 1,
+          }}>egg</span>
+
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.8)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Batch Aktif</span>
+              <span style={{ fontSize: 9, fontWeight: 800, background: 'rgba(255,255,255,0.2)', color: '#FFF', padding: '2px 8px', borderRadius: 999, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>B24-09</span>
             </div>
-            {/* Progress bar */}
-            <div style={{
-              height: '10px',
-              background: '#0A0A08',
-              borderRadius: '2px',
-              border: '1px solid #3A3028',
-              boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.5)',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                width: '33%', height: '100%',
-                background: 'linear-gradient(90deg, #1A8A1A, #39E239)',
-                boxShadow: '0 0 6px rgba(57,226,57,0.6)',
-              }} />
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontSize: 48, fontWeight: 900, color: '#FFFFFF', lineHeight: 1, fontFamily: "'JetBrains Mono', monospace" }}>Hari 7</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>/21</span>
             </div>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <div style={{ height: 10, background: 'rgba(255,255,255,0.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 5 }}>
+              <div style={{ width: '33%', height: '100%', background: '#FFFFFF', borderRadius: 999, boxShadow: '0 0 8px rgba(255,255,255,0.6)' }} />
+            </div>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>33% selesai · Ayam · 21 hari</span>
           </div>
         </div>
       </div>
 
-      {/* Actuator Controls */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-        <ActuatorBtn
-          icon="thermostat"
-          label="PEMANAS"
-          active={actuators.pemanas}
-          activeColor="#CC5500"
-          onClick={() => toggleActuator('pemanas')}
-        />
-        <ActuatorBtn
+      {/* ===== 4 CONTROL CARDS ===== */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, flex: 1, minHeight: 0 }}>
+
+        {/* PEMANAS */}
+        <ControlCard
+          icon="local_fire_department"
+          label="Pemanas"
+          sublabel="Heater element · Target 37.8°C"
+          gradient="linear-gradient(135deg, #F97316 0%, #EF4444 100%)"
+          colorOn="#EF4444"
+        >
+          <SliderToggle value={pemanas} onChange={setPemanas} labelOff="MATI" labelOn="AKTIF" />
+        </ControlCard>
+
+        {/* KIPAS */}
+        <ControlCard
           icon="mode_fan"
-          label="KIPAS"
-          active={actuators.kipas}
-          activeColor="#2A8A2A"
-          onClick={() => toggleActuator('kipas')}
-        />
-        <ActuatorBtn
-          icon="water_drop"
-          label="PELEMBAB"
-          active={actuators.pelembab}
-          activeColor="#0077CC"
-          onClick={() => toggleActuator('pelembab')}
-        />
-      </div>
+          label="Sirkulasi Kipas"
+          sublabel="Fan circulation · 2400 RPM"
+          gradient="linear-gradient(135deg, #38BDF8 0%, #3B82F6 100%)"
+          colorOn="#3B82F6"
+        >
+          <SliderToggle value={kipas} onChange={setKipas} labelOff="MATI" labelOn="AKTIF" />
+        </ControlCard>
 
-      {/* Rack Grid */}
-      <div className="panel-section" style={{ padding: '14px', flex: 1 }}>
-        <SectionLabel>STATUS RAK (8 UNIT) — KLIK UNTUK UBAH STATUS</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-          {racks.map((r) => (
-            <RackCell
-              key={r.id}
-              id={r.id}
-              status={r.status}
-              onClick={() => toggleRack(r.id)}
+        {/* PELEMBAB */}
+        <ControlCard
+          icon="water_drop"
+          label="Pelembab Udara"
+          sublabel="Humidifier · Target 65%"
+          gradient="linear-gradient(135deg, #34D399 0%, #14B8A6 100%)"
+          colorOn="#14B8A6"
+        >
+          <SliderToggle value={pelembab} onChange={setPelembab} labelOff="MATI" labelOn="AKTIF" />
+        </ControlCard>
+
+        {/* PEMBALIK RAK — slider KIRI, konsisten */}
+        <ControlCard
+          icon="view_carousel"
+          label="Pembalik Rak"
+          sublabel="Tilt system · Semua rak"
+          gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
+          colorOn="#8B5CF6"
+        >
+          {/* Sama persis dengan kartu lain: slider kiri + label */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <SliderToggle
+              value={rakGerak}
+              onChange={setRakGerak}
+              labelOff="DIAM"
+              labelOn="BERGERAK"
             />
-          ))}
-        </div>
+            {/* Icon kecil berputar saat aktif */}
+            <span
+              className="material-symbols-rounded"
+              style={{
+                fontSize: 18,
+                color: rakGerak ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
+                animation: rakGerak ? 'spin-slow 2.5s linear infinite' : 'none',
+                marginLeft: 4,
+              }}
+            >
+              rotate_90_degrees_ccw
+            </span>
+          </div>
+        </ControlCard>
+
       </div>
     </div>
   );
 };
 
 export default DasborUtama;
-

@@ -1,74 +1,76 @@
 # 🥚 OVO-INCUBATOR-PRO — Smart Egg Incubator HMI
 
-> **Industrial Skeuomorphic-Retro Touch Interface** untuk Sistem Inkubator Penetas Telur Pintar berbasis React.js dan Vite, dioptimalkan untuk layar sentuh 7 inci (1024×600) seperti Raspberry Pi Touch Display.
+> **Modern Colorful Touchscreen Interface** untuk Sistem Inkubator Penetas Telur Pintar berbasis React 19 & Vite, dirancang khusus dan dioptimalkan untuk layar sentuh 7 inci (1024×600) seperti Raspberry Pi Touch Display.
 
 ---
 
-## 📸 Preview Tampilan
+## ✨ Tampilan & Desain Baru (Colorful & Vibrant)
 
-Antarmuka dirancang dengan gaya **Skeuomorphic-Retro** yang terinspirasi dari instrumen kontrol industri klasik:
-- **Base Warna:** Warm Ivory/Cream (`#E8E0D0`) dengan efek bevel fisik (highlight atas, shadow bawah).
-- **Display Well:** Panel recessed hitam bergaya CRT/LCD dengan scanlines dan pendaran phosphor hijau (`#39E239`) & cyan (`#50C8FF`).
-- **Indikator LED:** Housing LED recessed dengan efek glow luminositas tinggi untuk status aktif, peringatan, dan error.
-- **Interaktivitas Tactile:** Tombol terangkat (*raised bevel*), flip toggle switch, dan tombol kontrol yang responsif saat ditekan (*depressed state*).
+Antarmuka telah dirombak total menggunakan gaya modern, bersih, cerah, dan penuh warna (*vibrant color-coded system*):
+- **Identitas Warna per Aktuator & Parameter:**
+  - 🟠 **Pemanas (Heater):** Gradien oranye-merah menyala dengan slider toggle kontras tinggi.
+  - 🔵 **Sirkulasi Kipas (Fan):** Gradien biru cerah.
+  - 🟢 **Pelembab Udara (Humidifier):** Gradien emerald-teal segar.
+  - 🟣 **Pembalik Rak (Tilt System):** Gradien ungu cerah dengan animasi putar real-time saat bergerak.
+  - 🌿 **Batch Aktif:** Panel hijau dominan dengan progress bar dinamis dan ikon grafis besar.
+- **Konsistensi Layout Tactile:**
+  - Seluruh tombol slider diposisikan seragam di sudut kiri bawah kartu.
+  - Indikator status teks kontras (`AKTIF` / `MATI`, `BERGERAK` / `DIAM`).
+  - Top Bar tinggi (84px) dengan tombol status Cloud Sync, Network Link, dan Alarm.
+  - Bottom Navigation Bar dengan 5 menu utama yang ergonomis untuk navigasi jempol pada layar sentuh.
 
 ---
 
-## ✨ Fitur Utama
+## 🧭 Menu & Fitur Utama
 
 1. **🏠 Dasbor Utama (Home):**
-   - Readout real-time suhu internal (°C) dan kelembaban (% RH).
-   - Indikator progres inkubasi batch aktif (Hari X / 21).
-   - Tombol kontrol aktuator interaktif: **Pemanas (Heater)**, **Kipas (Fan)**, dan **Pelembab (Humidifier)**.
-   - Panel status 8 modul rak inkubator dengan toggle interaktif (ON / OFF / Reset Error).
-   - Status bar atas dengan indikator Cloud Sync, Network Link, dan Emergency Stop.
+   - Telemetri cepat: Suhu Internal (°C), Kelembaban (% RH), dan Kartu Batch Aktif yang mendominasi.
+   - 4 Kontrol Aktuator Utama berbasis Slider Toggle: **Pemanas**, **Sirkulasi Kipas**, **Pelembab Udara**, dan **Pembalik Rak** (kontrol 1 tombol untuk seluruh rak).
 
-2. **🎛️ Kontrol Lingkungan & Profil Inkubasi (Control):**
-   - Integrasi langsung dengan profil spesies telur: **Ayam** (21 hari), **Bebek** (28 hari), **Puyuh** (18 hari), **Kalkun** (28 hari), **Angsa** (30 hari), dan **Kustom**.
-   - Saklar mode operasi: **Otomatis (Auto)** vs **Manual**.
-   - Penyesuaian target suhu dan kelembaban secara presisi (terkunci otomatis saat mode preset, dapat diubah saat mode manual/kustom).
+2. **🎛️ Kontrol Lingkungan & Preset Spesies (Kontrol):**
+   - Preset profil telur terintegrasi: **Ayam** (21 hari), **Bebek** (28 hari), **Puyuh** (18 hari), **Kalkun** (28 hari), **Angsa** (30 hari), serta mode **Kustom**.
+   - Saklar mode operasi **Otomatis (Auto)** vs **Manual**.
+   - Penyetelan target suhu (°C) dan kelembaban (% RH) dengan tombol plus/minus presisi tinggi.
 
-3. **📊 Pemantauan Batch (Batch Monitoring):**
-   - Grafik telemetri suhu dan kelembaban real-time dengan filter rentang waktu (1H, 6H, 24H).
-   - Pembacaan sensor multi-zona.
+3. **📊 Pemantauan Batch (Batch):**
+   - Grafik telemetri suhu dan kelembaban interaktif.
+   - Filter rentang waktu: 1 Jam, 6 Jam, dan 24 Jam.
+   - Status pemantauan zona inkubator.
 
-4. **🔄 Kontrol Rak (Rack Tilt System):**
-   - Monitoring sudut kemiringan (*tilt angle*) untuk 8 unit rak individual (+45°, 0°, -45°).
-   - Kontrol pembalik telur otomatis dan tombol override manual per rak.
+4. **📹 Kamera Langsung (Kamera):**
+   - Single camera live viewport (1080p feed) dengan badge live dan OSD telemetri real-time.
+   - Panel kontrol navigasi PTZ (Pan, Tilt, Zoom) yang diperlebar: D-pad arah, kontrol zoom in/out, tombol Capture foto, dan Record video.
 
-5. **📹 Kamera Pemantau (Camera Live Feed):**
-   - Multi-cam grid monitoring (6 sudut kamera) untuk memantau kondisi ruang inkubasi secara langsung.
-   - Kontrol PTZ (Pan, Tilt, Zoom) dengan D-pad beveled dan tombol Capture / Record.
-
-6. **⚙️ Status Sistem & Alarm (Settings):**
-   - Log alarm aktif berdasarkan level keparahan (*Kritis*, *Peringatan*, *Info*) dilengkapi tombol konfirmasi.
-   - Indikator kesehatan subsistem: Jaringan Sensor, Aktuator & Motor, serta Koneksi Cloud.
-   - Bar pemantau beban CPU sistem.
+5. **👤 Profil Peternak & Kesehatan Sistem (Profil):**
+   - Informasi profil peternak interaktif (Nama Peternak, Nama Farm, Nomor Telepon, Lokasi, Kapasitas Telur) yang dapat diedit langsung.
+   - Pemantauan kesehatan subsistem: Jaringan Sensor, Aktuator & Motor, Koneksi Cloud, dan CPU/MCU load.
+   - Log alarm aktif dengan severity badge (*Kritis*, *Peringatan*).
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** React 19 / Vite
+- **Framework:** React 19 / Vite 6
 - **Routing:** React Router DOM (HashRouter untuk kompatibilitas stand-alone & file-based embedded)
-- **Styling:** Vanilla CSS (Industrial Skeuomorphic Design System)
+- **Styling:** Modern Vanilla CSS + Glassmorphism accents
 - **Typography:** JetBrains Mono & Inter
-- **Icons:** Material Symbols Outlined
+- **Icons:** Google Material Symbols Rounded
 
 ---
 
 ## 🚀 Panduan Setup & Instalasi
 
-### 1. Prasyarat
-Pastikan komputer / Raspberry Pi Anda sudah terinstal:
-- **Node.js** (versi 18 ke atas disarankan)
-- **npm** atau **yarn** / **pnpm**
+### 1. Prasyarat Sistem
+Pastikan telah menginstal:
+- **Node.js** (v18.x atau yang lebih baru)
+- **npm** (atau pnpm / yarn)
 - **Git**
 
-Cek versi Node.js dan npm:
+Verifikasi instalasi di terminal:
 ```bash
 node -v
 npm -v
+git -v
 ```
 
 ---
@@ -81,7 +83,7 @@ cd Penetas-Telur
 
 ---
 
-### 3. Instal Dependensi
+### 3. Instalasi Dependensi
 ```bash
 npm install
 ```
@@ -89,35 +91,39 @@ npm install
 ---
 
 ### 4. Menjalankan di Mode Development
-Jalankan dev server lokal:
+Jalankan development server:
 ```bash
 npm run dev
 ```
-Buka browser di: **`http://localhost:5173`**
+Buka browser di alamat:
+```
+http://localhost:5173
+```
+> **Catatan untuk Windows PowerShell:** Jika menemui kendala script execution policy, gunakan `npm.cmd run dev`.
 
-Untuk mengakses dari perangkat lain di jaringan lokal yang sama (misal dari Raspberry Pi atau tablet):
+Untuk membuka akses bagi perangkat lain di jaringan lokal yang sama (misal Raspberry Pi atau tablet):
 ```bash
 npm run dev -- --host
 ```
 
 ---
 
-### 5. Build untuk Produksi
-Untuk meng-compile file siap deploy:
+### 5. Kompilasi Produksi (Production Build)
+Untuk membuat file bundle produksi:
 ```bash
 npm run build
 ```
-Hasil build akan tersimpan di folder `dist/`.
+Hasil build siap saji akan dibuat di folder `dist/`.
 
-Uji coba hasil build lokal:
+Uji pratinjau hasil build secara lokal:
 ```bash
 npm run preview
 ```
 
 ---
 
-### 6. Menjalankan di Raspberry Pi (Kiosk Mode)
-Jika ingin menjalankan antarmuka ini pada Raspberry Pi OS dengan Chromium Kiosk Mode otomatis:
+### 6. Menjalankan Kiosk Mode di Raspberry Pi (Layar 7 Inci)
+Untuk menjalankan otomatis dalam mode Kiosk layar penuh pada Raspberry Pi OS:
 ```bash
 chromium-browser --noerrdialogs --disable-infobars --kiosk http://localhost:5173
 ```
@@ -128,31 +134,30 @@ chromium-browser --noerrdialogs --disable-infobars --kiosk http://localhost:5173
 
 ```text
 Penetas-Telur/
-├── public/                 # File aset statis
+├── public/                     # Aset statis (ikon, gambar)
 ├── src/
-│   ├── components/         # Komponen UI modular
-│   │   ├── BottomNavBar.jsx  # Control strip navigasi bawah
-│   │   ├── Layout.jsx        # Layout shell utama
-│   │   └── TopAppBar.jsx     # Header plat merek & status atas
-│   ├── pages/              # Halaman HMI
-│   │   ├── DasborUtama.jsx       # Dasbor Utama (Home)
-│   │   ├── KontrolLingkungan.jsx # Kontrol & Profil Inkubasi
-│   │   ├── PemantauanBatch.jsx   # Telemetri & Grafik
-│   │   ├── KontrolRak.jsx        # Kontrol Tilt Rak
-│   │   ├── KameraLangsung.jsx    # Live Camera & PTZ
-│   │   └── StatusSistem.jsx      # Alarm & Status Sistem
-│   ├── App.jsx             # Konfigurasi router & halaman
-│   ├── index.css           # Sistem desain skeuomorphic-retro CSS
-│   └── main.jsx            # Entry point aplikasi
-├── index.html              # HTML Shell
-├── package.json            # Daftar dependensi & scripts
-├── vite.config.js          # Konfigurasi Vite bundler
-└── README.md               # Dokumentasi proyek
+│   ├── components/             # Komponen UI
+│   │   ├── BottomNavBar.jsx    # Navigasi bawah 5 tab (Home, Kontrol, Batch, Kamera, Profil)
+│   │   ├── Layout.jsx          # Wrapper layout utama
+│   │   └── TopAppBar.jsx       # Header 84px dengan status Cloud, Network, Alarm
+│   ├── pages/                  # Halaman aplikasi
+│   │   ├── DasborUtama.jsx     # Dasbor kontrol utama & 4 slider aktuator
+│   │   ├── KontrolLingkungan.jsx # Kontrol suhu, kelembaban & profil spesies
+│   │   ├── PemantauanBatch.jsx # Grafik telemetri & monitoring batch
+│   │   ├── KameraLangsung.jsx  # Single camera feed & kontrol navigasi PTZ
+│   │   └── ProfilSistem.jsx    # Profil peternak & kesehatan sistem / alarm
+│   ├── App.jsx                 # Routing & konfigurasi halaman
+│   ├── index.css               # Desain sistem CSS modern & colorful
+│   └── main.jsx                # Entry point aplikasi
+├── index.html                  # HTML template
+├── package.json                # Dependensi & konfigurasi skrip
+├── vite.config.js              # Konfigurasi bundler Vite
+└── README.md                   # Dokumentasi proyek & setup
 ```
 
 ---
 
-## 📜 Lisensi
+## 📜 Pengembang
 
-Proyek ini dibuat untuk keperluan monitoring dan kontrol inkubator telur industri.
-Dikembangkan oleh **[Ryan Putra](https://github.com/RyanPutra1478)**.
+Dikembangkan oleh **[Ryan Putra](https://github.com/RyanPutra1478)**.  
+Repositori Resmi: [https://github.com/RyanPutra1478/Penetas-Telur](https://github.com/RyanPutra1478/Penetas-Telur)

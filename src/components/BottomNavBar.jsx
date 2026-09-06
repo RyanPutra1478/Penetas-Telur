@@ -2,108 +2,74 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const navItems = [
-  { icon: 'home', label: 'HOME', path: '/' },
-  { icon: 'tune', label: 'CONTROL', path: '/control' },
-  { icon: 'layers', label: 'BATCH', path: '/batch' },
-  { icon: 'grid_view', label: 'RACK', path: '/rack' },
-  { icon: 'videocam', label: 'CAMERA', path: '/camera' },
-  { icon: 'settings', label: 'SETTINGS', path: '/settings' },
+  { icon: 'home',      label: 'HOME',    path: '/',        color: '#6366F1', bg: '#EEF2FF' },
+  { icon: 'tune',      label: 'KONTROL', path: '/control', color: '#F97316', bg: '#FFF7ED' },
+  { icon: 'layers',    label: 'BATCH',   path: '/batch',   color: '#22C55E', bg: '#F0FDF4' },
+  { icon: 'videocam',  label: 'KAMERA',  path: '/camera',  color: '#14B8A6', bg: '#F0FDFA' },
+  { icon: 'person',    label: 'PROFIL',  path: '/profil',  color: '#8B5CF6', bg: '#F5F3FF' },
 ];
 
 const BottomNavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPath = location.pathname;
+  const path = location.pathname;
 
   return (
     <nav style={{
-      background: 'linear-gradient(180deg, #C8C0B0 0%, #D8D0C0 100%)',
-      borderTop: '3px solid #A89880',
-      boxShadow: `
-        inset 0px 2px 0px #F0EAE0,
-        0px -4px 10px rgba(0,0,0,0.2)
-      `,
       position: 'fixed',
-      bottom: 0, left: 0,
-      width: '100%',
+      bottom: 0, left: 0, right: 0,
+      background: '#FFFFFF',
+      borderTop: '1px solid #E2E8F0',
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
       zIndex: 50,
+      padding: '6px 16px 4px',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      padding: '6px 12px',
-      height: '72px',
-      gap: '8px',
+      height: 68,
     }}>
-      {/* Seam line at top of nav */}
-      <div style={{
-        position: 'absolute',
-        top: '3px', left: 0, right: 0,
-        height: '1px',
-        background: 'rgba(255,255,255,0.5)',
-      }} />
-
       {navItems.map((item) => {
-        const isActive = currentPath === item.path;
+        const isActive = path === item.path;
         return (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
-              maxWidth: '120px',
-              height: '52px',
+              height: 56,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '3px',
-              borderRadius: '6px',
+              gap: 4,
+              borderRadius: 14,
+              border: 'none',
               cursor: 'pointer',
-              transition: 'all 0.08s ease',
-              // Active: recessed / pressed in
-              ...(isActive ? {
-                background: 'linear-gradient(160deg, #C4BAA8 0%, #D8D0C0 100%)',
-                boxShadow: `
-                  inset 3px 3px 6px rgba(0,0,0,0.3),
-                  inset -1px -1px 0px rgba(255,255,255,0.5)
-                `,
-                border: '2px solid #C87020',
-                color: '#C87020',
-              } : {
-                background: 'linear-gradient(160deg, #EDE7D8 0%, #D4CCC0 100%)',
-                boxShadow: `
-                  inset 1px 1px 0px rgba(255,255,255,0.8),
-                  inset -1px -1px 0px #9A8C78,
-                  2px 2px 4px rgba(0,0,0,0.2)
-                `,
-                border: '1px solid #B8A890',
-                color: '#6B5D48',
-              }),
+              transition: 'all 0.2s ease',
+              background: isActive ? item.bg : 'transparent',
             }}
           >
             <span
-              className="material-symbols-outlined"
+              className="material-symbols-rounded"
               style={{
-                fontSize: '18px',
-                fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
+                fontSize: 24,
+                color: isActive ? item.color : '#94A3B8',
+                transition: 'color 0.2s',
               }}
             >
               {item.icon}
             </span>
-            <span className="font-label-sm" style={{ fontSize: '8px' }}>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              color: isActive ? item.color : '#94A3B8',
+              fontFamily: "'JetBrains Mono', monospace",
+              textTransform: 'uppercase',
+              transition: 'color 0.2s',
+            }}>
               {item.label}
             </span>
-            {/* Active indicator LED */}
-            {isActive && (
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                width: '6px', height: '6px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle at 35% 35%, #8FFF8F, #39E239)',
-                boxShadow: '0 0 6px rgba(57,226,57,0.8)',
-              }} />
-            )}
           </button>
         );
       })}
