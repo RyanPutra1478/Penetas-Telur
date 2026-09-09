@@ -27,23 +27,23 @@ const KontrolLingkungan = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
 
       {/* Profile Row */}
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
         {profiles.map((pr, i) => {
           const active = selected === i;
           const AnimalIcon = pr.icon;
           return (
             <button key={pr.name} onClick={() => selectProfile(i)} style={{
               flex: 1,
-              padding: '8px 6px',
-              borderRadius: 14,
+              padding: '10px 6px',
+              borderRadius: 16,
               border: `2px solid ${active ? pr.color : pr.border}`,
               background: active ? pr.bg : '#FFFFFF',
               cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-              boxShadow: active ? `0 4px 14px ${pr.color}35` : '0 1px 4px rgba(0,0,0,0.06)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              boxShadow: active ? `0 4px 14px ${pr.color}35` : '0 1px 4px rgba(0,0,0,0.05)',
               transition: 'all 0.2s ease',
             }}>
               <AnimalIcon size={26} color={active ? pr.color : '#94A3B8'} />
@@ -58,8 +58,8 @@ const KontrolLingkungan = () => {
       <div style={{
         background: `linear-gradient(135deg, ${p.color}18 0%, ${p.color}08 100%)`,
         border: `1.5px solid ${p.color}40`,
-        borderRadius: 12,
-        padding: '8px 16px',
+        borderRadius: 14,
+        padding: '9px 18px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexShrink: 0,
       }}>
@@ -75,16 +75,16 @@ const KontrolLingkungan = () => {
       </div>
 
       {/* Main Controls — 3 Equal Height Columns */}
-      <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', gap: 12, flex: 1, minHeight: 0 }}>
 
         {/* Temperature */}
         <div
           style={{
             flex: 1,
             background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
-            borderRadius: 20, border: '2px solid #FED7AA',
-            padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
+            borderRadius: 22, border: '2px solid #FED7AA',
+            padding: '16px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            boxShadow: '0 4px 14px rgba(249,115,22,0.10)',
             position: 'relative', overflow: 'hidden',
           }}
         >
@@ -114,16 +114,16 @@ const KontrolLingkungan = () => {
         {/* Mode — Integrated Single Card */}
         <div
           style={{
-            width: 145,
+            width: 148,
             background: '#FFFFFF',
-            borderRadius: 20,
+            borderRadius: 22,
             border: '2px solid #E2E8F0',
-            padding: '14px 12px',
+            padding: '16px 12px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
             alignItems: 'center',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
             boxSizing: 'border-box',
             position: 'relative', overflow: 'hidden',
           }}
@@ -169,9 +169,9 @@ const KontrolLingkungan = () => {
           style={{
             flex: 1,
             background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-            borderRadius: 20, border: '2px solid #BFDBFE',
-            padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
+            borderRadius: 22, border: '2px solid #BFDBFE',
+            padding: '16px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            boxShadow: '0 4px 14px rgba(59,130,246,0.10)',
             position: 'relative', overflow: 'hidden',
           }}
         >

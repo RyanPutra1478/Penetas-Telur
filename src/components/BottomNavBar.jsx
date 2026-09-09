@@ -18,13 +18,13 @@ const BottomNavBar = () => {
     <nav style={{
       background: '#FFFFFF',
       borderTop: '1px solid #E2E8F0',
-      boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
+      boxShadow: '0 -2px 10px rgba(0,0,0,0.04)',
       zIndex: 50,
-      padding: '2px 14px',
+      padding: '0 14px',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      height: 58,
+      height: 50,
       flexShrink: 0,
       position: 'relative',
     }}>
@@ -37,25 +37,25 @@ const BottomNavBar = () => {
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
-              maxWidth: 120,
-              height: 48,
+              maxWidth: 110,
+              height: 40,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 2,
-              borderRadius: 14,
+              gap: 1,
+              borderRadius: 12,
               border: isActive ? `1.5px solid ${item.color}40` : '1.5px solid transparent',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               background: isActive ? item.bg : 'transparent',
-              boxShadow: isActive ? `0 2px 8px ${item.color}20` : 'none',
+              boxShadow: isActive ? `0 2px 6px ${item.color}15` : 'none',
             }}
           >
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 25,
+                fontSize: 21,
                 color: isActive ? item.color : '#94A3B8',
                 transition: 'all 0.2s',
                 fontWeight: isActive ? 700 : 500,
@@ -64,7 +64,7 @@ const BottomNavBar = () => {
               {item.icon}
             </span>
             <span style={{
-              fontSize: 9.5,
+              fontSize: 9,
               fontWeight: 800,
               letterSpacing: '0.06em',
               color: isActive ? item.color : '#64748B',

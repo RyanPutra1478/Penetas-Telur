@@ -59,13 +59,13 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     style={{
       background: gradient,
       borderRadius: 18,
-      padding: '9px 15px',
+      padding: '11px 18px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       position: 'relative',
       overflow: 'hidden',
-      boxShadow: `0 5px 16px ${colorOn}35`,
+      boxShadow: `0 4px 14px ${colorOn}28`,
       boxSizing: 'border-box',
       height: '100%',
     }}
@@ -73,16 +73,16 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     {/* Indonesian Batik Kawung Component Overlay */}
     <div className="batik-overlay batik-overlay-white" />
 
-    {/* Background Watermark Icon — Jelas & Kontras */}
+    {/* Background Watermark Icon — Halus & Lega */}
     <span
       className="material-symbols-rounded"
       style={{
         position: 'absolute',
-        right: 4,
+        right: 8,
         top: '50%',
         transform: 'translateY(-50%)',
-        fontSize: 78,
-        color: 'rgba(255,255,255,0.28)',
+        fontSize: 74,
+        color: 'rgba(255,255,255,0.14)',
         pointerEvents: 'none',
         lineHeight: 1,
         userSelect: 'none',
@@ -138,7 +138,7 @@ const DasborUtama = () => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      gap: 10,
+      gap: 12,
       height: '100%',
       boxSizing: 'border-box',
     }}>
@@ -147,7 +147,7 @@ const DasborUtama = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1.15fr 1.15fr 1.6fr',
-        gap: 10,
+        gap: 12,
         flex: 1,                    /* 50% tinggi layar seimbang */
         minHeight: 0,
       }}>
@@ -157,27 +157,27 @@ const DasborUtama = () => {
           style={{
             background: 'linear-gradient(145deg, #FFFDF9 0%, #FFEDD5 100%)',
             borderRadius: 20,
-            padding: '11px 15px',
+            padding: '13px 18px',
             border: '2px solid #FED7AA',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
+            boxShadow: '0 4px 14px rgba(249,115,22,0.10)',
           }}
         >
           {/* Indonesian Batik Kawung Motif */}
           <div className="batik-overlay batik-overlay-warm" />
 
-          {/* Background Icon — Jelas & Kontras */}
+          {/* Background Icon — Halus & Lega */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
-            right: 6,
+            right: 8,
             top: '50%',
             transform: 'translateY(-50%)',
-            fontSize: 98,
-            color: 'rgba(249,115,22,0.22)',
+            fontSize: 90,
+            color: 'rgba(249,115,22,0.11)',
             pointerEvents: 'none',
             lineHeight: 1,
             userSelect: 'none',
@@ -256,27 +256,27 @@ const DasborUtama = () => {
           style={{
             background: 'linear-gradient(145deg, #F8FAFF 0%, #DBEAFE 100%)',
             borderRadius: 20,
-            padding: '11px 15px',
+            padding: '13px 18px',
             border: '2px solid #BFDBFE',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
+            boxShadow: '0 4px 14px rgba(59,130,246,0.10)',
           }}
         >
           {/* Indonesian Batik Kawung Motif */}
           <div className="batik-overlay batik-overlay-blue" />
 
-          {/* Background Icon — Jelas & Kontras */}
+          {/* Background Icon — Halus & Lega */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
-            right: 6,
+            right: 8,
             top: '50%',
             transform: 'translateY(-50%)',
-            fontSize: 98,
-            color: 'rgba(59,130,246,0.22)',
+            fontSize: 90,
+            color: 'rgba(59,130,246,0.11)',
             pointerEvents: 'none',
             lineHeight: 1,
             userSelect: 'none',
@@ -355,8 +355,8 @@ const DasborUtama = () => {
           style={{
             background: 'linear-gradient(140deg, #22C55E 0%, #16A34A 60%, #15803D 100%)',
             borderRadius: 20,
-            padding: '11px 16px',
-            boxShadow: '0 8px 24px rgba(34,197,94,0.34)',
+            padding: '13px 18px',
+            boxShadow: '0 6px 20px rgba(34,197,94,0.28)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
@@ -367,14 +367,14 @@ const DasborUtama = () => {
           {/* Indonesian Batik Kawung Motif */}
           <div className="batik-overlay batik-overlay-white" />
 
-          {/* Background Icon — Jelas & Kontras */}
+          {/* Background Icon — Halus & Lega */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
-            right: 6,
+            right: 8,
             top: '50%',
             transform: 'translateY(-50%)',
-            fontSize: 100,
-            color: 'rgba(255,255,255,0.26)',
+            fontSize: 92,
+            color: 'rgba(255,255,255,0.14)',
             pointerEvents: 'none',
             lineHeight: 1,
             userSelect: 'none',
@@ -471,7 +471,7 @@ const DasborUtama = () => {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gridTemplateRows: '1fr 1fr',
-        gap: 10,
+        gap: 12,
         flex: 1,                    /* 50% tinggi layar seimbang */
         minHeight: 0,
       }}>
