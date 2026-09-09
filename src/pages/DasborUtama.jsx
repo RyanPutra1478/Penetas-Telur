@@ -55,7 +55,7 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
    ================================================ */
 const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => (
   <div
-    className="batik-overlay-white"
+    className="batik-panel-white"
     style={{
       background: gradient,
       borderRadius: 18,
@@ -70,6 +70,9 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       height: '100%',
     }}
   >
+    {/* Indonesian Batik Kawung Component Overlay */}
+    <div className="batik-overlay batik-overlay-white" />
+
     {/* Background Watermark Icon — Jelas & Kontras */}
     <span
       className="material-symbols-rounded"
@@ -151,7 +154,6 @@ const DasborUtama = () => {
 
         {/* SUHU INTERNAL */}
         <div
-          className="batik-overlay-card"
           style={{
             background: 'linear-gradient(145deg, #FFFDF9 0%, #FFEDD5 100%)',
             borderRadius: 20,
@@ -165,6 +167,9 @@ const DasborUtama = () => {
             boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
           }}
         >
+          {/* Indonesian Batik Kawung Motif */}
+          <div className="batik-overlay batik-overlay-warm" />
+
           {/* Background Icon — Jelas & Kontras */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
@@ -248,7 +253,6 @@ const DasborUtama = () => {
 
         {/* KELEMBABAN */}
         <div
-          className="batik-overlay-card"
           style={{
             background: 'linear-gradient(145deg, #F8FAFF 0%, #DBEAFE 100%)',
             borderRadius: 20,
@@ -262,6 +266,9 @@ const DasborUtama = () => {
             boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
           }}
         >
+          {/* Indonesian Batik Kawung Motif */}
+          <div className="batik-overlay batik-overlay-blue" />
+
           {/* Background Icon — Jelas & Kontras */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
@@ -345,7 +352,6 @@ const DasborUtama = () => {
 
         {/* BATCH AKTIF */}
         <div
-          className="batik-overlay-white"
           style={{
             background: 'linear-gradient(140deg, #22C55E 0%, #16A34A 60%, #15803D 100%)',
             borderRadius: 20,
@@ -358,6 +364,9 @@ const DasborUtama = () => {
             justifyContent: 'space-between',
           }}
         >
+          {/* Indonesian Batik Kawung Motif */}
+          <div className="batik-overlay batik-overlay-white" />
+
           {/* Background Icon — Jelas & Kontras */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',

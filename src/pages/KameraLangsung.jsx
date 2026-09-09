@@ -99,21 +99,25 @@ const KameraLangsung = () => {
       </div>
 
       {/* ===== PTZ CONTROL PANEL — COMPACT & BOLD ===== */}
-      <div style={{
-        width: 260,
-        background: '#FFFFFF',
-        borderRadius: 20,
-        border: '2px solid #E2E8F0',
-        padding: '12px 16px',
-        display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
-        flexShrink: 0,
-        boxSizing: 'border-box',
-      }}>
+      <div
+        style={{
+          width: 260,
+          background: '#FFFFFF',
+          borderRadius: 20,
+          border: '2px solid #E2E8F0',
+          padding: '12px 16px',
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'space-between',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
+          flexShrink: 0,
+          boxSizing: 'border-box',
+          position: 'relative', overflow: 'hidden',
+        }}
+      >
+        <div className="batik-overlay batik-overlay-neutral" />
 
         {/* Panel header */}
-        <div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 18, fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }}>PTZ Control</div>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.07em', marginTop: 2 }}>Pan · Tilt · Zoom</div>
         </div>

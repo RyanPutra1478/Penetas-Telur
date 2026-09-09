@@ -5,8 +5,8 @@ import BottomNavBar from './BottomNavBar';
 
 const Layout = () => (
   <div
-    className="batik-pattern-bg"
     style={{
+      background: '#F1F5F9',
       display: 'flex',
       flexDirection: 'column',
       width: '100vw',

@@ -47,22 +47,23 @@ const PemantauanBatch = () => {
         <div style={{ width: 210, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
           {/* Temp */}
           <div
-            className="batik-overlay-card"
             style={{
               flex: 1, background: 'linear-gradient(135deg, #FFF7ED, #FFEDD5)',
               borderRadius: 20, border: '2px solid #FED7AA', padding: '16px',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
               boxShadow: '0 4px 14px rgba(249,115,22,0.12)',
+              position: 'relative', overflow: 'hidden',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="batik-overlay batik-overlay-warm" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Suhu / Zona A</span>
               <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#EA580C' }}>thermometer</span>
             </div>
-            <div style={{ my: 'auto' }}>
+            <div style={{ my: 'auto', position: 'relative', zIndex: 1 }}>
               <span style={{ fontSize: 52, fontWeight: 900, color: '#EA580C', fontFamily: "'JetBrains Mono', monospace", lineHeight: 1, letterSpacing: '-0.02em' }}>37.5°</span>
             </div>
-            <div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ padding: '6px 12px', background: '#FEF3C7', borderRadius: 999, display: 'inline-block', border: '1px solid #FDE68A' }}>
                 <span style={{ fontSize: 12, fontWeight: 800, color: '#92400E', fontFamily: "'JetBrains Mono', monospace" }}>TARGET: 37.8°C</span>
               </div>
@@ -70,22 +71,23 @@ const PemantauanBatch = () => {
           </div>
           {/* Humidity */}
           <div
-            className="batik-overlay-card"
             style={{
               flex: 1, background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)',
               borderRadius: 20, border: '2px solid #BFDBFE', padding: '16px',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
               boxShadow: '0 4px 14px rgba(59,130,246,0.12)',
+              position: 'relative', overflow: 'hidden',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="batik-overlay batik-overlay-blue" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#1D4ED8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Hum / Zona A</span>
               <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#3B82F6' }}>water_drop</span>
             </div>
-            <div style={{ my: 'auto' }}>
+            <div style={{ my: 'auto', position: 'relative', zIndex: 1 }}>
               <span style={{ fontSize: 52, fontWeight: 900, color: '#2563EB', fontFamily: "'JetBrains Mono', monospace", lineHeight: 1, letterSpacing: '-0.02em' }}>65.2%</span>
             </div>
-            <div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ padding: '6px 12px', background: '#DBEAFE', borderRadius: 999, display: 'inline-block', border: '1px solid #BFDBFE' }}>
                 <span style={{ fontSize: 12, fontWeight: 800, color: '#1E40AF', fontFamily: "'JetBrains Mono', monospace" }}>TARGET: 65.0%</span>
               </div>
@@ -94,13 +96,17 @@ const PemantauanBatch = () => {
         </div>
 
         {/* Chart */}
-        <div style={{
-          flex: 1, background: '#FFFFFF', borderRadius: 20,
-          border: '2px solid #E2E8F0', padding: '16px',
-          display: 'flex', flexDirection: 'column',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div
+          style={{
+            flex: 1, background: '#FFFFFF', borderRadius: 20,
+            border: '2px solid #E2E8F0', padding: '16px',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div className="batik-overlay batik-overlay-neutral" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 15, fontWeight: 900, color: '#0F172A' }}>Grafik Telemetri · Rentang {range}</span>
             <div style={{ display: 'flex', gap: 16 }}>
               {[['#EA580C','Suhu (°C)'],['#2563EB','Kelembaban (%)']].map(([c,l]) => (

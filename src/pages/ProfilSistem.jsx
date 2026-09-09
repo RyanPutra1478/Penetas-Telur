@@ -186,7 +186,6 @@ const ProfilSistem = () => {
 
         {/* Profile Card Header */}
         <div
-          className="batik-overlay-white"
           style={{
             background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
             borderRadius: 14,
@@ -199,6 +198,7 @@ const ProfilSistem = () => {
             overflow: 'hidden',
           }}
         >
+          <div className="batik-overlay batik-overlay-white" />
           {/* Avatar */}
           <div style={{
             width: 46, height: 46, borderRadius: '50%',
@@ -246,18 +246,22 @@ const ProfilSistem = () => {
       }}>
 
         {/* Panel 1: Kesehatan Sistem */}
-        <div style={{
-          background: '#FFFFFF',
-          borderRadius: 18,
-          border: '2px solid #E2E8F0',
-          padding: '10px 15px',
-          boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 7,
-          flexShrink: 0,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: 18,
+            border: '2px solid #E2E8F0',
+            padding: '10px 15px',
+            boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 7,
+            flexShrink: 0,
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div className="batik-overlay batik-overlay-neutral" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
               <div style={{
                 width: 28, height: 28, borderRadius: 8,
@@ -272,51 +276,58 @@ const ProfilSistem = () => {
             <span style={{ fontSize: 12, fontWeight: 700, color: '#64748B' }}>4/4 Modul Terpantau</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, position: 'relative', zIndex: 1 }}>
             {health.map((h, i) => <HealthCard key={i} {...h} />)}
           </div>
         </div>
 
         {/* Panel 2: Alarm & Peringatan Aktif (Mengisi penuh ke bawah, fail-safe di bottom) */}
-        <div style={{
-          background: '#FFFFFF',
-          borderRadius: 18,
-          border: '2px solid #E2E8F0',
-          padding: '11px 16px',
-          boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          gap: 7,
-        }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: 8,
-                background: 'linear-gradient(135deg, #FCA5A5, #EF4444)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 6px rgba(239,68,68,0.3)',
-              }}>
-                <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>notifications_active</span>
-              </div>
-              <span style={{ fontSize: 15.5, fontWeight: 900, color: '#0F172A' }}>Log Alarm & Peringatan ({alarms.length})</span>
-            </div>
-            <button style={{
-              padding: '3px 12px', borderRadius: 7,
-              border: '1px solid #CBD5E1', background: '#F8FAFC',
-              fontSize: 10.5, fontWeight: 800, color: '#475569', cursor: 'pointer',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}>
-              MUTE BUZZER
-            </button>
-          </div>
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: 18,
+            border: '2px solid #E2E8F0',
+            padding: '11px 16px',
+            boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div className="batik-overlay batik-overlay-neutral" />
 
-          {/* Alarm Cards list — di atas dengan spasi rapi */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-            {alarms.map((a, i) => <AlarmCard key={i} {...a} />)}
+          {/* Header & Alarm Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, position: 'relative', zIndex: 1 }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 8,
+                  background: 'linear-gradient(135deg, #FCA5A5, #EF4444)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(239,68,68,0.3)',
+                }}>
+                  <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#FFF' }}>notifications_active</span>
+                </div>
+                <span style={{ fontSize: 15.5, fontWeight: 900, color: '#0F172A' }}>Log Alarm & Peringatan ({alarms.length})</span>
+              </div>
+              <button style={{
+                padding: '3px 12px', borderRadius: 7,
+                border: '1px solid #CBD5E1', background: '#F8FAFC',
+                fontSize: 10.5, fontWeight: 800, color: '#475569', cursor: 'pointer',
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                MUTE BUZZER
+              </button>
+            </div>
+
+            {/* Alarm Cards list — di atas dengan spasi rapi */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {alarms.map((a, i) => <AlarmCard key={i} {...a} />)}
+            </div>
           </div>
 
           {/* Security assurance pill — DIPOSISIKAN ALIGN VERTICAL BOTTOM (marginTop: auto) */}
@@ -324,7 +335,8 @@ const ProfilSistem = () => {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '7px 14px', background: '#F8FAFC', borderRadius: 10,
             border: '1.5px solid #F1F5F9',
-            marginTop: 'auto', /* Memposisikan pill tepat di dasar panel */
+            marginTop: 'auto',
+            position: 'relative', zIndex: 1,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px rgba(34,197,94,0.6)' }} />

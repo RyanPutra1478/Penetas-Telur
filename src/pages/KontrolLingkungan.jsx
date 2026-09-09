@@ -77,24 +77,25 @@ const KontrolLingkungan = () => {
 
         {/* Temperature */}
         <div
-          className="batik-overlay-card"
           style={{
             flex: 1,
             background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
             borderRadius: 20, border: '2px solid #FED7AA',
             padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
             boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
+            position: 'relative', overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="batik-overlay batik-overlay-warm" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Suhu Target</span>
             <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#EA580C' }}>device_thermostat</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 5, my: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 5, my: 'auto', position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 68, fontWeight: 900, color: '#EA580C', lineHeight: 1, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.03em' }}>{temp.toFixed(1)}</span>
             <span style={{ fontSize: 26, fontWeight: 900, color: '#FB923C' }}>°C</span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, position: 'relative', zIndex: 1 }}>
             {[['−', () => setTemp(t => Math.max(20, +(t-0.1).toFixed(1)))], ['+', () => setTemp(t => Math.min(45, +(t+0.1).toFixed(1)))]].map(([lbl, fn]) => (
               <button key={lbl} onClick={fn} disabled={!canAdjust} style={{
                 flex: 1, height: 48, borderRadius: 12, fontSize: 28, fontWeight: 900,
@@ -110,7 +111,6 @@ const KontrolLingkungan = () => {
 
         {/* Mode — Integrated Single Card */}
         <div
-          className="batik-overlay-card"
           style={{
             width: 145,
             background: '#FFFFFF',
@@ -123,12 +123,14 @@ const KontrolLingkungan = () => {
             alignItems: 'center',
             boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
             boxSizing: 'border-box',
+            position: 'relative', overflow: 'hidden',
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 900, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Mode Operasi</span>
+          <div className="batik-overlay batik-overlay-neutral" />
+          <span style={{ fontSize: 12, fontWeight: 900, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', position: 'relative', zIndex: 1 }}>Mode Operasi</span>
           
           {/* Vertical Toggle */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, my: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, my: 'auto', position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: isAuto ? '#6366F1' : '#CBD5E1', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.05em' }}>AUTO</span>
             <button onClick={() => setIsAuto(!isAuto)} style={{
               width: 42, height: 78, borderRadius: 999,
@@ -153,6 +155,7 @@ const KontrolLingkungan = () => {
           <div style={{
             background: '#FFF7ED', borderRadius: 999, border: '1px solid #FED7AA',
             padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 5,
+            position: 'relative', zIndex: 1,
           }}>
             <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#EA580C' }}>local_fire_department</span>
             <span style={{ fontSize: 11, fontWeight: 900, color: '#EA580C', fontFamily: "'JetBrains Mono', monospace" }}>HEATER ON</span>
@@ -161,16 +164,17 @@ const KontrolLingkungan = () => {
 
         {/* Humidity */}
         <div
-          className="batik-overlay-card"
           style={{
             flex: 1,
             background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
             borderRadius: 20, border: '2px solid #BFDBFE',
             padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
             boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
+            position: 'relative', overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="batik-overlay batik-overlay-blue" />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#1D4ED8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kelembaban Target</span>
             <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#3B82F6' }}>water_drop</span>
           </div>
