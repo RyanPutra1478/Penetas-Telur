@@ -185,15 +185,20 @@ const ProfilSistem = () => {
       }}>
 
         {/* Profile Card Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
-          borderRadius: 14,
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          boxShadow: '0 3px 10px rgba(139,92,246,0.35)',
-        }}>
+        <div
+          className="batik-overlay-white"
+          style={{
+            background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+            borderRadius: 14,
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: '0 3px 10px rgba(139,92,246,0.35)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
           {/* Avatar */}
           <div style={{
             width: 46, height: 46, borderRadius: '50%',

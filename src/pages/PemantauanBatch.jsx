@@ -46,12 +46,15 @@ const PemantauanBatch = () => {
         {/* Sensor Panels */}
         <div style={{ width: 210, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
           {/* Temp */}
-          <div style={{
-            flex: 1, background: 'linear-gradient(135deg, #FFF7ED, #FFEDD5)',
-            borderRadius: 20, border: '2px solid #FED7AA', padding: '16px',
-            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            boxShadow: '0 4px 14px rgba(249,115,22,0.12)',
-          }}>
+          <div
+            className="batik-overlay-card"
+            style={{
+              flex: 1, background: 'linear-gradient(135deg, #FFF7ED, #FFEDD5)',
+              borderRadius: 20, border: '2px solid #FED7AA', padding: '16px',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              boxShadow: '0 4px 14px rgba(249,115,22,0.12)',
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Suhu / Zona A</span>
               <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#EA580C' }}>thermometer</span>
@@ -66,12 +69,15 @@ const PemantauanBatch = () => {
             </div>
           </div>
           {/* Humidity */}
-          <div style={{
-            flex: 1, background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)',
-            borderRadius: 20, border: '2px solid #BFDBFE', padding: '16px',
-            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            boxShadow: '0 4px 14px rgba(59,130,246,0.12)',
-          }}>
+          <div
+            className="batik-overlay-card"
+            style={{
+              flex: 1, background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)',
+              borderRadius: 20, border: '2px solid #BFDBFE', padding: '16px',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              boxShadow: '0 4px 14px rgba(59,130,246,0.12)',
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#1D4ED8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Hum / Zona A</span>
               <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#3B82F6' }}>water_drop</span>

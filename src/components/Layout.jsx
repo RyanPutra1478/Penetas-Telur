@@ -4,15 +4,17 @@ import TopAppBar from './TopAppBar';
 import BottomNavBar from './BottomNavBar';
 
 const Layout = () => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100vw',
-    height: '100vh',
-    overflow: 'hidden',
-    background: '#F0F4FF',
-    boxSizing: 'border-box',
-  }}>
+  <div
+    className="batik-pattern-bg"
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    }}
+  >
     <TopAppBar />
     <main style={{
       flex: 1,

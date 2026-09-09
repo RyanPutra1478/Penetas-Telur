@@ -26,7 +26,9 @@ const BottomNavBar = () => {
       alignItems: 'center',
       height: 58,
       flexShrink: 0,
+      position: 'relative',
     }}>
+      <div className="batik-ribbon-strip" style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />
       {navItems.map((item) => {
         const isActive = path === item.path;
         return (
@@ -35,34 +37,37 @@ const BottomNavBar = () => {
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
+              maxWidth: 120,
               height: 48,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 2,
-              borderRadius: 12,
-              border: 'none',
+              borderRadius: 14,
+              border: isActive ? `1.5px solid ${item.color}40` : '1.5px solid transparent',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               background: isActive ? item.bg : 'transparent',
+              boxShadow: isActive ? `0 2px 8px ${item.color}20` : 'none',
             }}
           >
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 22,
+                fontSize: 25,
                 color: isActive ? item.color : '#94A3B8',
-                transition: 'color 0.2s',
+                transition: 'all 0.2s',
+                fontWeight: isActive ? 700 : 500,
               }}
             >
               {item.icon}
             </span>
             <span style={{
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: 800,
               letterSpacing: '0.06em',
-              color: isActive ? item.color : '#94A3B8',
+              color: isActive ? item.color : '#64748B',
               fontFamily: "'JetBrains Mono', monospace",
               textTransform: 'uppercase',
               transition: 'color 0.2s',

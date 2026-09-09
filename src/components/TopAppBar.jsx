@@ -23,25 +23,45 @@ const TopAppBar = () => {
       justifyContent: 'space-between',
       flexShrink: 0,
       zIndex: 20,
+      position: 'relative',
     }}>
-      {/* Brand */}
+      {/* Brand: Tetasco with Indonesian Batik Heritage Accent */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{
-          width: 48, height: 48,
-          borderRadius: 14,
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          width: 50, height: 50,
+          borderRadius: 15,
+          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #D97706 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 5px 14px rgba(139,92,246,0.38)',
+          boxShadow: '0 5px 16px rgba(124,58,237,0.38)',
           flexShrink: 0,
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <span className="material-symbols-rounded" style={{ fontSize: 26, color: '#FFF' }}>egg_alt</span>
+          {/* Subtle Kawung Batik watermark on logo */}
+          <div className="batik-overlay-white" style={{ position: 'absolute', inset: 0, opacity: 0.3 }} />
+          <span className="material-symbols-rounded" style={{ fontSize: 28, color: '#FFF', position: 'relative', zIndex: 1 }}>egg_alt</span>
         </div>
         <div>
-          <div style={{ fontSize: 19, fontWeight: 900, color: '#0F172A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-            OVO-INCUBATOR
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+              Tetasco
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 900,
+              background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)',
+              color: '#B45309',
+              border: '1px solid #FCD34D',
+              padding: '2px 7px', borderRadius: 6,
+              fontFamily: "'JetBrains Mono', monospace",
+              letterSpacing: '0.08em',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#D97706' }} />
+              BATIK ID
+            </span>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
-            Smart HMI · v1.0
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 2 }}>
+            Smart Incubator HMI · Nusantara v1.0
           </div>
         </div>
       </div>
@@ -74,6 +94,7 @@ const TopAppBar = () => {
           </button>
         ))}
       </div>
+      <div className="batik-ribbon-strip" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
     </header>
   );
 };

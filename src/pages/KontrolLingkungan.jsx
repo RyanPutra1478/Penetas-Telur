@@ -76,13 +76,16 @@ const KontrolLingkungan = () => {
       <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0 }}>
 
         {/* Temperature */}
-        <div style={{
-          flex: 1,
-          background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
-          borderRadius: 20, border: '2px solid #FED7AA',
-          padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
-        }}>
+        <div
+          className="batik-overlay-card"
+          style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
+            borderRadius: 20, border: '2px solid #FED7AA',
+            padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            boxShadow: '0 6px 16px rgba(249,115,22,0.12)',
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Suhu Target</span>
             <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#EA580C' }}>device_thermostat</span>
@@ -106,19 +109,22 @@ const KontrolLingkungan = () => {
         </div>
 
         {/* Mode — Integrated Single Card */}
-        <div style={{
-          width: 145,
-          background: '#FFFFFF',
-          borderRadius: 20,
-          border: '2px solid #E2E8F0',
-          padding: '14px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-          boxSizing: 'border-box',
-        }}>
+        <div
+          className="batik-overlay-card"
+          style={{
+            width: 145,
+            background: '#FFFFFF',
+            borderRadius: 20,
+            border: '2px solid #E2E8F0',
+            padding: '14px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+            boxSizing: 'border-box',
+          }}
+        >
           <span style={{ fontSize: 12, fontWeight: 900, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Mode Operasi</span>
           
           {/* Vertical Toggle */}
@@ -154,13 +160,16 @@ const KontrolLingkungan = () => {
         </div>
 
         {/* Humidity */}
-        <div style={{
-          flex: 1,
-          background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-          borderRadius: 20, border: '2px solid #BFDBFE',
-          padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
-        }}>
+        <div
+          className="batik-overlay-card"
+          style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+            borderRadius: 20, border: '2px solid #BFDBFE',
+            padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            boxShadow: '0 6px 16px rgba(59,130,246,0.12)',
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#1D4ED8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kelembaban Target</span>
             <span className="material-symbols-rounded" style={{ fontSize: 24, color: '#3B82F6' }}>water_drop</span>

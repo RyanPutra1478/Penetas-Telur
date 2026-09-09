@@ -1,0 +1,50 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'>
+  <g fill='none' stroke='#6366F1' stroke-width='1.2' opacity='0.18'>
+    <!-- Center flower -->
+    <ellipse cx='24' cy='14' rx='6' ry='9.5'/>
+    <ellipse cx='24' cy='34' rx='6' ry='9.5'/>
+    <ellipse cx='14' cy='24' rx='9.5' ry='6'/>
+    <ellipse cx='34' cy='24' rx='9.5' ry='6'/>
+    <!-- Inner rings -->
+    <ellipse cx='24' cy='14' rx='3' ry='5'/>
+    <ellipse cx='24' cy='34' rx='3' ry='5'/>
+    <ellipse cx='14' cy='24' rx='5' ry='3'/>
+    <ellipse cx='34' cy='24' rx='5' ry='3'/>
+    <!-- Center Cecek / Dots -->
+    <circle cx='24' cy='24' r='2' fill='#6366F1'/>
+    <circle cx='24' cy='14' r='1.5' fill='#6366F1'/>
+    <circle cx='24' cy='34' r='1.5' fill='#6366F1'/>
+    <circle cx='14' cy='24' r='1.5' fill='#6366F1'/>
+    <circle cx='34' cy='24' r='1.5' fill='#6366F1'/>
+    <!-- 4 Corners matching (at 0,0, 48,0, 0,48, 48,48) -->
+    <!-- (0,0) -->
+    <ellipse cx='0' cy='10' rx='6' ry='9.5'/>
+    <ellipse cx='10' cy='0' rx='9.5' ry='6'/>
+    <ellipse cx='0' cy='10' rx='3' ry='5'/>
+    <ellipse cx='10' cy='0' rx='5' ry='3'/>
+    <circle cx='0' cy='0' r='2' fill='#6366F1'/>
+    <!-- (48,0) -->
+    <ellipse cx='48' cy='10' rx='6' ry='9.5'/>
+    <ellipse cx='38' cy='0' rx='9.5' ry='6'/>
+    <ellipse cx='48' cy='10' rx='3' ry='5'/>
+    <ellipse cx='38' cy='0' rx='5' ry='3'/>
+    <circle cx='48' cy='0' r='2' fill='#6366F1'/>
+    <!-- (0,48) -->
+    <ellipse cx='0' cy='38' rx='6' ry='9.5'/>
+    <ellipse cx='10' cy='48' rx='9.5' ry='6'/>
+    <ellipse cx='0' cy='38' rx='3' ry='5'/>
+    <ellipse cx='10' cy='48' rx='5' ry='3'/>
+    <circle cx='0' cy='48' r='2' fill='#6366F1'/>
+    <!-- (48,48) -->
+    <ellipse cx='48' cy='38' rx='6' ry='9.5'/>
+    <ellipse cx='38' cy='48' rx='9.5' ry='6'/>
+    <ellipse cx='48' cy='38' rx='3' ry='5'/>
+    <ellipse cx='38' cy='48' rx='5' ry='3'/>
+    <circle cx='48' cy='48' r='2' fill='#6366F1'/>
+    <!-- Diamond crosses in the gaps -->
+    <polygon points='24,1 25.5,3 24,5 22.5,3' fill='#6366F1'/>
+    <polygon points='24,43 25.5,45 24,47 22.5,45' fill='#6366F1'/>
+    <polygon points='1,24 3,25.5 5,24 3,22.5' fill='#6366F1'/>
+    <polygon points='43,24 45,25.5 47,24 45,22.5' fill='#6366F1'/>
+  </g>
+</svg>
