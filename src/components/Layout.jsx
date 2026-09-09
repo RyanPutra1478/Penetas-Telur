@@ -20,7 +20,7 @@ const Layout = () => (
       flex: 1,
       minHeight: 0,
       overflow: 'hidden',
-      padding: '10px 14px',
+      padding: '8px 14px',
       boxSizing: 'border-box',
     }}>
       <Outlet />
