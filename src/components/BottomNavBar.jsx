@@ -18,13 +18,13 @@ const BottomNavBar = () => {
     <nav style={{
       background: '#FFFFFF',
       borderTop: '1px solid #E2E8F0',
-      boxShadow: '0 -3px 12px rgba(0,0,0,0.05)',
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
       zIndex: 50,
-      padding: '0 16px',
+      padding: '0 18px',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      height: 62,
+      height: 74,
       flexShrink: 0,
       position: 'relative',
     }}>
@@ -37,25 +37,25 @@ const BottomNavBar = () => {
             onClick={() => navigate(item.path)}
             style={{
               flex: 1,
-              maxWidth: 120,
-              height: 50,
+              maxWidth: 130,
+              height: 60,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 2,
-              borderRadius: 14,
-              border: isActive ? `1.5px solid ${item.color}40` : '1.5px solid transparent',
+              gap: 3,
+              borderRadius: 16,
+              border: isActive ? `2px solid ${item.color}50` : '2px solid transparent',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               background: isActive ? item.bg : 'transparent',
-              boxShadow: isActive ? `0 2px 8px ${item.color}20` : 'none',
+              boxShadow: isActive ? `0 3px 10px ${item.color}25` : 'none',
             }}
           >
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 24,
+                fontSize: 27,
                 color: isActive ? item.color : '#94A3B8',
                 transition: 'all 0.2s',
                 fontWeight: isActive ? 700 : 500,
@@ -64,7 +64,7 @@ const BottomNavBar = () => {
               {item.icon}
             </span>
             <span style={{
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 800,
               letterSpacing: '0.06em',
               color: isActive ? item.color : '#64748B',
