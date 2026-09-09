@@ -59,10 +59,8 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     style={{
       background: gradient,
       borderRadius: 18,
-      padding: '11px 18px',
       display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
+      alignItems: 'stretch',
       position: 'relative',
       overflow: 'hidden',
       boxShadow: `0 4px 14px ${colorOn}28`,
@@ -73,54 +71,80 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     {/* Indonesian Batik Kawung Component Overlay */}
     <div className="batik-overlay batik-overlay-white" />
 
-    {/* Background Watermark Icon — Halus & Lega */}
-    <span
-      className="material-symbols-rounded"
+    {/* Sisi Paling Kiri: Icon Full Mengisi Secara Vertikal */}
+    <div
       style={{
-        position: 'absolute',
-        right: 8,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        fontSize: 74,
-        color: 'rgba(255,255,255,0.14)',
-        pointerEvents: 'none',
-        lineHeight: 1,
-        userSelect: 'none',
+        width: 76,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255, 255, 255, 0.18)',
+        borderRight: '1.5px solid rgba(255, 255, 255, 0.25)',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 1,
       }}
     >
-      {icon}
-    </span>
-
-    {/* Header info — Badge Icon Jelas & Font Terkalibrasi Rapi */}
-    <div style={{ position: 'relative', zIndex: 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-        <div style={{
-          width: 32, height: 32,
-          borderRadius: 10,
-          background: 'rgba(255,255,255,0.25)',
-          border: '1.5px solid rgba(255,255,255,0.45)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-          boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-        }}>
-          <span className="material-symbols-rounded" style={{ fontSize: 20, color: '#FFFFFF' }}>
-            {icon}
-          </span>
-        </div>
-        <div>
-          <div style={{ fontSize: 19, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-            {label}
-          </div>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,0.92)', marginTop: 1 }}>
-            {sublabel}
-          </div>
-        </div>
-      </div>
+      <span
+        className="material-symbols-rounded"
+        style={{
+          fontSize: 36,
+          color: '#FFFFFF',
+          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.2))',
+        }}
+      >
+        {icon}
+      </span>
     </div>
 
-    {/* Slider Section — di bawah kiri */}
-    <div style={{ position: 'relative', zIndex: 1 }}>
-      {children}
+    {/* Sisi Kanan: Title, Subtitle, dan Slider */}
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        padding: '0 20px 0 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 900,
+            color: '#FFFFFF',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.15,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {label}
+        </div>
+        <div
+          style={{
+            fontSize: 11.5,
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.92)',
+            marginTop: 3,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {sublabel}
+        </div>
+      </div>
+
+      {/* Slider Section */}
+      <div style={{ flexShrink: 0 }}>
+        {children}
+      </div>
     </div>
   </div>
 );
