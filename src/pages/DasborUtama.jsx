@@ -11,6 +11,18 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
       opacity: disabled ? 0.4 : 1,
       pointerEvents: disabled ? 'none' : 'auto',
     }}>
+      {/* Label status di sebelah kiri tombol slider */}
+      <span style={{
+        fontSize: 13, fontWeight: 900, letterSpacing: '0.07em',
+        textTransform: 'uppercase',
+        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
+        fontFamily: "'JetBrains Mono', monospace",
+        textAlign: 'right',
+        minWidth: 46,
+        transition: 'color 0.25s',
+      }}>
+        {value ? labelOn : labelOff}
+      </span>
       <button
         onClick={e => { e.stopPropagation(); onChange(!value); }}
         style={{
@@ -37,15 +49,6 @@ const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', d
           transition: 'left 0.25s cubic-bezier(0.34,1.3,0.64,1)',
         }} />
       </button>
-      <span style={{
-        fontSize: 13, fontWeight: 900, letterSpacing: '0.07em',
-        textTransform: 'uppercase',
-        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-        fontFamily: "'JetBrains Mono', monospace",
-        transition: 'color 0.25s',
-      }}>
-        {value ? labelOn : labelOff}
-      </span>
     </div>
   );
 };
@@ -536,30 +539,29 @@ const DasborUtama = () => {
         {/* PEMBALIK RAK */}
         <ControlCard
           icon="view_carousel"
-          label="Pembalik Rak"
-          sublabel="Sistem tilt kemiringan otomatis"
+          label={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span>Pembalik Rak</span>
+              {rakGerak && (
+                <span
+                  className="material-symbols-rounded animate-spin-slow"
+                  style={{ fontSize: 18, color: '#FFFFFF' }}
+                >
+                  rotate_90_degrees_ccw
+                </span>
+              )}
+            </div>
+          }
+          sublabel={rakGerak ? "Sistem tilt otomatis · Berputar" : "Sistem tilt kemiringan otomatis"}
           gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
           colorOn="#8B5CF6"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <SliderToggle
-              value={rakGerak}
-              onChange={setRakGerak}
-              labelOff="DIAM"
-              labelOn="BERGERAK"
-            />
-            <span
-              className="material-symbols-rounded"
-              style={{
-                fontSize: 20,
-                color: rakGerak ? '#FFFFFF' : 'rgba(255,255,255,0.45)',
-                animation: rakGerak ? 'spin-slow 2.5s linear infinite' : 'none',
-                marginLeft: 2,
-              }}
-            >
-              rotate_90_degrees_ccw
-            </span>
-          </div>
+          <SliderToggle
+            value={rakGerak}
+            onChange={setRakGerak}
+            labelOff="MATI"
+            labelOn="AKTIF"
+          />
         </ControlCard>
 
       </div>
