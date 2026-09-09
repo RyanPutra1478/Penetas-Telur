@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import { IconAyam, IconBebek, IconPuyuh, IconKalkun, IconAngsa, IconKustom } from '../components/AnimalIcons';
 
 const profiles = [
-  { name: 'AYAM',   durasi: '21 hr', temp: 37.8, hum: 55, color: '#F97316', bg: '#FFF7ED', border: '#FED7AA', icon: 'egg' },
-  { name: 'BEBEK',  durasi: '28 hr', temp: 37.5, hum: 60, color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE', icon: 'egg' },
-  { name: 'PUYUH',  durasi: '18 hr', temp: 37.7, hum: 50, color: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE', icon: 'egg' },
-  { name: 'KALKUN', durasi: '28 hr', temp: 37.5, hum: 55, color: '#14B8A6', bg: '#F0FDFA', border: '#99F6E4', icon: 'egg' },
-  { name: 'ANGSA',  durasi: '30 hr', temp: 37.6, hum: 65, color: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8', icon: 'egg' },
-  { name: 'KUSTOM', durasi: 'Manual', temp: 37.5, hum: 55, color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0', icon: 'tune' },
+  { name: 'AYAM',   durasi: '21 hr', temp: 37.8, hum: 55, color: '#F97316', bg: '#FFF7ED', border: '#FED7AA', icon: IconAyam },
+  { name: 'BEBEK',  durasi: '28 hr', temp: 37.5, hum: 60, color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE', icon: IconBebek },
+  { name: 'PUYUH',  durasi: '18 hr', temp: 37.7, hum: 50, color: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE', icon: IconPuyuh },
+  { name: 'KALKUN', durasi: '28 hr', temp: 37.5, hum: 55, color: '#14B8A6', bg: '#F0FDFA', border: '#99F6E4', icon: IconKalkun },
+  { name: 'ANGSA',  durasi: '30 hr', temp: 37.6, hum: 65, color: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8', icon: IconAngsa },
+  { name: 'KUSTOM', durasi: 'Manual', temp: 37.5, hum: 55, color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0', icon: IconKustom },
 ];
 
 const KontrolLingkungan = () => {
@@ -32,10 +33,11 @@ const KontrolLingkungan = () => {
       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         {profiles.map((pr, i) => {
           const active = selected === i;
+          const AnimalIcon = pr.icon;
           return (
             <button key={pr.name} onClick={() => selectProfile(i)} style={{
               flex: 1,
-              padding: '9px 6px',
+              padding: '8px 6px',
               borderRadius: 14,
               border: `2px solid ${active ? pr.color : pr.border}`,
               background: active ? pr.bg : '#FFFFFF',
@@ -44,7 +46,7 @@ const KontrolLingkungan = () => {
               boxShadow: active ? `0 4px 14px ${pr.color}35` : '0 1px 4px rgba(0,0,0,0.06)',
               transition: 'all 0.2s ease',
             }}>
-              <span className="material-symbols-rounded" style={{ fontSize: 24, color: active ? pr.color : '#94A3B8' }}>{pr.icon}</span>
+              <AnimalIcon size={26} color={active ? pr.color : '#94A3B8'} />
               <span style={{ fontSize: 13, fontWeight: 900, color: active ? pr.color : '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: "'JetBrains Mono', monospace" }}>{pr.name}</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: active ? pr.color : '#94A3B8' }}>{pr.durasi}</span>
             </button>
@@ -61,8 +63,8 @@ const KontrolLingkungan = () => {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: p.color, boxShadow: `0 0 8px ${p.color}` }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {React.createElement(p.icon, { size: 20, color: p.color })}
           <span style={{ fontSize: 13, fontWeight: 900, color: p.color, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em' }}>
             PROFIL AKTIF: {p.name} · {p.durasi}
           </span>
