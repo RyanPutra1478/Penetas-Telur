@@ -1,0 +1,17 @@
+[Unit]
+Description=Tetasco Connect — Backend Flask GPIO & Sensor Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/Penetas-Telur
+ExecStart=/usr/bin/python3 /home/pi/Penetas-Telur/backend/app.py
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

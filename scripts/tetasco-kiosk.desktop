@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Tetasco Connect Kiosk
+Comment=HMI Mesin Penetas Telur Cerdas
+Exec=/bin/bash /home/pi/Penetas-Telur/scripts/start_tetasco.sh
+Terminal=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

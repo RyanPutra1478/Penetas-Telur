@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IconAyam, IconBebek, IconPuyuh, IconKalkun, IconAngsa, IconKustom } from '../components/AnimalIcons';
+import { getControlMode, setControlMode, getActuators } from '../api/tetascoApi';
 
 const profiles = [
   { name: 'AYAM',   durasi: '21 hr', temp: 37.8, hum: 55, color: '#F97316', bg: '#FFF7ED', border: '#FED7AA', icon: IconAyam },
@@ -15,15 +16,74 @@ const KontrolLingkungan = () => {
   const [temp, setTemp] = useState(profiles[0].temp);
   const [hum,  setHum]  = useState(profiles[0].hum);
   const [isAuto, setIsAuto] = useState(true);
+  const [heaterActive, setHeaterActive] = useState(true);
 
   const p = profiles[selected];
   const isKustom = p.name === 'KUSTOM';
   const canAdjust = isKustom || !isAuto;
 
+  // Baca setpoint dari backend saat halaman dimuat
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMode = async () => {
+      const mode = await getControlMode();
+      const acts = await getActuators();
+      if (!isMounted) return;
+      if (mode) {
+        if (mode.auto !== undefined) setIsAuto(mode.auto);
+        if (mode.target_temp !== undefined) setTemp(mode.target_temp);
+        if (mode.target_hum !== undefined) setHum(mode.target_hum);
+        if (mode.profile) {
+          const idx = profiles.findIndex(pr => pr.name.toUpperCase() === mode.profile.toUpperCase());
+          if (idx !== -1) setSelected(idx);
+        }
+      }
+      if (acts && acts.heater !== undefined) {
+        setHeaterActive(acts.heater);
+      }
+    };
+    fetchMode();
+    const timer = setInterval(fetchMode, 2000);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, []);
+
   const selectProfile = (idx) => {
     setSelected(idx);
-    setTemp(profiles[idx].temp);
-    setHum(profiles[idx].hum);
+    const chosen = profiles[idx];
+    setTemp(chosen.temp);
+    setHum(chosen.hum);
+    setControlMode({
+      auto: isAuto,
+      target_temp: chosen.temp,
+      target_hum: chosen.hum,
+      profile: chosen.name
+    });
+  };
+
+  const handleToggleAuto = () => {
+    const nextAuto = !isAuto;
+    setIsAuto(nextAuto);
+    setControlMode({
+      auto: nextAuto,
+      target_temp: temp,
+      target_hum: hum,
+      profile: p.name
+    });
+  };
+
+  const adjustTemp = (newTemp) => {
+    const rounded = +(Math.max(20, Math.min(45, newTemp))).toFixed(1);
+    setTemp(rounded);
+    setControlMode({ target_temp: rounded });
+  };
+
+  const adjustHum = (newHum) => {
+    const clamped = Math.max(0, Math.min(100, newHum));
+    setHum(clamped);
+    setControlMode({ target_hum: clamped });
   };
 
   return (
@@ -98,7 +158,7 @@ const KontrolLingkungan = () => {
             <span style={{ fontSize: 26, fontWeight: 900, color: '#FB923C' }}>°C</span>
           </div>
           <div style={{ display: 'flex', gap: 8, position: 'relative', zIndex: 1 }}>
-            {[['−', () => setTemp(t => Math.max(20, +(t-0.1).toFixed(1)))], ['+', () => setTemp(t => Math.min(45, +(t+0.1).toFixed(1)))]].map(([lbl, fn]) => (
+            {[['−', () => adjustTemp(temp - 0.1)], ['+', () => adjustTemp(temp + 0.1)]].map(([lbl, fn]) => (
               <button key={lbl} onClick={fn} disabled={!canAdjust} style={{
                 flex: 1, height: 48, borderRadius: 12, fontSize: 28, fontWeight: 900,
                 border: 'none', cursor: canAdjust ? 'pointer' : 'not-allowed',
@@ -134,7 +194,7 @@ const KontrolLingkungan = () => {
           {/* Vertical Toggle */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, my: 'auto', position: 'relative', zIndex: 1 }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: isAuto ? '#6366F1' : '#CBD5E1', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.05em' }}>AUTO</span>
-            <button onClick={() => setIsAuto(!isAuto)} style={{
+            <button onClick={handleToggleAuto} style={{
               width: 42, height: 78, borderRadius: 999,
               background: isAuto ? '#EEF2FF' : '#FEE2E2',
               border: `2px solid ${isAuto ? '#818CF8' : '#FCA5A5'}`,
@@ -155,12 +215,17 @@ const KontrolLingkungan = () => {
 
           {/* Integrated Heater Status Pill */}
           <div style={{
-            background: '#FFF7ED', borderRadius: 999, border: '1px solid #FED7AA',
-            padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 5,
+            background: heaterActive ? '#FFF7ED' : '#F1F5F9',
+            borderRadius: 999,
+            border: `1px solid ${heaterActive ? '#FED7AA' : '#E2E8F0'}`,
+            padding: '5px 12px',
+            display: 'flex', alignItems: 'center', gap: 5,
             position: 'relative', zIndex: 1,
           }}>
-            <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#EA580C' }}>local_fire_department</span>
-            <span style={{ fontSize: 11, fontWeight: 900, color: '#EA580C', fontFamily: "'JetBrains Mono', monospace" }}>HEATER ON</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 18, color: heaterActive ? '#EA580C' : '#94A3B8' }}>local_fire_department</span>
+            <span style={{ fontSize: 11, fontWeight: 900, color: heaterActive ? '#EA580C' : '#64748B', fontFamily: "'JetBrains Mono', monospace" }}>
+              {heaterActive ? 'HEATER ON' : 'HEATER OFF'}
+            </span>
           </div>
         </div>
 
@@ -185,7 +250,7 @@ const KontrolLingkungan = () => {
             <span style={{ fontSize: 26, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            {[['−', () => setHum(h => Math.max(0, h-1))], ['+', () => setHum(h => Math.min(100, h+1))]].map(([lbl, fn]) => (
+            {[['−', () => adjustHum(hum - 1)], ['+', () => adjustHum(hum + 1)]].map(([lbl, fn]) => (
               <button key={lbl} onClick={fn} disabled={!canAdjust} style={{
                 flex: 1, height: 48, borderRadius: 12, fontSize: 28, fontWeight: 900,
                 border: 'none', cursor: canAdjust ? 'pointer' : 'not-allowed',

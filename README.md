@@ -1,132 +1,132 @@
-# 🥚 OVO-INCUBATOR-PRO — Smart Egg Incubator HMI
+# 🥚 TETASCO CONNECT — Smart Egg Incubator HMI & Local Controller
 
-> **Modern Colorful Touchscreen Interface** untuk Sistem Inkubator Penetas Telur Pintar berbasis React 19 & Vite, dirancang khusus dan dioptimalkan untuk layar sentuh 7 inci (1024×600) seperti Raspberry Pi Touch Display.
-
----
-
-## ✨ Tampilan & Desain Baru (Colorful & Vibrant)
-
-Antarmuka telah dirombak total menggunakan gaya modern, bersih, cerah, dan penuh warna (*vibrant color-coded system*):
-- **Identitas Warna per Aktuator & Parameter:**
-  - 🟠 **Pemanas (Heater):** Gradien oranye-merah menyala dengan slider toggle kontras tinggi.
-  - 🔵 **Sirkulasi Kipas (Fan):** Gradien biru cerah.
-  - 🟢 **Pelembab Udara (Humidifier):** Gradien emerald-teal segar.
-  - 🟣 **Pembalik Rak (Tilt System):** Gradien ungu cerah dengan animasi putar real-time saat bergerak.
-  - 🌿 **Batch Aktif:** Panel hijau dominan dengan progress bar dinamis dan ikon grafis besar.
-- **Konsistensi Layout Tactile:**
-  - Seluruh tombol slider diposisikan seragam di sudut kiri bawah kartu.
-  - Indikator status teks kontras (`AKTIF` / `MATI`, `BERGERAK` / `DIAM`).
-  - Top Bar tinggi (84px) dengan tombol status Cloud Sync, Network Link, dan Alarm.
-  - Bottom Navigation Bar dengan 5 menu utama yang ergonomis untuk navigasi jempol pada layar sentuh.
+> **Modern Touchscreen Interface & Local Hardware Controller** untuk Sistem Mesin Penetas Telur Pintar berbasis **React 19**, **Python Flask**, dan **GPIO Raspberry Pi 4**, dioptimalkan khusus untuk layar sentuh 7 inci (1024×600) dan berjalan **100% OFFLINE TANPA INTERNET**.
 
 ---
 
-## 🧭 Menu & Fitur Utama
+## 🏛️ Arsitektur Sistem Standalone (Offline)
 
-1. **🏠 Dasbor Utama (Home):**
-   - Telemetri cepat: Suhu Internal (°C), Kelembaban (% RH), dan Kartu Batch Aktif yang mendominasi.
-   - 4 Kontrol Aktuator Utama berbasis Slider Toggle: **Pemanas**, **Sirkulasi Kipas**, **Pelembab Udara**, dan **Pembalik Rak** (kontrol 1 tombol untuk seluruh rak).
-
-2. **🎛️ Kontrol Lingkungan & Preset Spesies (Kontrol):**
-   - Preset profil telur terintegrasi: **Ayam** (21 hari), **Bebek** (28 hari), **Puyuh** (18 hari), **Kalkun** (28 hari), **Angsa** (30 hari), serta mode **Kustom**.
-   - Saklar mode operasi **Otomatis (Auto)** vs **Manual**.
-   - Penyetelan target suhu (°C) dan kelembaban (% RH) dengan tombol plus/minus presisi tinggi.
-
-3. **📊 Pemantauan Batch (Batch):**
-   - Grafik telemetri suhu dan kelembaban interaktif.
-   - Filter rentang waktu: 1 Jam, 6 Jam, dan 24 Jam.
-   - Status pemantauan zona inkubator.
-
-4. **📹 Kamera Langsung (Kamera):**
-   - Single camera live viewport (1080p feed) dengan badge live dan OSD telemetri real-time.
-   - Panel kontrol navigasi PTZ (Pan, Tilt, Zoom) yang diperlebar: D-pad arah, kontrol zoom in/out, tombol Capture foto, dan Record video.
-
-5. **👤 Profil Peternak & Kesehatan Sistem (Profil):**
-   - Informasi profil peternak interaktif (Nama Peternak, Nama Farm, Nomor Telepon, Lokasi, Kapasitas Telur) yang dapat diedit langsung.
-   - Pemantauan kesehatan subsistem: Jaringan Sensor, Aktuator & Motor, Koneksi Cloud, dan CPU/MCU load.
-   - Log alarm aktif dengan severity badge (*Kritis*, *Peringatan*).
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework:** React 19 / Vite 6
-- **Routing:** React Router DOM (HashRouter untuk kompatibilitas stand-alone & file-based embedded)
-- **Styling:** Modern Vanilla CSS + Glassmorphism accents
-- **Typography:** JetBrains Mono & Inter
-- **Icons:** Google Material Symbols Rounded
-
----
-
-## 🚀 Panduan Setup & Instalasi
-
-### 1. Prasyarat Sistem
-Pastikan telah menginstal:
-- **Node.js** (v18.x atau yang lebih baru)
-- **npm** (atau pnpm / yarn)
-- **Git**
-
-Verifikasi instalasi di terminal:
-```bash
-node -v
-npm -v
-git -v
+```text
+┌─────────────────────────────────────────────────────────┐
+│                 RASPBERRY PI 4 STANDALONE               │
+│                                                         │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │   LCD TOUCHSCREEN 7 INCI (1024 × 600)           │   │
+│   │   Chromium Kiosk Mode                           │   │
+│   └────────────────────────┬────────────────────────┘   │
+│                            │                            │
+│                            ▼                            │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │   React 19 HMI (Tetasco Connect)                │   │
+│   │   http://127.0.0.1:5001                         │   │
+│   └────────────────────────┬────────────────────────┘   │
+│                            │ REST API (localhost)       │
+│                            ▼                            │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │   Python Flask Backend & Smart Controller Loop  │   │
+│   │   (app.py - Port 5001)                          │   │
+│   └────────────────────────┬────────────────────────┘   │
+│                            │ gpiozero                   │
+│                            ▼                            │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │   GPIO Controller (Broadcom Pin BCM)            │   │
+│   └──────┬─────────────┬─────────────┬───────────┬──┘   │
+└──────────┼─────────────┼─────────────┼───────────┼──────┘
+           ▼             ▼             ▼           ▼
+       [GPIO 22]     [GPIO 26]     [GPIO 4]    [GPIO 13]
+       Relay IN1     Relay IN2     Relay IN3   Relay IN4
+        PEMANAS        KIPAS       PELEMBAB      MOTOR
+       (Active LOW) (Active HIGH) (Active HIGH)(Active HIGH)
 ```
 
+- **Zero External Network Needed:** Tidak membutuhkan Wi-Fi, router, maupun koneksi internet. Seluruh komunikasi berlangsung di dalam `localhost` (127.0.0.1).
+- **Single Production Server:** Backend Python menyajikan file statis React (`dist/`) sekaligus melayani REST API GPIO di port 5001.
+
 ---
 
-### 2. Kloning Repositori
+## 🔌 Pemetaan Pin GPIO Hardware (Relay 4 Channel)
+
+| Aktuator | Pin BCM | Pin Fisik Board | Modul Relay | Konfigurasi Logika |
+|---|---|---|---|---|
+| **Pemanas (Heater)** | GPIO 22 | Pin 15 | IN1 | **Active LOW** (`active_high=False`) |
+| **Kipas (Circulation Fan)** | GPIO 26 | Pin 37 | IN2 | **Active HIGH** (`active_high=True`) |
+| **Pelembab (Humidifier)** | GPIO 4 | Pin 7 | IN3 | **Active HIGH** (`active_high=True`) |
+| **Pembalik Rak (Motor)** | GPIO 13 | Pin 33 | IN4 | **Active HIGH** (`active_high=True`) |
+
+> *Catatan Sensor:* Sensor DHT11/DHT22 terhubung ke pin GPIO (default GPIO 17 / Pin 11) dan didukung simulasi pintar dinamis saat berjalan di laptop/komputer pengembang.
+
+---
+
+## 🚀 Panduan Setup di Raspberry Pi 4
+
+### OPSI A: Setup Otomatis 1 Perintah (Sangat Disarankan)
+
+Buka terminal di Raspberry Pi dan jalankan:
+```bash
+cd ~/Penetas-Telur
+bash scripts/setup_raspberry_pi.sh
+```
+Skrip ini akan secara otomatis:
+1. Menginstal seluruh paket sistem (Python, Chromium, Unclutter, Node.js, dll.).
+2. Menginstal library Python backend (`gpiozero`, `rpi-lgpio`, `flask`, dll.).
+3. Mengompilasi frontend React HMI (`npm run build`).
+4. Mengonfigurasi autostart Kiosk Mode layar 7 inci saat Raspberry Pi menyala.
+
+Setelah instalasi selesai, cukup reboot:
+```bash
+sudo reboot
+```
+Raspberry Pi akan langsung menyala, membuka HMI Tetasco Connect layar penuh (fullscreen), dan siap digunakan.
+
+---
+
+### OPSI B: Setup Manual Langkah demi Langkah
+
+#### 1. Kloning Repositori
 ```bash
 git clone https://github.com/RyanPutra1478/Penetas-Telur.git
 cd Penetas-Telur
 ```
 
----
+#### 2. Install Dependensi Sistem & Python
+```bash
+sudo apt-get update
+sudo apt-get install -y python3 python3-pip python3-gpiozero python3-rpi.gpio chromium-browser unclutter curl
+pip install -r backend/requirements.txt --break-system-packages
+```
 
-### 3. Instalasi Dependensi
+#### 3. Build React Frontend untuk Mode Offline
 ```bash
 npm install
-```
-
----
-
-### 4. Menjalankan di Mode Development
-Jalankan development server:
-```bash
-npm run dev
-```
-Buka browser di alamat:
-```
-http://localhost:5173
-```
-> **Catatan untuk Windows PowerShell:** Jika menemui kendala script execution policy, gunakan `npm.cmd run dev`.
-
-Untuk membuka akses bagi perangkat lain di jaringan lokal yang sama (misal Raspberry Pi atau tablet):
-```bash
-npm run dev -- --host
-```
-
----
-
-### 5. Kompilasi Produksi (Production Build)
-Untuk membuat file bundle produksi:
-```bash
 npm run build
 ```
-Hasil build siap saji akan dibuat di folder `dist/`.
 
-Uji pratinjau hasil build secara lokal:
+#### 4. Uji Coba Menjalankan
+Jalankan skrip startup:
 ```bash
-npm run preview
+chmod +x scripts/start_tetasco.sh
+./scripts/start_tetasco.sh
+```
+
+#### 5. Memasang Autostart Kiosk Saat Booting
+Salin konfigurasi autostart ke desktop session:
+```bash
+mkdir -p ~/.config/autostart
+cp scripts/tetasco-kiosk.desktop ~/.config/autostart/tetasco.desktop
 ```
 
 ---
 
-### 6. Menjalankan Kiosk Mode di Raspberry Pi (Layar 7 Inci)
-Untuk menjalankan otomatis dalam mode Kiosk layar penuh pada Raspberry Pi OS:
-```bash
-chromium-browser --noerrdialogs --disable-infobars --kiosk http://localhost:5173
-```
+## 📡 Dokumentasi Endpoint REST API (Localhost:5001)
+
+| Method | Endpoint | Deskripsi |
+|---|---|---|
+| `GET` | `/api/health` | Status kesehatan backend & mode GPIO (hardware / simulated). |
+| `GET` | `/api/sensor` | Data suhu (°C) dan kelembaban (% RH) terkini. |
+| `GET` | `/api/actuators` | Status hidup/mati seluruh relay saat ini. |
+| `POST` | `/api/actuators/<name>` | Menghidupkan/mematikan aktuator (`heater`, `fan`, `humidifier`, `motor`). Payload: `{"state": true}`. |
+| `POST` | `/api/emergency-stop` | Mematikan seluruh relay secara instan (Emergency). |
+| `GET/POST` | `/api/control/mode` | Mengambil atau mengubah mode Auto/Manual, target suhu, target kelembaban, dan profil spesies. |
 
 ---
 
@@ -134,30 +134,43 @@ chromium-browser --noerrdialogs --disable-infobars --kiosk http://localhost:5173
 
 ```text
 Penetas-Telur/
-├── public/                     # Aset statis (ikon, gambar)
+├── backend/
+│   ├── app.py                     # Entry point Flask server, REST API & static server
+│   ├── requirements.txt           # Dependensi Python (flask, gpiozero, rpi-lgpio)
+│   ├── hardware/
+│   │   └── gpio_controller.py     # Kontroler GPIO 22, 26, 4, 13 + fallback simulasi
+│   └── sensors/
+│       └── dht_sensor.py          # Driver sensor DHT & simulasi responsif
+├── dist/                          # Hasil kompilasi produksi React (siap saji offline)
+├── scripts/
+│   ├── setup_raspberry_pi.sh      # Skrip instalasi otomatis Raspberry Pi
+│   ├── start_tetasco.sh           # Skrip startup backend + Chromium kiosk
+│   ├── tetasco-backend.service    # Systemd service untuk background daemon
+│   └── tetasco-kiosk.desktop      # Konfigurasi autostart layar sentuh
 ├── src/
-│   ├── components/             # Komponen UI
-│   │   ├── BottomNavBar.jsx    # Navigasi bawah 5 tab (Home, Kontrol, Batch, Kamera, Profil)
-│   │   ├── Layout.jsx          # Wrapper layout utama
-│   │   └── TopAppBar.jsx       # Header 84px dengan status Cloud, Network, Alarm
-│   ├── pages/                  # Halaman aplikasi
-│   │   ├── DasborUtama.jsx     # Dasbor kontrol utama & 4 slider aktuator
-│   │   ├── KontrolLingkungan.jsx # Kontrol suhu, kelembaban & profil spesies
-│   │   ├── PemantauanBatch.jsx # Grafik telemetri & monitoring batch
-│   │   ├── KameraLangsung.jsx  # Single camera feed & kontrol navigasi PTZ
-│   │   └── ProfilSistem.jsx    # Profil peternak & kesehatan sistem / alarm
-│   ├── App.jsx                 # Routing & konfigurasi halaman
-│   ├── index.css               # Desain sistem CSS modern & colorful
-│   └── main.jsx                # Entry point aplikasi
-├── index.html                  # HTML template
-├── package.json                # Dependensi & konfigurasi skrip
-├── vite.config.js              # Konfigurasi bundler Vite
-└── README.md                   # Dokumentasi proyek & setup
+│   ├── api/
+│   │   └── tetascoApi.js          # Klien komunikasi lokal React ke Flask
+│   ├── components/
+│   │   ├── BottomNavBar.jsx       # Navigasi bawah 5 tab ergonomis
+│   │   ├── Layout.jsx             # Shell layout HMI
+│   │   └── TopAppBar.jsx          # Header status sistem & brand
+│   ├── pages/
+│   │   ├── DasborUtama.jsx        # Telemetri suhu/RH & 4 slider aktuator
+│   │   ├── KontrolLingkungan.jsx  # Kontrol target, mode Auto/Manual, & profil
+│   │   ├── PemantauanBatch.jsx    # Grafik riwayat inkubasi
+│   │   ├── KameraLangsung.jsx     # Live camera feed & kontrol PTZ
+│   │   └── StatusSistem.jsx       # Log alarm & kesehatan sistem
+│   ├── App.jsx                    # Router
+│   ├── index.css                  # Desain sistem Batik Nusantara & Color Tokens
+│   └── main.jsx                   # React root
+├── package.json
+├── vite.config.js                 # Proxy localhost:5001 untuk mode dev
+└── README.md
 ```
 
 ---
 
-## 📜 Pengembang
+## 📜 Lisensi & Pengembang
 
 Dikembangkan oleh **[Ryan Putra](https://github.com/RyanPutra1478)**.  
 Repositori Resmi: [https://github.com/RyanPutra1478/Penetas-Telur](https://github.com/RyanPutra1478/Penetas-Telur)

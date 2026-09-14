@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSensorData, getActuators, setActuator } from '../api/tetascoApi';
 
 /* ================================================
    Slider Toggle — Ramah Layar Sentuh 7 Inci
@@ -161,6 +162,63 @@ const DasborUtama = () => {
   const [pelembab, setPelembab] = useState(false);
   const [rakGerak, setRakGerak] = useState(false);
 
+  const [tempVal, setTempVal] = useState(37.8);
+  const [humVal, setHumVal] = useState(55.0);
+  const [targetTemp, setTargetTemp] = useState(37.8);
+  const [targetHum, setTargetHum] = useState(55.0);
+
+  // Sinkronisasi data real-time dari backend lokal setiap 1.5 detik
+  useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        const [sensor, acts] = await Promise.all([getSensorData(), getActuators()]);
+        if (!isMounted) return;
+        if (sensor) {
+          if (sensor.temperature !== undefined) setTempVal(sensor.temperature);
+          if (sensor.humidity !== undefined) setHumVal(sensor.humidity);
+          if (sensor.target_temp !== undefined) setTargetTemp(sensor.target_temp);
+          if (sensor.target_hum !== undefined) setTargetHum(sensor.target_hum);
+        }
+        if (acts) {
+          if (acts.heater !== undefined) setPemanas(acts.heater);
+          if (acts.fan !== undefined) setKipas(acts.fan);
+          if (acts.humidifier !== undefined) setPelembab(acts.humidifier);
+          if (acts.motor !== undefined) setRakGerak(acts.motor);
+        }
+      } catch (err) {
+        // Safe failover
+      }
+    };
+
+    fetchData();
+    const timer = setInterval(fetchData, 1500);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const handleToggleHeater = async (val) => {
+    setPemanas(val);
+    await setActuator('heater', val);
+  };
+
+  const handleToggleFan = async (val) => {
+    setKipas(val);
+    await setActuator('fan', val);
+  };
+
+  const handleToggleHumidifier = async (val) => {
+    setPelembab(val);
+    await setActuator('humidifier', val);
+  };
+
+  const handleToggleMotor = async (val) => {
+    setRakGerak(val);
+    await setActuator('motor', val);
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -237,7 +295,7 @@ const DasborUtama = () => {
               border: '1.5px solid #FED7AA',
               whiteSpace: 'nowrap',
             }}>
-              TARGET 37.8°C
+              TARGET {targetTemp.toFixed(1)}°C
             </span>
           </div>
 
@@ -251,7 +309,7 @@ const DasborUtama = () => {
               fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: '-0.02em',
             }}>
-              {pemanas ? '37.5' : '36.2'}
+              {tempVal.toFixed(1)}
             </span>
             <span style={{ fontSize: 20, fontWeight: 900, color: '#FB923C' }}>°C</span>
           </div>
@@ -336,7 +394,7 @@ const DasborUtama = () => {
               border: '1.5px solid #BFDBFE',
               whiteSpace: 'nowrap',
             }}>
-              TARGET 60%
+              TARGET {Math.round(targetHum)}%
             </span>
           </div>
 
@@ -350,7 +408,7 @@ const DasborUtama = () => {
               fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: '-0.02em',
             }}>
-              {pelembab ? '65' : '55'}
+              {Math.round(humVal)}
             </span>
             <span style={{ fontSize: 18, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
           </div>
@@ -507,11 +565,11 @@ const DasborUtama = () => {
         <ControlCard
           icon="local_fire_department"
           label="Pemanas"
-          sublabel="Elemen pemanas · Target 37.8°C"
+          sublabel={`Elemen pemanas · Target ${targetTemp.toFixed(1)}°C`}
           gradient="linear-gradient(135deg, #F97316 0%, #EF4444 100%)"
           colorOn="#EF4444"
         >
-          <SliderToggle value={pemanas} onChange={setPemanas} labelOff="MATI" labelOn="AKTIF" />
+          <SliderToggle value={pemanas} onChange={handleToggleHeater} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
         {/* SIRKULASI KIPAS */}
@@ -522,18 +580,18 @@ const DasborUtama = () => {
           gradient="linear-gradient(135deg, #38BDF8 0%, #3B82F6 100%)"
           colorOn="#3B82F6"
         >
-          <SliderToggle value={kipas} onChange={setKipas} labelOff="MATI" labelOn="AKTIF" />
+          <SliderToggle value={kipas} onChange={handleToggleFan} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
         {/* PELEMBAB UDARA */}
         <ControlCard
           icon="water_drop"
           label="Pelembab Udara"
-          sublabel="Ultrasonic mist · Target 60%"
+          sublabel={`Ultrasonic mist · Target ${Math.round(targetHum)}%`}
           gradient="linear-gradient(135deg, #34D399 0%, #14B8A6 100%)"
           colorOn="#14B8A6"
         >
-          <SliderToggle value={pelembab} onChange={setPelembab} labelOff="MATI" labelOn="AKTIF" />
+          <SliderToggle value={pelembab} onChange={handleToggleHumidifier} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
         {/* PEMBALIK RAK */}
@@ -558,7 +616,7 @@ const DasborUtama = () => {
         >
           <SliderToggle
             value={rakGerak}
-            onChange={setRakGerak}
+            onChange={handleToggleMotor}
             labelOff="MATI"
             labelOn="AKTIF"
           />
