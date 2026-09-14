@@ -165,6 +165,39 @@ def handle_control_mode():
 
     return jsonify(control_state)
 
+@app.route('/api/system/exit-kiosk', methods=['POST'])
+def exit_kiosk():
+    """Menutup browser Chromium kiosk dan kembali ke desktop Raspberry Pi OS"""
+    logger.info("Permintaan keluar dari Kiosk Mode diterima.")
+    try:
+        import subprocess
+        subprocess.Popen(["pkill", "-f", "chromium"])
+        return jsonify({"status": "ok", "message": "Menutup Chromium Kiosk..."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/system/reboot', methods=['POST'])
+def reboot_system():
+    """Mulai ulang Raspberry Pi"""
+    logger.warning("Permintaan reboot sistem diterima.")
+    try:
+        import subprocess
+        subprocess.Popen(["sudo", "reboot"])
+        return jsonify({"status": "ok", "message": "Sistem sedang reboot..."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/system/shutdown', methods=['POST'])
+def shutdown_system():
+    """Matikan daya Raspberry Pi dengan aman"""
+    logger.warning("Permintaan shutdown sistem diterima.")
+    try:
+        import subprocess
+        subprocess.Popen(["sudo", "poweroff"])
+        return jsonify({"status": "ok", "message": "Sistem sedang dimatikan..."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # -------------------------------------------------------------
 # Static Web Server (Production Build HMI)
 # -------------------------------------------------------------

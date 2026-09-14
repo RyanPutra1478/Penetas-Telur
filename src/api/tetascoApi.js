@@ -117,3 +117,42 @@ export async function setControlMode(config) {
     return null;
   }
 }
+
+/**
+ * Menutup Chromium Kiosk dan kembali ke desktop OS
+ */
+export async function exitKiosk() {
+  try {
+    const res = await fetch(`${API_BASE}/system/exit-kiosk`, { method: 'POST' });
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal keluar dari kiosk:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Restart Raspberry Pi
+ */
+export async function rebootSystem() {
+  try {
+    const res = await fetch(`${API_BASE}/system/reboot`, { method: 'POST' });
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal reboot sistem:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Shutdown Raspberry Pi
+ */
+export async function shutdownSystem() {
+  try {
+    const res = await fetch(`${API_BASE}/system/shutdown`, { method: 'POST' });
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal shutdown sistem:', err.message);
+    return null;
+  }
+}

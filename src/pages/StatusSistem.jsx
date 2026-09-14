@@ -1,4 +1,5 @@
 import React from 'react';
+import { exitKiosk, rebootSystem, shutdownSystem } from '../api/tetascoApi';
 
 const alarms = [
   { level: 'KRITIS',    time: '14:02:15', id: 'ERR-T09', msg: 'Temperatur Rak A melebihi ambang batas (39.5°C).', color: '#EF4444', bg: '#FEF2F2', border: '#FECACA' },
@@ -12,7 +13,8 @@ const health = [
   { icon: 'cloud_sync',              title: 'Koneksi Cloud',    detail: 'Sinkronisasi Terakhir: 2 mnt lalu',   status: 'STABIL',     color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },
 ];
 
-const StatusSistem = () => (
+const StatusSistem = () => {
+  return (
   <div style={{ display: 'flex', gap: 12, height: '100%' }}>
 
     {/* Alarm Log */}
@@ -128,8 +130,100 @@ const StatusSistem = () => (
           <div style={{ width: '42%', height: '100%', background: 'linear-gradient(90deg, #4ADE80, #22C55E)', borderRadius: 999 }} />
         </div>
       </div>
+
+      {/* Kontrol Daya & Sesi Raspberry Pi */}
+      <div style={{
+        background: '#FFFFFF',
+        borderRadius: 18,
+        border: '1.5px solid #E2E8F0',
+        padding: '12px 16px',
+        display: 'flex',
+        gap: 8,
+      }}>
+        <button
+          onClick={() => {
+            if (window.confirm('Keluar dari Kiosk Tetasco dan kembali ke Desktop Raspberry Pi?')) {
+              exitKiosk();
+            }
+          }}
+          style={{
+            flex: 1,
+            height: 38,
+            borderRadius: 10,
+            border: '1px solid #CBD5E1',
+            background: '#F8FAFC',
+            color: '#334155',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 800,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: 17, color: '#475569' }}>desktop_windows</span>
+          DESKTOP
+        </button>
+
+        <button
+          onClick={() => {
+            if (window.confirm('Mulai ulang (Reboot) sistem Raspberry Pi sekarang?')) {
+              rebootSystem();
+            }
+          }}
+          style={{
+            flex: 1,
+            height: 38,
+            borderRadius: 10,
+            border: '1px solid #FED7AA',
+            background: '#FFF7ED',
+            color: '#C2410C',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 800,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: 17, color: '#EA580C' }}>restart_alt</span>
+          REBOOT
+        </button>
+
+        <button
+          onClick={() => {
+            if (window.confirm('Matikan daya (Shutdown) Raspberry Pi dengan aman?')) {
+              shutdownSystem();
+            }
+          }}
+          style={{
+            flex: 1,
+            height: 38,
+            borderRadius: 10,
+            border: '1px solid #FECACA',
+            background: '#FEF2F2',
+            color: '#B91C1C',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 800,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: 17, color: '#EF4444' }}>power_settings_new</span>
+          MATIKAN
+        </button>
+      </div>
     </div>
   </div>
-);
+  );
+};
 
 export default StatusSistem;
