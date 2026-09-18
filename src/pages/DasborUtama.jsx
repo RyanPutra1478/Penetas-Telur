@@ -106,7 +106,7 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       style={{
         flex: 1,
         minWidth: 0,
-        padding: '0 10px',
+        padding: '0 8px 0 10px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -115,10 +115,10 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
         zIndex: 1,
       }}
     >
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, flex: 1, paddingRight: 4 }}>
         <div
           style={{
-            fontSize: 12.5,
+            fontSize: 12,
             fontWeight: 900,
             color: '#FFFFFF',
             letterSpacing: '-0.01em',
@@ -132,13 +132,16 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
         </div>
         <div
           style={{
-            fontSize: 9,
+            fontSize: 8.5,
             fontWeight: 700,
             color: 'rgba(255, 255, 255, 0.92)',
             marginTop: 2,
-            whiteSpace: 'nowrap',
+            lineHeight: 1.25,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            wordBreak: 'break-word',
           }}
         >
           {sublabel}
@@ -579,7 +582,7 @@ const DasborUtama = () => {
         <ControlCard
           icon="local_fire_department"
           label="Pemanas 1"
-          sublabel="Lampu Utama · Pemanas"
+          sublabel="Lampu Pemanas Utama"
           gradient="linear-gradient(135deg, #F97316 0%, #EF4444 100%)"
           colorOn="#EF4444"
         >
@@ -590,7 +593,7 @@ const DasborUtama = () => {
         <ControlCard
           icon="wb_incandescent"
           label="Pemanas 2"
-          sublabel="Lampu Booster Tambahan"
+          sublabel="Lampu Booster Suhu"
           gradient="linear-gradient(135deg, #FB923C 0%, #EA580C 100%)"
           colorOn="#EA580C"
         >
@@ -601,7 +604,7 @@ const DasborUtama = () => {
         <ControlCard
           icon="mode_fan"
           label="Kipas Sirkulasi"
-          sublabel="Exhaust & sirkulasi udara"
+          sublabel="Exhaust Sirkulasi Udara"
           gradient="linear-gradient(135deg, #38BDF8 0%, #3B82F6 100%)"
           colorOn="#3B82F6"
         >
@@ -612,7 +615,7 @@ const DasborUtama = () => {
         <ControlCard
           icon="water_drop"
           label="Pelembab Udara"
-          sublabel={`Mist maker · Target ${Math.round(targetHum)}%`}
+          sublabel={`Mist Maker Target ${Math.round(targetHum)}%`}
           gradient="linear-gradient(135deg, #34D399 0%, #14B8A6 100%)"
           colorOn="#14B8A6"
         >
@@ -623,7 +626,7 @@ const DasborUtama = () => {
         <ControlCard
           icon="sanitizer"
           label="Sinar UV"
-          sublabel="Sterilisasi ruang kabinet"
+          sublabel="Sterilisasi Ruang Kabinet"
           gradient="linear-gradient(135deg, #818CF8 0%, #6366F1 100%)"
           colorOn="#6366F1"
         >
@@ -646,7 +649,7 @@ const DasborUtama = () => {
               )}
             </div>
           }
-          sublabel={rakGerak ? "Rak berputar (aktif)" : "Rak posisi diam (standby)"}
+          sublabel={rakGerak ? "Rak berputar aktif" : "Rak posisi diam standby"}
           gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
           colorOn="#8B5CF6"
         >
