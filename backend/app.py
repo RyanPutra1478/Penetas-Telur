@@ -264,7 +264,11 @@ def serve_frontend(path):
         if path != "" and os.path.exists(file_path):
             return send_from_directory(DIST_DIR, path)
         else:
-            return send_from_directory(DIST_DIR, "index.html")
+            response = send_from_directory(DIST_DIR, "index.html")
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
     return jsonify({
         "message": "Backend Tetasco Connect berjalan. Folder 'dist' belum dibangun. Jalankan 'npm run build' untuk mengaktifkan UI lokal.",
         "api_docs": "/api/health, /api/sensor, /api/actuators"
