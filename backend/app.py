@@ -23,7 +23,7 @@ CORS(app)
 
 # State Kontrol Cerdas (Smart Controller State)
 control_state = {
-    "auto": True,
+    "auto": False,                      # Default MANUAL agar relay tidak menyala-mati sendiri
     "target_temp": 37.8,
     "target_hum": 55.0,
     "profile": "AYAM",
@@ -47,13 +47,13 @@ def smart_control_loop():
             fan_on = current_actuators.get('fan', False)
             mist_on = current_actuators.get('mist_maker', False)
 
-            # Baca sensor terkini (dipengaruhi pemanas, kipas, mist maker)
+            # Baca sensor terkini
             reading = sensor_manager.read(lamp_1_on or lamp_2_on, fan_on, mist_on)
             temp = reading["temperature"]
             hum = reading["humidity"]
 
-            # Jika mode AUTO aktif, kendalikan relay secara cerdas
-            if control_state["auto"]:
+            # Kontrol otomatis HANYA berjalan jika mode AUTO aktif DAN sensor fisik benar-benar terhubung
+            if control_state["auto"] and sensor_manager.is_hardware_active:
                 target_t = control_state["target_temp"]
                 target_h = control_state["target_hum"]
 

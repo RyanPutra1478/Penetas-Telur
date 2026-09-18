@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getSensorData, getActuators, setActuator, getHydraulicStatus, setHydraulicCommand } from '../api/tetascoApi';
+import { getSensorData, getActuators, setActuator } from '../api/tetascoApi';
 
 /* ================================================
    Slider Toggle — Ramah Layar Sentuh 7 Inci
    ================================================ */
 const SliderToggle = ({ value, onChange, labelOff = 'MATI', labelOn = 'AKTIF', disabled = false }) => {
-  const W = 50, H = 26, THUMB = 20, INSET = (H - THUMB) / 2;
+  const W = 46, H = 24, THUMB = 18, INSET = (H - THUMB) / 2;
   return (
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 9,
+      display: 'inline-flex', alignItems: 'center', gap: 7,
       opacity: disabled ? 0.4 : 1,
       pointerEvents: disabled ? 'none' : 'auto',
     }}>
       {/* Label status di sebelah kiri tombol slider */}
       <span style={{
-        fontSize: 13, fontWeight: 900, letterSpacing: '0.07em',
+        fontSize: 11.5, fontWeight: 900, letterSpacing: '0.05em',
         textTransform: 'uppercase',
-        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
+        color: value ? '#FFFFFF' : 'rgba(255,255,255,0.85)',
         fontFamily: "'JetBrains Mono', monospace",
         textAlign: 'right',
-        minWidth: 46,
+        minWidth: 38,
         transition: 'color 0.25s',
       }}>
         {value ? labelOn : labelOff}
@@ -63,12 +62,12 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     className="batik-panel-white"
     style={{
       background: gradient,
-      borderRadius: 18,
+      borderRadius: 16,
       display: 'flex',
       alignItems: 'stretch',
       position: 'relative',
       overflow: 'hidden',
-      boxShadow: `0 4px 14px ${colorOn}28`,
+      boxShadow: `0 3px 12px ${colorOn}24`,
       boxSizing: 'border-box',
       height: '100%',
     }}
@@ -79,7 +78,7 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
     {/* Sisi Paling Kiri: Icon Full Mengisi Secara Vertikal */}
     <div
       style={{
-        width: 76,
+        width: 54,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -93,9 +92,9 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       <span
         className="material-symbols-rounded"
         style={{
-          fontSize: 36,
+          fontSize: 28,
           color: '#FFFFFF',
-          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.2))',
+          filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.2))',
         }}
       >
         {icon}
@@ -107,11 +106,11 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       style={{
         flex: 1,
         minWidth: 0,
-        padding: '0 20px 0 16px',
+        padding: '0 12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 12,
+        gap: 6,
         position: 'relative',
         zIndex: 1,
       }}
@@ -119,10 +118,10 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
       <div style={{ minWidth: 0 }}>
         <div
           style={{
-            fontSize: 18,
+            fontSize: 14.5,
             fontWeight: 900,
             color: '#FFFFFF',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.01em',
             lineHeight: 1.15,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -133,10 +132,10 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
         </div>
         <div
           style={{
-            fontSize: 11.5,
+            fontSize: 10,
             fontWeight: 700,
             color: 'rgba(255, 255, 255, 0.92)',
-            marginTop: 3,
+            marginTop: 2,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -158,10 +157,11 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
    DASBOR UTAMA — Font Terkalibrasi & Icon Jelas
    ================================================ */
 const DasborUtama = () => {
-  const navigate = useNavigate();
-  const [pemanas,  setPemanas]  = useState(true);
-  const [kipas,    setKipas]    = useState(true);
+  const [lampu1,   setLampu1]   = useState(false);
+  const [lampu2,   setLampu2]   = useState(false);
+  const [kipas,    setKipas]    = useState(false);
   const [pelembab, setPelembab] = useState(false);
+  const [sinarUV,  setSinarUV]  = useState(false);
   const [rakGerak, setRakGerak] = useState(false);
 
   const [tempVal, setTempVal] = useState(37.8);
@@ -169,17 +169,14 @@ const DasborUtama = () => {
   const [targetTemp, setTargetTemp] = useState(37.8);
   const [targetHum, setTargetHum] = useState(55.0);
 
-  const [hydraulic, setHydraulic] = useState({ state: 'IDLE', limit_max: false, limit_min: false });
-
-  // Sinkronisasi data real-time dari backend lokal setiap 1.5 detik
+  // Sinkronisasi data real-time dari backend lokal setiap 1.2 detik
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const [sensor, acts, hydro] = await Promise.all([
+        const [sensor, acts] = await Promise.all([
           getSensorData(),
           getActuators(),
-          getHydraulicStatus()
         ]);
         if (!isMounted) return;
         if (sensor) {
@@ -189,14 +186,12 @@ const DasborUtama = () => {
           if (sensor.target_hum !== undefined) setTargetHum(sensor.target_hum);
         }
         if (acts) {
-          if (acts.heater !== undefined) setPemanas(acts.heater);
+          if (acts.lamp_1 !== undefined) setLampu1(acts.lamp_1);
+          if (acts.lamp_2 !== undefined) setLampu2(acts.lamp_2);
           if (acts.fan !== undefined) setKipas(acts.fan);
-          if (acts.humidifier !== undefined) setPelembab(acts.humidifier);
+          if (acts.mist_maker !== undefined) setPelembab(acts.mist_maker);
+          if (acts.uv_light !== undefined) setSinarUV(acts.uv_light);
           if (acts.motor !== undefined) setRakGerak(acts.motor);
-        }
-        if (hydro) {
-          setHydraulic(hydro);
-          setRakGerak(hydro.state in ['UP', 'DOWN'] || hydro.state === 'UP' || hydro.state === 'DOWN');
         }
       } catch (err) {
         // Safe failover
@@ -211,9 +206,14 @@ const DasborUtama = () => {
     };
   }, []);
 
-  const handleToggleHeater = async (val) => {
-    setPemanas(val);
-    await setActuator('heater', val);
+  const handleToggleLampu1 = async (val) => {
+    setLampu1(val);
+    await setActuator('lamp_1', val);
+  };
+
+  const handleToggleLampu2 = async (val) => {
+    setLampu2(val);
+    await setActuator('lamp_2', val);
   };
 
   const handleToggleFan = async (val) => {
@@ -223,17 +223,20 @@ const DasborUtama = () => {
 
   const handleToggleHumidifier = async (val) => {
     setPelembab(val);
-    await setActuator('humidifier', val);
+    await setActuator('mist_maker', val);
   };
 
-  const handleToggleMotor = async (val) => {
-    setRakGerak(val);
-    if (val) {
-      await setHydraulicCommand('up');
-    } else {
-      await setHydraulicCommand('stop');
-    }
+  const handleToggleUV = async (val) => {
+    setSinarUV(val);
+    await setActuator('uv_light', val);
   };
+
+  const handleToggleRak = async (val) => {
+    setRakGerak(val);
+    await setActuator('motor', val);
+  };
+
+  const pemanasAktif = lampu1 || lampu2;
 
   return (
     <div style={{
@@ -334,19 +337,21 @@ const DasborUtama = () => {
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
-              background: pemanas ? 'rgba(34,197,94,0.18)' : 'rgba(148,163,184,0.2)',
+              background: pemanasAktif ? 'rgba(34,197,94,0.18)' : 'rgba(148,163,184,0.2)',
               padding: '3px 11px', borderRadius: 999,
             }}>
               <div style={{
                 width: 7, height: 7, borderRadius: '50%',
-                background: pemanas ? '#22C55E' : '#94A3B8',
-                boxShadow: pemanas ? '0 0 8px #22C55E' : 'none',
+                background: pemanasAktif ? '#22C55E' : '#94A3B8',
+                boxShadow: pemanasAktif ? '0 0 8px #22C55E' : 'none',
               }} />
               <span style={{
                 fontSize: 11.5, fontWeight: 800,
-                color: pemanas ? '#15803D' : '#475569',
+                color: pemanasAktif ? '#15803D' : '#475569',
               }}>
-                {pemanas ? 'Pemanas Aktif · Hangat' : 'Pemanas Siaga · Stabil'}
+                {pemanasAktif
+                  ? (lampu1 && lampu2 ? 'Lampu 1 & 2 Aktif' : (lampu1 ? 'Lampu 1 Aktif' : 'Lampu 2 Aktif'))
+                  : 'Pemanas Siaga · Stabil'}
               </span>
             </div>
           </div>
@@ -493,26 +498,19 @@ const DasborUtama = () => {
                 flexShrink: 0,
               }}>
                 <span className="material-symbols-rounded" style={{ fontSize: 16, color: '#FFFFFF' }}>
-                  egg
+                  layers
                 </span>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(255,255,255,0.95)', letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Batch Aktif
-              </span>
-              <span style={{
-                fontSize: 9.5, fontWeight: 800,
-                background: 'rgba(255,255,255,0.25)', color: '#FFFFFF',
-                padding: '2px 7px', borderRadius: 999,
-                fontFamily: "'JetBrains Mono', monospace",
-                letterSpacing: '0.05em',
-              }}>
-                #24-09
               </span>
             </div>
             <span style={{
               fontSize: 10.5, fontWeight: 800,
-              color: '#FFFFFF', background: 'rgba(0,0,0,0.24)',
+              background: 'rgba(255,255,255,0.25)', color: '#FFFFFF',
               padding: '2.5px 8px', borderRadius: 999,
+              fontFamily: "'JetBrains Mono', monospace",
+              border: '1px solid rgba(255,255,255,0.4)',
               whiteSpace: 'nowrap',
             }}>
               Ayam Kampung
@@ -567,84 +565,98 @@ const DasborUtama = () => {
 
       </div>
 
-      {/* ===== 4 CONTROL CARDS (50% TINGGI) — ICON JELAS & FONT PAS ===== */}
+      {/* ===== 6 CONTROL CARDS (3 KOLOM × 2 BARIS) ===== */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gridTemplateRows: '1fr 1fr',
-        gap: 12,
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateRows: 'repeat(2, 1fr)',
+        gap: 10,
         flex: 1,                    /* 50% tinggi layar seimbang */
         minHeight: 0,
       }}>
 
-        {/* PEMANAS */}
+        {/* 1. PEMANAS 1 (Lampu 1) */}
         <ControlCard
           icon="local_fire_department"
-          label="Pemanas"
-          sublabel={`Elemen pemanas · Target ${targetTemp.toFixed(1)}°C`}
+          label="Pemanas 1"
+          sublabel="Lampu Utama · Pemanas"
           gradient="linear-gradient(135deg, #F97316 0%, #EF4444 100%)"
           colorOn="#EF4444"
         >
-          <SliderToggle value={pemanas} onChange={handleToggleHeater} labelOff="MATI" labelOn="AKTIF" />
+          <SliderToggle value={lampu1} onChange={handleToggleLampu1} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
-        {/* SIRKULASI KIPAS */}
+        {/* 2. PEMANAS 2 (Lampu 2) */}
+        <ControlCard
+          icon="wb_incandescent"
+          label="Pemanas 2"
+          sublabel="Lampu Booster Tambahan"
+          gradient="linear-gradient(135deg, #FB923C 0%, #EA580C 100%)"
+          colorOn="#EA580C"
+        >
+          <SliderToggle value={lampu2} onChange={handleToggleLampu2} labelOff="MATI" labelOn="AKTIF" />
+        </ControlCard>
+
+        {/* 3. SIRKULASI KIPAS */}
         <ControlCard
           icon="mode_fan"
-          label="Sirkulasi Kipas"
-          sublabel="Exhaust & sirkulasi · 2400 RPM"
+          label="Kipas Sirkulasi"
+          sublabel="Exhaust & sirkulasi udara"
           gradient="linear-gradient(135deg, #38BDF8 0%, #3B82F6 100%)"
           colorOn="#3B82F6"
         >
           <SliderToggle value={kipas} onChange={handleToggleFan} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
-        {/* PELEMBAB UDARA */}
+        {/* 4. PELEMBAB UDARA */}
         <ControlCard
           icon="water_drop"
           label="Pelembab Udara"
-          sublabel={`Ultrasonic mist · Target ${Math.round(targetHum)}%`}
+          sublabel={`Mist maker · Target ${Math.round(targetHum)}%`}
           gradient="linear-gradient(135deg, #34D399 0%, #14B8A6 100%)"
           colorOn="#14B8A6"
         >
           <SliderToggle value={pelembab} onChange={handleToggleHumidifier} labelOff="MATI" labelOn="AKTIF" />
         </ControlCard>
 
-        {/* PEMBALIK RAK */}
-        <div onClick={() => navigate('/rack')} style={{ cursor: 'pointer', height: '100%' }}>
-          <ControlCard
-            icon="settings_input_component"
-            label={
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span>Pembalik Rak</span>
-                {rakGerak && (
-                  <span
-                    className="material-symbols-rounded animate-spin-slow"
-                    style={{ fontSize: 18, color: '#FFFFFF' }}
-                  >
-                    rotate_90_degrees_ccw
-                  </span>
-                )}
-              </div>
-            }
-            sublabel={
-              hydraulic.state === 'UP'
-                ? "Hidrolik NAIK (Limit MAX Siaga)"
-                : hydraulic.state === 'DOWN'
-                ? "Hidrolik TURUN (Limit MIN Siaga)"
-                : "Hidrolik Siaga · Buka Panel Rak →"
-            }
-            gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
-            colorOn="#8B5CF6"
-          >
-            <SliderToggle
-              value={rakGerak}
-              onChange={handleToggleMotor}
-              labelOff="MATI"
-              labelOn="AKTIF"
-            />
-          </ControlCard>
-        </div>
+        {/* 5. SINAR UV */}
+        <ControlCard
+          icon="sanitizer"
+          label="Sinar UV"
+          sublabel="Sterilisasi ruang kabinet"
+          gradient="linear-gradient(135deg, #818CF8 0%, #6366F1 100%)"
+          colorOn="#6366F1"
+        >
+          <SliderToggle value={sinarUV} onChange={handleToggleUV} labelOff="MATI" labelOn="AKTIF" />
+        </ControlCard>
+
+        {/* 6. PEMBALIK RAK */}
+        <ControlCard
+          icon="sync"
+          label={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>Pembalik Rak</span>
+              {rakGerak && (
+                <span
+                  className="material-symbols-rounded animate-spin-slow"
+                  style={{ fontSize: 16, color: '#FFFFFF' }}
+                >
+                  rotate_90_degrees_ccw
+                </span>
+              )}
+            </div>
+          }
+          sublabel={rakGerak ? "Rak berputar (aktif)" : "Rak posisi diam (standby)"}
+          gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
+          colorOn="#8B5CF6"
+        >
+          <SliderToggle
+            value={rakGerak}
+            onChange={handleToggleRak}
+            labelOff="MATI"
+            labelOn="AKTIF"
+          />
+        </ControlCard>
 
       </div>
 

@@ -2,12 +2,11 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const navItems = [
-  { icon: 'home',                      label: 'HOME',     path: '/',        color: '#6366F1', bg: '#EEF2FF' },
-  { icon: 'tune',                      label: 'KONTROL',  path: '/control', color: '#F97316', bg: '#FFF7ED' },
-  { icon: 'settings_input_component',  label: 'RAK TILT', path: '/rack',    color: '#8B5CF6', bg: '#F5F3FF' },
-  { icon: 'layers',                    label: 'BATCH',    path: '/batch',   color: '#22C55E', bg: '#F0FDF4' },
-  { icon: 'videocam',                  label: 'KAMERA',   path: '/camera',  color: '#14B8A6', bg: '#F0FDFA' },
-  { icon: 'person',                    label: 'PROFIL',   path: '/profil',  color: '#64748B', bg: '#F8FAFC' },
+  { icon: 'home',      label: 'HOME',    path: '/',        color: '#6366F1', bg: '#EEF2FF' },
+  { icon: 'tune',      label: 'KONTROL', path: '/control', color: '#F97316', bg: '#FFF7ED' },
+  { icon: 'layers',    label: 'BATCH',   path: '/batch',   color: '#22C55E', bg: '#F0FDF4' },
+  { icon: 'videocam',  label: 'KAMERA',  path: '/camera',  color: '#14B8A6', bg: '#F0FDFA' },
+  { icon: 'person',    label: 'PROFIL',  path: '/profil',  color: '#64748B', bg: '#F8FAFC' },
 ];
 
 const BottomNavBar = () => {
