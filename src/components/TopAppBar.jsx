@@ -42,51 +42,51 @@ const TopAppBar = () => {
           <span className="material-symbols-rounded" style={{ fontSize: 25, color: '#FFF', position: 'relative', zIndex: 1 }}>egg_alt</span>
         </div>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 21, fontWeight: 900, color: '#0F172A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <span style={{ fontSize: 15, fontWeight: 900, color: '#0F172A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
               Tetasco
             </span>
             <span style={{
-              fontSize: 9.5, fontWeight: 900,
+              fontSize: 8, fontWeight: 900,
               background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)',
               color: '#B45309',
               border: '1px solid #FCD34D',
-              padding: '2px 7px', borderRadius: 6,
+              padding: '1.5px 5px', borderRadius: 5,
               fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: '0.08em',
-              display: 'inline-flex', alignItems: 'center', gap: 4,
+              display: 'inline-flex', alignItems: 'center', gap: 3,
             }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#D97706' }} />
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#D97706' }} />
               BATIK ID
             </span>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2 }}>
+          <div style={{ fontSize: 8.5, fontWeight: 700, color: '#64748B', letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: 2 }}>
             Smart Incubator HMI · Nusantara v1.0
           </div>
         </div>
       </div>
 
       {/* Status Buttons */}
-      <div style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
         {statusItems.map(item => (
           <button key={item.key} onClick={() => item.set(!item.on)} style={{
-            height: 38,
-            padding: '0 16px',
+            height: 32,
+            padding: '0 11px',
             borderRadius: 999,
             border: 'none',
-            display: 'flex', alignItems: 'center', gap: 7,
+            display: 'flex', alignItems: 'center', gap: 5,
             background: item.on ? item.bgOn : '#F1F5F9',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             boxShadow: item.on ? `0 0 0 1.5px ${item.colorOn}40` : 'none',
           }}>
             <span className="material-symbols-rounded" style={{
-              fontSize: 18,
+              fontSize: 15,
               color: item.on ? item.colorOn : '#94A3B8',
               transition: 'color 0.2s',
             }}>{item.icon}</span>
             <span style={{
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.05em',
+              fontSize: 8.5, fontWeight: 800, letterSpacing: '0.05em',
               color: item.on ? item.textOn : '#94A3B8',
               fontFamily: "'JetBrains Mono', monospace",
               textTransform: 'uppercase',

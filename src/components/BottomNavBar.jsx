@@ -55,7 +55,7 @@ const BottomNavBar = () => {
             <span
               className="material-symbols-rounded"
               style={{
-                fontSize: 27,
+                fontSize: 21,
                 color: isActive ? item.color : '#94A3B8',
                 transition: 'all 0.2s',
                 fontWeight: isActive ? 700 : 500,
@@ -64,7 +64,7 @@ const BottomNavBar = () => {
               {item.icon}
             </span>
             <span style={{
-              fontSize: 11,
+              fontSize: 8.5,
               fontWeight: 800,
               letterSpacing: '0.06em',
               color: isActive ? item.color : '#64748B',
