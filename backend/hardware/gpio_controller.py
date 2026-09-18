@@ -1,21 +1,30 @@
 import os
 import platform
 import logging
+from .hydraulic_controller import hydraulic_controller
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s %(name)s: %(message)s')
 logger = logging.getLogger("GPIOController")
 
-# Mapping Pin BCM Hardware
+# =========================================================
+# PEMETAAN 5-CHANNEL RELAY (ACTIVE-HIGH)
+# Channel 1: Lampu Pemanas 1
+# Channel 2: Lampu Pemanas 2
+# Channel 3: Kipas Sirkulasi
+# Channel 4: Mist Maker / Pelembab Udara
+# Channel 5: Lampu UV Sterilisasi
+# =========================================================
 PIN_CONFIG = {
-    'heater': {'pin': 22, 'active_high': False, 'label': 'Pemanas (Relay IN1)'},
-    'fan': {'pin': 26, 'active_high': True, 'label': 'Kipas Sirkulasi (Relay IN2)'},
-    'humidifier': {'pin': 4, 'active_high': True, 'label': 'Pelembab Udara (Relay IN3)'},
-    'motor': {'pin': 13, 'active_high': True, 'label': 'Motor Pembalik Rak (Relay IN4)'},
+    'lamp_1':     {'pin': 22, 'active_high': True, 'label': 'Lampu Pemanas 1 (Relay IN1)'},
+    'lamp_2':     {'pin': 26, 'active_high': True, 'label': 'Lampu Pemanas 2 (Relay IN2)'},
+    'fan':        {'pin': 4,  'active_high': True, 'label': 'Kipas Sirkulasi (Relay IN3)'},
+    'mist_maker': {'pin': 17, 'active_high': True, 'label': 'Mist Maker Pelembab (Relay IN4)'},
+    'uv_light':   {'pin': 27, 'active_high': True, 'label': 'Lampu UV Sterilisasi (Relay IN5)'},
 }
 
 class GPIOController:
     """
-    Controller GPIO untuk Raspberry Pi 4 dengan fallback simulasi otomatis
+    Controller GPIO 5-Channel Relay untuk Raspberry Pi 4 dengan fallback simulasi otomatis
     jika dijalankan pada OS non-Linux / mesin pengembang.
     """
     def __init__(self):
@@ -25,9 +34,8 @@ class GPIOController:
         self._init_hardware()
 
     def _init_hardware(self):
-        # Deteksi apakah berjalan pada Raspberry Pi / Linux dengan gpiozero
         if platform.system().lower() != "linux":
-            logger.info("Sistem bukan Linux (Deteksi: %s). Mengaktifkan mode SIMULASI GPIO.", platform.system())
+            logger.info("Sistem bukan Linux (Deteksi: %s). Mengaktifkan mode SIMULASI GPIO 5-Channel.", platform.system())
             self.is_simulated = True
             return
 
@@ -40,44 +48,73 @@ class GPIOController:
                     initial_value=False
                 )
                 self.devices[name] = dev
-            logger.info("GPIO Hardware berhasil diinisialisasi via gpiozero (RPi 4)")
+            logger.info("GPIO 5-Channel Hardware berhasil diinisialisasi via gpiozero (RPi 4)")
         except Exception as e:
             logger.warning("Gagal inisialisasi gpiozero hardware: %s. Beralih ke SIMULASI GPIO.", e)
             self.is_simulated = True
 
     def set_actuator(self, name: str, state: bool) -> bool:
-        """Mengatur status on/off sebuah aktuator (heater, fan, humidifier, motor)"""
+        """Mengatur status on/off sebuah aktuator relay"""
+        b_state = bool(state)
+
+        # Dukungan alias backward compatibility
+        if name == 'heater':
+            self.set_actuator('lamp_1', b_state)
+            self.set_actuator('lamp_2', b_state)
+            return b_state
+        elif name == 'humidifier':
+            return self.set_actuator('mist_maker', b_state)
+        elif name in ('motor', 'aux'):
+            # Jika memicu motor lama, arahkan ke hidrolik
+            if b_state:
+                hydraulic_controller.move_up()
+            else:
+                hydraulic_controller.stop()
+            return b_state
+
         if name not in PIN_CONFIG:
             raise ValueError(f"Aktuator tidak dikenal: {name}")
 
-        self.states[name] = bool(state)
+        self.states[name] = b_state
         cfg = PIN_CONFIG[name]
 
         if not self.is_simulated and name in self.devices:
             dev = self.devices[name]
-            if state:
+            if b_state:
                 dev.on()
             else:
                 dev.off()
-            logger.info("[HARDWARE] %s (GPIO %d) -> %s", cfg['label'], cfg['pin'], 'ON' if state else 'OFF')
+            logger.info("[HARDWARE] %s (GPIO %d) -> %s", cfg['label'], cfg['pin'], 'ON' if b_state else 'OFF')
         else:
-            logger.info("[SIMULASI] %s (GPIO %d) -> %s", cfg['label'], cfg['pin'], 'ON' if state else 'OFF')
+            logger.info("[SIMULASI] %s (GPIO %d) -> %s", cfg['label'], cfg['pin'], 'ON' if b_state else 'OFF')
 
         return self.states[name]
 
     def get_actuator(self, name: str) -> bool:
         """Mendapatkan status terkini sebuah aktuator"""
+        if name == 'heater':
+            return self.states.get('lamp_1', False) or self.states.get('lamp_2', False)
+        elif name == 'humidifier':
+            return self.states.get('mist_maker', False)
+        elif name in ('motor', 'aux'):
+            return hydraulic_controller.state in ("UP", "DOWN")
         return self.states.get(name, False)
 
     def get_all_actuators(self) -> dict:
-        """Mendapatkan status seluruh aktuator"""
-        return dict(self.states)
+        """Mendapatkan status seluruh aktuator (termasuk alias untuk UI)"""
+        res = dict(self.states)
+        # Tambahkan alias kemudahan integrasi UI
+        res['heater'] = res.get('lamp_1', False) or res.get('lamp_2', False)
+        res['humidifier'] = res.get('mist_maker', False)
+        res['motor'] = hydraulic_controller.state in ("UP", "DOWN")
+        return res
 
     def emergency_stop(self) -> dict:
-        """Matikan seluruh relay/aktuator secara seketika demi keselamatan"""
-        logger.warning("EMERGENCY STOP DIPICU! Mematikan semua aktuator.")
+        """Matikan seluruh relay dan motor hidrolik secara seketika demi keselamatan"""
+        logger.warning("EMERGENCY STOP DIPICU! Mematikan semua aktuator & hidrolik.")
         for name in PIN_CONFIG:
             self.set_actuator(name, False)
+        hydraulic_controller.stop()
         return self.get_all_actuators()
 
     def cleanup(self):
@@ -90,6 +127,7 @@ class GPIOController:
             except Exception:
                 pass
         self.devices.clear()
+        hydraulic_controller.cleanup()
 
 # Singleton controller
 gpio_controller = GPIOController()

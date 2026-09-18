@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getSensorData, getActuators, setActuator } from '../api/tetascoApi';
+import { useNavigate } from 'react-router-dom';
+import { getSensorData, getActuators, setActuator, getHydraulicStatus, setHydraulicCommand } from '../api/tetascoApi';
 
 /* ================================================
    Slider Toggle — Ramah Layar Sentuh 7 Inci
@@ -157,6 +158,7 @@ const ControlCard = ({ icon, label, sublabel, gradient, colorOn, children }) => 
    DASBOR UTAMA — Font Terkalibrasi & Icon Jelas
    ================================================ */
 const DasborUtama = () => {
+  const navigate = useNavigate();
   const [pemanas,  setPemanas]  = useState(true);
   const [kipas,    setKipas]    = useState(true);
   const [pelembab, setPelembab] = useState(false);
@@ -167,12 +169,18 @@ const DasborUtama = () => {
   const [targetTemp, setTargetTemp] = useState(37.8);
   const [targetHum, setTargetHum] = useState(55.0);
 
+  const [hydraulic, setHydraulic] = useState({ state: 'IDLE', limit_max: false, limit_min: false });
+
   // Sinkronisasi data real-time dari backend lokal setiap 1.5 detik
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const [sensor, acts] = await Promise.all([getSensorData(), getActuators()]);
+        const [sensor, acts, hydro] = await Promise.all([
+          getSensorData(),
+          getActuators(),
+          getHydraulicStatus()
+        ]);
         if (!isMounted) return;
         if (sensor) {
           if (sensor.temperature !== undefined) setTempVal(sensor.temperature);
@@ -186,13 +194,17 @@ const DasborUtama = () => {
           if (acts.humidifier !== undefined) setPelembab(acts.humidifier);
           if (acts.motor !== undefined) setRakGerak(acts.motor);
         }
+        if (hydro) {
+          setHydraulic(hydro);
+          setRakGerak(hydro.state in ['UP', 'DOWN'] || hydro.state === 'UP' || hydro.state === 'DOWN');
+        }
       } catch (err) {
         // Safe failover
       }
     };
 
     fetchData();
-    const timer = setInterval(fetchData, 1500);
+    const timer = setInterval(fetchData, 1200);
     return () => {
       isMounted = false;
       clearInterval(timer);
@@ -216,7 +228,11 @@ const DasborUtama = () => {
 
   const handleToggleMotor = async (val) => {
     setRakGerak(val);
-    await setActuator('motor', val);
+    if (val) {
+      await setHydraulicCommand('up');
+    } else {
+      await setHydraulicCommand('stop');
+    }
   };
 
   return (
@@ -595,32 +611,40 @@ const DasborUtama = () => {
         </ControlCard>
 
         {/* PEMBALIK RAK */}
-        <ControlCard
-          icon="view_carousel"
-          label={
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span>Pembalik Rak</span>
-              {rakGerak && (
-                <span
-                  className="material-symbols-rounded animate-spin-slow"
-                  style={{ fontSize: 18, color: '#FFFFFF' }}
-                >
-                  rotate_90_degrees_ccw
-                </span>
-              )}
-            </div>
-          }
-          sublabel={rakGerak ? "Sistem tilt otomatis · Berputar" : "Sistem tilt kemiringan otomatis"}
-          gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
-          colorOn="#8B5CF6"
-        >
-          <SliderToggle
-            value={rakGerak}
-            onChange={handleToggleMotor}
-            labelOff="MATI"
-            labelOn="AKTIF"
-          />
-        </ControlCard>
+        <div onClick={() => navigate('/rack')} style={{ cursor: 'pointer', height: '100%' }}>
+          <ControlCard
+            icon="settings_input_component"
+            label={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span>Pembalik Rak</span>
+                {rakGerak && (
+                  <span
+                    className="material-symbols-rounded animate-spin-slow"
+                    style={{ fontSize: 18, color: '#FFFFFF' }}
+                  >
+                    rotate_90_degrees_ccw
+                  </span>
+                )}
+              </div>
+            }
+            sublabel={
+              hydraulic.state === 'UP'
+                ? "Hidrolik NAIK (Limit MAX Siaga)"
+                : hydraulic.state === 'DOWN'
+                ? "Hidrolik TURUN (Limit MIN Siaga)"
+                : "Hidrolik Siaga · Buka Panel Rak →"
+            }
+            gradient="linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)"
+            colorOn="#8B5CF6"
+          >
+            <SliderToggle
+              value={rakGerak}
+              onChange={handleToggleMotor}
+              labelOff="MATI"
+              labelOn="AKTIF"
+            />
+          </ControlCard>
+        </div>
 
       </div>
 

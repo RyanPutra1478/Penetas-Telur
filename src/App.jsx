@@ -4,6 +4,7 @@ import './App.css';
 import Layout from './components/Layout';
 import DasborUtama from './pages/DasborUtama';
 import KontrolLingkungan from './pages/KontrolLingkungan';
+import KontrolRak from './pages/KontrolRak';
 import PemantauanBatch from './pages/PemantauanBatch';
 import KameraLangsung from './pages/KameraLangsung';
 import ProfilSistem from './pages/ProfilSistem';
@@ -15,6 +16,7 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<DasborUtama />} />
           <Route path="control" element={<KontrolLingkungan />} />
+          <Route path="rack" element={<KontrolRak />} />
           <Route path="batch" element={<PemantauanBatch />} />
           <Route path="camera" element={<KameraLangsung />} />
           <Route path="profil" element={<ProfilSistem />} />

@@ -44,16 +44,26 @@
 
 ---
 
-## 🔌 Pemetaan Pin GPIO Hardware (Relay 4 Channel)
+## 🔌 Pemetaan Pin GPIO Hardware
 
-| Aktuator | Pin BCM | Pin Fisik Board | Modul Relay | Konfigurasi Logika |
+### A. Modul Relay 5-Channel (Active-HIGH)
+| Aktuator | Pin BCM | Pin Fisik Board | Modul Relay | Logika | Catatan |
+|---|---|---|---|---|---|
+| **Lampu Pemanas 1** | **GPIO 22** | Pin 15 | IN1 | Active-HIGH | Pemanas Utama (Stage 1) |
+| **Lampu Pemanas 2** | **GPIO 26** | Pin 37 | IN2 | Active-HIGH | Pemanas Cepat (Stage 2 / Boost) |
+| **Kipas Sirkulasi** | **GPIO 4** | Pin 7 | IN3 | Active-HIGH | Sirkulasi & Exhaust Suhu Berlebih |
+| **Mist Maker / Pelembab** | **GPIO 17** | Pin 11 | IN4 | Active-HIGH | Pengatur Kelembaban Udara |
+| **Lampu UV Sterilisasi** | **GPIO 27** | Pin 13 | IN5 | Active-HIGH | Sterilisasi Ruang Mesin Penetas |
+
+### B. Kontroler Motor Hidrolik (Custom PCB Matrix Driver)
+| Fungsi / Komponen | Pin BCM | Pin Fisik Board | Tipe Sinyal | Deskripsi |
 |---|---|---|---|---|
-| **Pemanas (Heater)** | GPIO 22 | Pin 15 | IN1 | **Active LOW** (`active_high=False`) |
-| **Kipas (Circulation Fan)** | GPIO 26 | Pin 37 | IN2 | **Active HIGH** (`active_high=True`) |
-| **Pelembab (Humidifier)** | GPIO 4 | Pin 7 | IN3 | **Active HIGH** (`active_high=True`) |
-| **Pembalik Rak (Motor)** | GPIO 13 | Pin 33 | IN4 | **Active HIGH** (`active_high=True`) |
+| **Perintah NAIK (UP)** | **GPIO 13** | Pin 33 | Output | Sinyal HIGH ke Custom PCB Driver untuk memutar motor hidrolik naik |
+| **Perintah TURUN (DOWN)**| **GPIO 19** | Pin 35 | Output | Sinyal HIGH ke Custom PCB Driver untuk memutar motor hidrolik turun |
+| **Sensor LIMIT MAX** | **GPIO 5** | Pin 29 | Input | Limit Switch Batas Atas (`pull_up=False`) — Auto Cut-Off UP |
+| **Sensor LIMIT MIN** | **GPIO 6** | Pin 31 | Input | Limit Switch Batas Bawah (`pull_up=False`) — Auto Cut-Off DOWN |
 
-> *Catatan Sensor:* Sensor DHT11/DHT22 terhubung ke pin GPIO (default GPIO 17 / Pin 11) dan didukung simulasi pintar dinamis saat berjalan di laptop/komputer pengembang.
+> **Safety Interlock Hardware:** Sistem secara otomatis mencegah sinyal UP dan DOWN aktif bersamaan dengan proteksi jeda waktu (*dead-time delay*). Limit switch terus diawasi secara real-time pada loop background (< 50ms) untuk menghentikan motor seketika saat mencapai batas fisik.
 
 ---
 

@@ -156,3 +156,56 @@ export async function shutdownSystem() {
     return null;
   }
 }
+
+/**
+ * Mendapatkan status motor hidrolik, sensor limit MAX & MIN, dan mode operasi
+ */
+export async function getHydraulicStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/hydraulic/status`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal membaca status hidrolik:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Mengirim perintah manual gerakan hidrolik ('up', 'down', 'stop')
+ * @param {'up'|'down'|'stop'} action 
+ */
+export async function setHydraulicCommand(action) {
+  try {
+    const res = await fetch(`${API_BASE}/hydraulic/command`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn(`[TetascoAPI] Gagal kirim perintah hidrolik ${action}:`, err.message);
+    return null;
+  }
+}
+
+/**
+ * Mengatur mode hidrolik ('MANUAL' atau 'AUTO') serta interval putar telur (menit)
+ * @param {'MANUAL'|'AUTO'} mode 
+ * @param {number} [intervalMinutes] 
+ */
+export async function setHydraulicMode(mode, intervalMinutes) {
+  try {
+    const res = await fetch(`${API_BASE}/hydraulic/mode`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode, interval_minutes: intervalMinutes }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal mengatur mode hidrolik:', err.message);
+    return null;
+  }
+}

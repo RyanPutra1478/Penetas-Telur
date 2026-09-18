@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 from hardware.gpio_controller import gpio_controller
+from hardware.hydraulic_controller import hydraulic_controller
 from sensors.dht_sensor import sensor_manager
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
@@ -41,42 +42,58 @@ def smart_control_loop():
     while not stop_event.is_set():
         try:
             current_actuators = gpio_controller.get_all_actuators()
-            heater_on = current_actuators.get('heater', False)
+            lamp_1_on = current_actuators.get('lamp_1', False)
+            lamp_2_on = current_actuators.get('lamp_2', False)
             fan_on = current_actuators.get('fan', False)
-            humid_on = current_actuators.get('humidifier', False)
+            mist_on = current_actuators.get('mist_maker', False)
 
-            # Baca sensor terkini
-            reading = sensor_manager.read(heater_on, fan_on, humid_on)
+            # Baca sensor terkini (dipengaruhi pemanas, kipas, mist maker)
+            reading = sensor_manager.read(lamp_1_on or lamp_2_on, fan_on, mist_on)
             temp = reading["temperature"]
             hum = reading["humidity"]
 
-            # Jika mode AUTO aktif, kendalikan relay secara otomatis
+            # Jika mode AUTO aktif, kendalikan relay secara cerdas
             if control_state["auto"]:
                 target_t = control_state["target_temp"]
                 target_h = control_state["target_hum"]
 
-                # 1. Kontrol Suhu:
-                if temp < (target_t - 0.2):
-                    if not heater_on:
-                        gpio_controller.set_actuator('heater', True)
+                # 1. Kontrol Suhu Presisi 2-Tahap (Dual Stage Lamps):
+                if temp < (target_t - 0.4):
+                    # Suhu drop cukup jauh: aktifkan kedua lampu pemanas
+                    if not lamp_1_on:
+                        gpio_controller.set_actuator('lamp_1', True)
+                    if not lamp_2_on:
+                        gpio_controller.set_actuator('lamp_2', True)
+                    if fan_on:
+                        gpio_controller.set_actuator('fan', False)
+                elif temp < target_t:
+                    # Suhu mendekati target: cukup 1 lampu pemanas aktif
+                    if not lamp_1_on:
+                        gpio_controller.set_actuator('lamp_1', True)
+                    if lamp_2_on:
+                        gpio_controller.set_actuator('lamp_2', False)
                     if fan_on:
                         gpio_controller.set_actuator('fan', False)
                 elif temp >= target_t:
-                    if heater_on:
-                        gpio_controller.set_actuator('heater', False)
-                    # Jika suhu berlebih, nyalakan kipas pembuang panas
+                    # Target tercapai: matikan kedua lampu
+                    if lamp_1_on:
+                        gpio_controller.set_actuator('lamp_1', False)
+                    if lamp_2_on:
+                        gpio_controller.set_actuator('lamp_2', False)
+
+                    # Jika suhu berlebih (overheat), nyalakan kipas sirkulasi pembuang panas
                     if temp > (target_t + 0.3) and not fan_on:
                         gpio_controller.set_actuator('fan', True)
                     elif temp <= target_t and fan_on:
                         gpio_controller.set_actuator('fan', False)
 
-                # 2. Kontrol Kelembaban:
+                # 2. Kontrol Kelembaban (Mist Maker):
                 if hum < (target_h - 2.0):
-                    if not humid_on:
-                        gpio_controller.set_actuator('humidifier', True)
+                    if not mist_on:
+                        gpio_controller.set_actuator('mist_maker', True)
                 elif hum >= target_h:
-                    if humid_on:
-                        gpio_controller.set_actuator('humidifier', False)
+                    if mist_on:
+                        gpio_controller.set_actuator('mist_maker', False)
 
         except Exception as e:
             logger.error("Error pada loop kontrol cerdas: %s", e)
@@ -164,6 +181,42 @@ def handle_control_mode():
         logger.info("Pengaturan kontrol diperbarui: %s", control_state)
 
     return jsonify(control_state)
+
+# -------------------------------------------------------------
+# Endpoints Kontrol Motor Hidrolik & Limit Switch
+# -------------------------------------------------------------
+
+@app.route('/api/hydraulic/status', methods=['GET'])
+def get_hydraulic_status():
+    """Mengambil status real-time motor hidrolik, sensor limit MAX/MIN, dan mode"""
+    return jsonify(hydraulic_controller.get_status())
+
+@app.route('/api/hydraulic/command', methods=['POST'])
+def handle_hydraulic_command():
+    """Mengirim perintah gerakan hidrolik: up, down, stop"""
+    data = request.get_json(silent=True) or {}
+    action = str(data.get("action", "")).lower()
+
+    if action == "up":
+        res = hydraulic_controller.move_up()
+    elif action == "down":
+        res = hydraulic_controller.move_down()
+    elif action == "stop":
+        res = hydraulic_controller.stop()
+    else:
+        return jsonify({"error": "Action harus 'up', 'down', atau 'stop'"}), 400
+
+    return jsonify({"status": "ok", "action": action, "hydraulic": res})
+
+@app.route('/api/hydraulic/mode', methods=['POST'])
+def handle_hydraulic_mode():
+    """Mengatur mode hidrolik (MANUAL / AUTO) dan interval auto-tilt (menit)"""
+    data = request.get_json(silent=True) or {}
+    mode = data.get("mode", "MANUAL")
+    interval = data.get("interval_minutes", None)
+
+    res = hydraulic_controller.set_mode(mode, interval)
+    return jsonify({"status": "ok", "hydraulic": res})
 
 @app.route('/api/system/exit-kiosk', methods=['POST'])
 def exit_kiosk():
