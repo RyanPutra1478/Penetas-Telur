@@ -70,7 +70,7 @@ class SHT20RS485:
             import serial
             port_to_use = self.port
             if not os.path.exists(port_to_use):
-                for alt in ["/dev/serial0", "/dev/ttyAMA0", "/dev/ttyS0", "/dev/ttyUSB0"]:
+                for alt in ["/dev/serial0", "/dev/ttyAMA0", "/dev/ttyAMA10", "/dev/ttyS0", "/dev/ttyUSB0"]:
                     if os.path.exists(alt):
                         port_to_use = alt
                         self.port = alt
