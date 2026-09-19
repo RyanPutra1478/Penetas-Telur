@@ -1,8 +1,7 @@
 """
 TETASCO CONNECT — SHT20 / XY-MD02 RS485 MODBUS RTU DRIVER
-Menggunakan MAX485 TTL Half-Duplex via GPIO UART (/dev/ttyAMA0 / /dev/serial0)
-dengan kontrol arah pin DE/RE pada GPIO 18 (Physical Pin 12).
-Dilengkapi timing delay hardware RS485 presisi tinggi dan logging diagnostik lengkap.
+Implementasi 1-ke-1 dengan script testing hardware yang telah berhasil.
+Port: /dev/ttyAMA0 @ 9600 baud | DE+RE: GPIO 18 (Pin Fisik 12) via lgpio
 """
 
 import os
@@ -11,70 +10,59 @@ import logging
 
 logger = logging.getLogger("SHT20Sensor")
 
-DEFAULT_PORTS = ["/dev/ttyAMA0", "/dev/serial0", "/dev/ttyS0", "/dev/ttyUSB0"]
+SERIAL_PORT = "/dev/ttyAMA0"
 BAUDRATE = 9600
-DE_RE_GPIO = 18    # Physical Pin 12 pada Raspberry Pi (disambung ke DE + RE)
+DE_RE_GPIO = 18    # Physical Pin 12 -> DE + RE
 
-# Frame Request Modbus RTU untuk XY-MD02 SHT20:
-# 01 04 00 01 00 02 20 0B (Slave 1, Function 4, Reg 1, Qty 2)
-MODBUS_REQUEST = bytes.fromhex("01 04 00 01 00 02 20 0B")
+# Modbus Request XY-MD02:
+# Slave ID: 1, Function: 04 (Read Input Registers), Start Reg: 0001, Quantity: 0002, CRC: 20 0B
+REQUEST = bytes.fromhex("01 04 00 01 00 02 20 0B")
 
 class SHT20RS485:
-    def __init__(self, port=None, de_re_pin=DE_RE_GPIO, baudrate=BAUDRATE):
-        self.port = port
-        self.de_re_pin = de_re_pin
-        self.baudrate = baudrate
+    def __init__(self):
         self.ser = None
-        self.gpio_handle = None
-        self.has_lgpio = False
+        self.gpio = None
         self.is_connected = False
-        self.last_error = "Belum diinisialisasi"
+        self.last_error = "Belum inisialisasi"
         self.last_temp = None
         self.last_hum = None
         self.last_success_time = 0
 
-        self._init_hardware()
+        self._init_sensor()
 
-    def _find_available_port(self):
-        if self.port and os.path.exists(self.port):
-            return self.port
-        for p in DEFAULT_PORTS:
-            if os.path.exists(p):
-                return p
-        return None
-
-    def _init_hardware(self):
-        # 1. Inisialisasi lgpio untuk kontrol pin DE/RE (GPIO 18 / Pin 12)
+    def _init_sensor(self):
+        # 1. Buka lgpio chip 0
         try:
             import lgpio
-            # Coba buka gpiochip 0 (RPi 4/3) atau chip 4 (RPi 5)
-            for chip_num in [0, 4]:
-                try:
-                    self.gpio_handle = lgpio.gpiochip_open(chip_num)
-                    lgpio.gpio_claim_output(self.gpio_handle, self.de_re_pin, 0) # Default: Receive (LOW)
-                    self.has_lgpio = True
-                    logger.info("Pin DE/RE MAX485 siap pada GPIO %d (chip %d).", self.de_re_pin, chip_num)
-                    break
-                except Exception:
-                    continue
+            if self.gpio is None:
+                # Coba chip 0 (RPi 4/3), fallback chip 4 (RPi 5)
+                for chip_id in [0, 4]:
+                    try:
+                        self.gpio = lgpio.gpiochip_open(chip_id)
+                        lgpio.gpio_claim_output(self.gpio, DE_RE_GPIO, 0)
+                        logger.info("lgpio chip %d DE+RE GPIO %d siap.", chip_id, DE_RE_GPIO)
+                        break
+                    except Exception:
+                        continue
         except ImportError:
-            self.has_lgpio = False
-            self.last_error = "Library lgpio tidak ditemukan (khusus Linux RPi)"
+            self.last_error = "Library lgpio tidak terinstall"
+            logger.warning("Library lgpio belum terpasang.")
+            return
         except Exception as e:
-            self.has_lgpio = False
-            self.last_error = f"Gagal init lgpio: {e}"
-            logger.warning("Gagal inisialisasi lgpio GPIO 18: %s", e)
-
-        # 2. Inisialisasi Serial Port UART
-        target_port = self._find_available_port()
-        if not target_port:
-            self.last_error = f"Port serial tidak ditemukan ({', '.join(DEFAULT_PORTS)})"
-            self.is_connected = False
+            self.last_error = f"Error lgpio: {e}"
+            logger.warning("Gagal setup lgpio: %s", e)
             return
 
+        # 2. Buka serial port
         try:
             import serial
-            self.port = target_port
+            port_to_use = SERIAL_PORT
+            if not os.path.exists(port_to_use):
+                for alt in ["/dev/serial0", "/dev/ttyS0", "/dev/ttyUSB0"]:
+                    if os.path.exists(alt):
+                        port_to_use = alt
+                        break
+
             if self.ser and self.ser.is_open:
                 try:
                     self.ser.close()
@@ -82,8 +70,8 @@ class SHT20RS485:
                     pass
 
             self.ser = serial.Serial(
-                port=self.port,
-                baudrate=self.baudrate,
+                port=port_to_use,
+                baudrate=BAUDRATE,
                 bytesize=serial.EIGHTBITS,
                 parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE,
@@ -93,106 +81,77 @@ class SHT20RS485:
             self.ser.reset_output_buffer()
             self.is_connected = True
             self.last_error = None
-            logger.info("Serial port RS485 terbuka pada %s @ %d baud.", self.port, self.baudrate)
+            logger.info("Serial %s berhasil dibuka @ %d baud.", port_to_use, BAUDRATE)
         except Exception as e:
-            self.last_error = f"Gagal buka serial {target_port}: {e}"
-            logger.warning("Gagal membuka serial port %s: %s", target_port, e)
+            self.last_error = f"Gagal buka serial {SERIAL_PORT}: {e}"
+            logger.warning("Gagal buka serial port %s: %s", SERIAL_PORT, e)
             self.is_connected = False
-
-    def _set_tx_mode(self):
-        """Set MAX485 ke mode Transmit (HIGH)"""
-        if self.has_lgpio and self.gpio_handle is not None:
-            import lgpio
-            lgpio.gpio_write(self.gpio_handle, self.de_re_pin, 1)
-
-    def _set_rx_mode(self):
-        """Set MAX485 ke mode Receive (LOW)"""
-        if self.has_lgpio and self.gpio_handle is not None:
-            import lgpio
-            lgpio.gpio_write(self.gpio_handle, self.de_re_pin, 0)
 
     def read(self):
         """
-        Mengirim request Modbus RTU ke sensor SHT20 / XY-MD02,
-        membaca respons 9 bytes, dan mengekstrak nilai Suhu & Kelembaban.
+        Mengirim request Modbus dan membaca respon 9 bytes persis seperti script testing user.
         Mengembalikan tuple: (temperature, humidity, is_ok)
         """
-        if not self.is_connected or not self.ser or not self.ser.is_open:
-            self._init_hardware()
-            if not self.is_connected or not self.ser:
+        if not self.is_connected or not self.ser or not self.ser.is_open or self.gpio is None:
+            self._init_sensor()
+            if not self.is_connected or not self.ser or self.gpio is None:
                 return None, None, False
 
         try:
+            import lgpio
+
             self.ser.reset_input_buffer()
             self.ser.reset_output_buffer()
 
-            # 1. TRANSMIT MODE: Set DE/RE HIGH
-            self._set_tx_mode()
-            time.sleep(0.002) # Jeda kecil stabilisasi pin DE
+            # 1. MODE TRANSMIT (HIGH)
+            lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
 
-            # Kirim Modbus request: 01 04 00 01 00 02 20 0B
-            self.ser.write(MODBUS_REQUEST)
+            # Kirim request Modbus
+            self.ser.write(REQUEST)
             self.ser.flush()
 
-            # PENTING: Tunggu transmisi byte terakhir selesai keluar dari UART FIFO (9600 baud = ~1ms per char)
-            time.sleep(0.012)
-
-            # 2. RECEIVE MODE: Set DE/RE LOW
-            self._set_rx_mode()
+            # 2. LANGSUNG MODE RECEIVE (LOW) - TANPA DELAY TIDUR
+            lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
 
             # 3. BACA RESPONSE (9 Bytes)
             response = self.ser.read(9)
 
             if len(response) < 9:
-                self.last_error = f"Timeout baca SHT20 (Hanya terima {len(response)}/9 bytes)"
-                logger.debug("SHT20 read timeout. Received bytes: %s", response.hex() if response else "KOSONG")
+                self.last_error = f"Response tidak lengkap (diterima {len(response)}/9 byte: {response.hex()})"
                 return None, None, False
 
             slave_id = response[0]
-            func_code = response[1]
+            function_code = response[1]
             byte_count = response[2]
 
-            # Validasi respon Modbus
-            if slave_id != 1 or func_code != 4 or byte_count != 4:
-                self.last_error = f"Respon Modbus salah (ID={slave_id}, Func={func_code})"
-                logger.debug("Respon Modbus invalid: %s", response.hex())
+            if slave_id != 1 or function_code != 4 or byte_count != 4:
+                self.last_error = f"Validasi gagal: ID={slave_id}, Func={function_code}, Count={byte_count}"
                 return None, None, False
 
-            # Ekstraksi Suhu (Signed 16-bit integer, dibagi 10.0)
-            raw_temp = int.from_bytes(response[3:5], byteorder="big", signed=True)
-            temperature = round(raw_temp / 10.0, 1)
+            # Suhu: signed 16-bit
+            temperature_raw = int.from_bytes(response[3:5], byteorder="big", signed=True)
+            temperature = round(temperature_raw / 10.0, 1)
 
-            # Ekstraksi Kelembaban (Unsigned 16-bit integer, dibagi 10.0)
-            raw_hum = int.from_bytes(response[5:7], byteorder="big", signed=False)
-            humidity = round(raw_hum / 10.0, 1)
+            # Kelembaban: unsigned 16-bit
+            humidity_raw = int.from_bytes(response[5:7], byteorder="big", signed=False)
+            humidity = round(humidity_raw / 10.0, 1)
 
-            # Verifikasi batas fisik wajar inkubator (-10 s.d 80 C)
-            if -10.0 <= temperature <= 80.0 and 0.0 <= humidity <= 100.0:
-                self.last_temp = temperature
-                self.last_hum = humidity
-                self.last_success_time = time.time()
-                self.last_error = None
-                return temperature, humidity, True
+            self.last_temp = temperature
+            self.last_hum = humidity
+            self.last_success_time = time.time()
+            self.last_error = None
 
-            self.last_error = f"Nilai di luar batas wajar: T={temperature}, H={humidity}"
-            return None, None, False
+            return temperature, humidity, True
 
         except Exception as e:
-            self.last_error = f"Exception RS485: {e}"
-            logger.debug("Exception baca SHT20 RS485: %s", e)
-            self._set_rx_mode()
-            return None, None, False
-
-    def close(self):
-        """Membersihkan resource serial dan GPIO saat sistem dimatikan"""
-        self._set_rx_mode()
-        if self.ser and self.ser.is_open:
-            self.ser.close()
-        if self.has_lgpio and self.gpio_handle is not None:
-            import lgpio
+            self.last_error = f"Exception saat read: {e}"
+            logger.debug("Exception baca SHT20: %s", e)
             try:
-                lgpio.gpiochip_close(self.gpio_handle)
+                import lgpio
+                if self.gpio is not None:
+                    lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
             except Exception:
                 pass
+            return None, None, False
 
 sht20_sensor = SHT20RS485()
