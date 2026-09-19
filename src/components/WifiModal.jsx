@@ -7,9 +7,11 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
   const [loadingScan, setLoadingScan] = useState(false);
   const [connectingSsid, setConnectingSsid] = useState(null);
   const [selectedNetwork, setSelectedNetwork] = useState(null);
+  const [manualMode, setManualMode] = useState(false);
+  const [manualSsid, setManualSsid] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: '' }
+  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error' | 'info', message: '' }
 
   // Load status dan lakukan scan awal ketika modal dibuka
   useEffect(() => {
@@ -18,6 +20,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
       handleScan();
     } else {
       setSelectedNetwork(null);
+      setManualMode(false);
       setPassword('');
       setFeedback(null);
     }
@@ -25,7 +28,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
 
   const showMsg = (message, type = 'info') => {
     setFeedback({ message, type });
-    setTimeout(() => setFeedback(null), 4500);
+    setTimeout(() => setFeedback(null), 5000);
   };
 
   const loadStatus = async () => {
@@ -41,6 +44,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
     try {
       const list = await scanWifi();
       setNetworks(list || []);
+      await loadStatus();
     } catch (err) {
       showMsg('Gagal memindai jaringan Wi-Fi.', 'error');
     } finally {
@@ -50,22 +54,28 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
 
   const handleSelectNetwork = (net) => {
     if (net.connected) return;
+    setManualMode(false);
     setSelectedNetwork(net);
     setPassword('');
   };
 
   const handleConnect = async (e) => {
     e?.preventDefault();
-    if (!selectedNetwork) return;
+    const targetSsid = manualMode ? manualSsid.trim() : selectedNetwork?.ssid;
+    if (!targetSsid) {
+      showMsg('Nama SSID wajib diisi.', 'error');
+      return;
+    }
 
-    setConnectingSsid(selectedNetwork.ssid);
-    showMsg(`Menghubungkan ke ${selectedNetwork.ssid}...`, 'info');
+    setConnectingSsid(targetSsid);
+    showMsg(`Menghubungkan ke ${targetSsid}...`, 'info');
 
     try {
-      const res = await connectWifi(selectedNetwork.ssid, password);
+      const res = await connectWifi(targetSsid, password);
       if (res && res.success) {
-        showMsg(res.message || `Berhasil terhubung ke ${selectedNetwork.ssid}!`, 'success');
+        showMsg(res.message || `Berhasil terhubung ke ${targetSsid}!`, 'success');
         setSelectedNetwork(null);
+        setManualMode(false);
         setPassword('');
         await loadStatus();
         await handleScan();
@@ -80,7 +90,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
   };
 
   const handleDisconnect = async () => {
-    if (!window.confirm(`Putuskan sambungan dari Wi-Fi "${currentStatus.ssid}"?`)) return;
+    if (!window.confirm(`Putuskan sambungan dari "${currentStatus.ssid}"?`)) return;
     try {
       const res = await disconnectWifi();
       if (res && res.success) {
@@ -96,6 +106,20 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
   };
 
   if (!isOpen) return null;
+
+  // Daftar gabungan: pastikan jika sedang terhubung, SSID aktif selalu tampil di daftar
+  let displayNetworks = [...networks];
+  if (currentStatus.connected && currentStatus.ssid) {
+    const exists = displayNetworks.some(n => n.ssid === currentStatus.ssid);
+    if (!exists) {
+      displayNetworks.unshift({
+        ssid: currentStatus.ssid,
+        signal: currentStatus.signal || 85,
+        security: 'WPA2',
+        connected: true,
+      });
+    }
+  }
 
   return (
     <div style={{
@@ -145,10 +169,10 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
             </div>
             <div>
               <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', margin: 0, lineHeight: 1.2 }}>
-                Pengaturan Wi-Fi
+                Pengaturan Jaringan & Wi-Fi
               </h3>
               <p style={{ fontSize: 10.5, color: '#64748B', margin: 0, marginTop: 2 }}>
-                Koneksi Jaringan Lokal & Internet Incubator
+                Koneksi Internet & Akses Jaringan Lokal Raspberry Pi
               </p>
             </div>
           </div>
@@ -175,7 +199,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
         {/* Notifikasi Status / Pesan */}
         {feedback && (
           <div style={{
-            padding: '8px 16px',
+            padding: '9px 16px',
             fontSize: 11,
             fontWeight: 600,
             display: 'flex',
@@ -195,7 +219,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
         {/* Konten Utama */}
         <div style={{ padding: 18, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
           
-          {/* Status Koneksi Saat Ini */}
+          {/* Kartu Status Koneksi Saat Ini */}
           <div style={{
             background: currentStatus.connected ? 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)' : '#F8FAFC',
             border: `1.5px solid ${currentStatus.connected ? '#86EFAC' : '#E2E8F0'}`,
@@ -205,21 +229,21 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="material-symbols-rounded" style={{
-                  fontSize: 22,
+                  fontSize: 24,
                   color: currentStatus.connected ? '#16A34A' : '#94A3B8'
                 }}>
                   {currentStatus.connected ? 'wifi' : 'wifi_off'}
                 </span>
                 <div>
                   <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: currentStatus.connected ? '#15803D' : '#64748B' }}>
-                    {currentStatus.connected ? 'Terhubung' : 'Terputus'}
+                    {currentStatus.connected ? 'Status: Terhubung' : 'Status: Tidak Terhubung'}
                   </div>
-                  <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A', marginTop: 1 }}>
-                    {currentStatus.ssid || 'Tidak ada koneksi'}
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#0F172A', marginTop: 1 }}>
+                    {currentStatus.ssid || 'Tidak Ada Koneksi Aktif'}
                   </div>
                   {currentStatus.ip && (
-                    <div style={{ fontSize: 10, color: '#475569', marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>
-                      IP: {currentStatus.ip}
+                    <div style={{ fontSize: 10.5, color: '#334155', marginTop: 2, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
+                      IP: {currentStatus.ip} {currentStatus.signal > 0 && `· Sinyal ${currentStatus.signal}%`}
                     </div>
                   )}
                 </div>
@@ -249,8 +273,8 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
             </div>
           </div>
 
-          {/* Form Input Password bila ada jaringan yang dipilih */}
-          {selectedNetwork && (
+          {/* Form Input Password bila ada jaringan yang dipilih ATAU mode input manual */}
+          {(selectedNetwork || manualMode) && (
             <div style={{
               background: '#EFF6FF',
               border: '1.5px solid #93C5FD',
@@ -259,11 +283,11 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <span style={{ fontSize: 12, fontWeight: 800, color: '#1E40AF' }}>
-                  Sambungkan ke: {selectedNetwork.ssid}
+                  {manualMode ? 'Hubungkan ke Wi-Fi Manual' : `Sambungkan ke: ${selectedNetwork?.ssid}`}
                 </span>
                 <button
-                  onClick={() => setSelectedNetwork(null)}
-                  style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 11 }}
+                  onClick={() => { setSelectedNetwork(null); setManualMode(false); }}
+                  style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
                 >
                   Batal
                 </button>
@@ -271,14 +295,35 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
 
               <form onSubmit={handleConnect}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {selectedNetwork.security !== 'OPEN' ? (
+                  {manualMode && (
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Nama Jaringan (SSID)..."
+                        value={manualSsid}
+                        onChange={(e) => setManualSsid(e.target.value)}
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: 8,
+                          border: '1.5px solid #CBD5E1',
+                          fontSize: 12,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {(!selectedNetwork || selectedNetwork.security !== 'OPEN') && (
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Masukkan Kata Sandi Wi-Fi..."
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        autoFocus
+                        autoFocus={!manualMode}
                         style={{
                           width: '100%',
                           padding: '10px 40px 10px 12px',
@@ -308,16 +353,12 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
                         </span>
                       </button>
                     </div>
-                  ) : (
-                    <div style={{ fontSize: 11, color: '#166534', fontStyle: 'italic' }}>
-                      Jaringan ini terbuka (tanpa kata sandi).
-                    </div>
                   )}
 
                   <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                     <button
                       type="submit"
-                      disabled={connectingSsid === selectedNetwork.ssid}
+                      disabled={connectingSsid !== null}
                       style={{
                         flex: 1,
                         padding: '9px',
@@ -332,10 +373,10 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 6,
-                        opacity: connectingSsid === selectedNetwork.ssid ? 0.7 : 1,
+                        opacity: connectingSsid ? 0.7 : 1,
                       }}
                     >
-                      {connectingSsid === selectedNetwork.ssid ? (
+                      {connectingSsid ? (
                         <>
                           <span className="material-symbols-rounded" style={{ fontSize: 16, animation: 'spin 1s infinite linear' }}>
                             sync
@@ -359,31 +400,46 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Jaringan Sekitar ({networks.length})
+                Jaringan Terdeteksi ({displayNetworks.length})
               </span>
-              <button
-                onClick={handleScan}
-                disabled={loadingScan}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#3B82F6',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  cursor: 'pointer',
-                }}
-              >
-                <span
-                  className="material-symbols-rounded"
-                  style={{ fontSize: 15, animation: loadingScan ? 'spin 1s infinite linear' : 'none' }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  onClick={() => { setManualMode(true); setSelectedNetwork(null); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748B',
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
                 >
-                  refresh
-                </span>
-                {loadingScan ? 'Memindai...' : 'Pindai Ulang'}
-              </button>
+                  + Tambah Manual
+                </button>
+                <button
+                  onClick={handleScan}
+                  disabled={loadingScan}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#3B82F6',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span
+                    className="material-symbols-rounded"
+                    style={{ fontSize: 15, animation: loadingScan ? 'spin 1s infinite linear' : 'none' }}
+                  >
+                    refresh
+                  </span>
+                  {loadingScan ? 'Memindai...' : 'Pindai Ulang'}
+                </button>
+              </div>
             </div>
 
             <div style={{
@@ -393,13 +449,13 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
               maxHeight: 220,
               overflowY: 'auto',
             }}>
-              {networks.length === 0 && !loadingScan && (
-                <div style={{ textAlign: 'center', padding: '24px 0', color: '#94A3B8', fontSize: 11 }}>
-                  Tidak ada jaringan yang terdeteksi. Tekan Pindai Ulang.
+              {displayNetworks.length === 0 && !loadingScan && (
+                <div style={{ textAlign: 'center', padding: '24px 12px', color: '#94A3B8', fontSize: 11 }}>
+                  Belum ada sinyal terdeteksi. Tekan <b>Pindai Ulang</b> atau gunakan <b>+ Tambah Manual</b>.
                 </div>
               )}
 
-              {networks.map((net) => {
+              {displayNetworks.map((net) => {
                 const isCurrent = currentStatus.connected && currentStatus.ssid === net.ssid;
                 const isProtected = net.security && net.security !== 'OPEN';
 
@@ -481,7 +537,7 @@ const WifiModal = ({ isOpen, onClose, onStatusChange }) => {
           justifyContent: 'space-between',
         }}>
           <span style={{ fontSize: 9.5, color: '#94A3B8', fontFamily: "'JetBrains Mono', monospace" }}>
-            NetworkManager (nmcli) · Tetasco
+            Network Manager · Tetasco
           </span>
           <button
             onClick={onClose}
