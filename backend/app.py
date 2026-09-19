@@ -129,7 +129,26 @@ def get_sensor():
         "target_hum": control_state["target_hum"],
         "unit_temp": "°C",
         "unit_hum": "% RH",
+        "is_hardware": reading.get("is_hardware", False),
+        "sensor": reading.get("sensor", "simulated"),
+        "error": reading.get("error"),
         "status": reading["status"]
+    })
+
+@app.route('/api/debug/sensor', methods=['GET'])
+def debug_sensor():
+    """Endpoint diagnostik mendalam untuk sensor SHT20 RS485"""
+    from sensors.sht20_sensor import sht20_sensor
+    return jsonify({
+        "port": sht20_sensor.port,
+        "is_connected": sht20_sensor.is_connected,
+        "has_lgpio": sht20_sensor.has_lgpio,
+        "de_re_pin": sht20_sensor.de_re_pin,
+        "last_error": sht20_sensor.last_error,
+        "last_temp": sht20_sensor.last_temp,
+        "last_hum": sht20_sensor.last_hum,
+        "last_success_time": sht20_sensor.last_success_time,
+        "sensor_manager_mode": sensor_manager.active_sensor_type
     })
 
 @app.route('/api/actuators', methods=['GET'])

@@ -77,7 +77,9 @@ class SensorManager:
                 "temperature": t_sht,
                 "humidity": h_sht,
                 "sensor": "SHT20_RS485",
-                "status": "hardware_ok"
+                "is_hardware": True,
+                "status": "hardware_ok",
+                "error": None
             }
             return self.cached_reading
 
@@ -128,7 +130,9 @@ class SensorManager:
             "temperature": temp_final,
             "humidity": hum_final,
             "sensor": "simulated",
-            "status": "simulated"
+            "is_hardware": False,
+            "status": "simulated",
+            "error": sht20_sensor.last_error
         }
         return self.cached_reading
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getWifiStatus } from '../api/tetascoApi';
+import { getWifiStatus, exitKiosk } from '../api/tetascoApi';
 import WifiModal from './WifiModal';
 
 const TopAppBar = () => {
@@ -23,6 +23,16 @@ const TopAppBar = () => {
       clearInterval(interval);
     };
   }, []);
+
+  const handleExitApp = () => {
+    if (window.confirm('Tutup tampilan HMI dan kembali ke Desktop Raspberry Pi? (F11)')) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+      exitKiosk();
+      window.close();
+    }
+  };
 
   return (
     <>
@@ -61,8 +71,9 @@ const TopAppBar = () => {
           </div>
         </div>
 
-        {/* Tombol Network / Wi-Fi Service */}
-        <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+        {/* Action Buttons: Network & Tombol Keluar (Debugging) */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Tombol Network / Wi-Fi Service */}
           <button
             onClick={() => setWifiModalOpen(true)}
             title="Buka Pengaturan Wi-Fi"
@@ -92,6 +103,44 @@ const TopAppBar = () => {
               textTransform: 'uppercase',
             }}>
               {wifiStatus.connected && wifiStatus.ssid ? wifiStatus.ssid : 'NETWORK'}
+            </span>
+          </button>
+
+          <div style={{ width: 1, height: 22, background: '#E2E8F0', margin: '0 2px' }} />
+
+          {/* Tombol Keluar UI untuk Debugging */}
+          <button
+            onClick={handleExitApp}
+            title="Tutup Tampilan HMI untuk Debugging (F11)"
+            style={{
+              height: 36,
+              padding: '0 12px',
+              borderRadius: 999,
+              border: '1.5px solid #FECACA',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              background: '#FEF2F2',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 1px 4px rgba(239,68,68,0.12)',
+            }}
+          >
+            <span
+              className="material-symbols-rounded"
+              style={{ fontSize: 16, color: '#EF4444' }}
+            >
+              power_settings_new
+            </span>
+            <span style={{
+              fontSize: 9.5,
+              fontWeight: 900,
+              letterSpacing: '0.05em',
+              color: '#DC2626',
+              fontFamily: "'JetBrains Mono', monospace",
+              textTransform: 'uppercase',
+            }}>
+              KELUAR (F11)
             </span>
           </button>
         </div>

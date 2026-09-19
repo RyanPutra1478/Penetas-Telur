@@ -171,6 +171,8 @@ const DasborUtama = () => {
   const [humVal, setHumVal] = useState(55.0);
   const [targetTemp, setTargetTemp] = useState(37.8);
   const [targetHum, setTargetHum] = useState(55.0);
+  const [isHardware, setIsHardware] = useState(false);
+  const [sensorType, setSensorType] = useState('simulated');
 
   // Sinkronisasi data real-time dari backend lokal setiap 1.2 detik
   useEffect(() => {
@@ -187,6 +189,8 @@ const DasborUtama = () => {
           if (sensor.humidity !== undefined) setHumVal(sensor.humidity);
           if (sensor.target_temp !== undefined) setTargetTemp(sensor.target_temp);
           if (sensor.target_hum !== undefined) setTargetHum(sensor.target_hum);
+          if (sensor.is_hardware !== undefined) setIsHardware(sensor.is_hardware);
+          if (sensor.sensor !== undefined) setSensorType(sensor.sensor);
         }
         if (acts) {
           if (acts.lamp_1 !== undefined) setLampu1(acts.lamp_1);
@@ -321,19 +325,34 @@ const DasborUtama = () => {
             </span>
           </div>
 
-          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, position: 'relative', zIndex: 1, my: 'auto' }}>
+          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca & Indikator Sumber Sensor */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', position: 'relative', zIndex: 1, my: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{
+                fontSize: 32,
+                fontWeight: 900,
+                color: '#EA580C',
+                lineHeight: 1.0,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: '-0.02em',
+              }}>
+                {tempVal.toFixed(1)}
+              </span>
+              <span style={{ fontSize: 16, fontWeight: 900, color: '#FB923C' }}>°C</span>
+            </div>
             <span style={{
-              fontSize: 32,
-              fontWeight: 900,
-              color: '#EA580C',
-              lineHeight: 1.0,
+              fontSize: 8.5,
+              fontWeight: 800,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: isHardware ? '#DCFCE7' : '#FEF3C7',
+              color: isHardware ? '#166534' : '#B45309',
+              border: `1px solid ${isHardware ? '#86EFAC' : '#FCD34D'}`,
               fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
             }}>
-              {tempVal.toFixed(1)}
+              {isHardware ? '● SHT20 FISIK' : '● SIMULASI'}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 900, color: '#FB923C' }}>°C</span>
           </div>
 
           {/* 3. Bawah: Status Pill */}
@@ -422,19 +441,34 @@ const DasborUtama = () => {
             </span>
           </div>
 
-          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, position: 'relative', zIndex: 1, my: 'auto' }}>
+          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca & Indikator Sumber Sensor */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', position: 'relative', zIndex: 1, my: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{
+                fontSize: 32,
+                fontWeight: 900,
+                color: '#2563EB',
+                lineHeight: 1.0,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: '-0.02em',
+              }}>
+                {Math.round(humVal)}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
+            </div>
             <span style={{
-              fontSize: 32,
-              fontWeight: 900,
-              color: '#2563EB',
-              lineHeight: 1.0,
+              fontSize: 8.5,
+              fontWeight: 800,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: isHardware ? '#DCFCE7' : '#FEF3C7',
+              color: isHardware ? '#166534' : '#B45309',
+              border: `1px solid ${isHardware ? '#86EFAC' : '#FCD34D'}`,
               fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
             }}>
-              {Math.round(humVal)}
+              {isHardware ? '● SHT20 FISIK' : '● SIMULASI'}
             </span>
-            <span style={{ fontSize: 15, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
           </div>
 
           {/* 3. Bawah: Status Pill */}
