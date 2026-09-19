@@ -48,17 +48,28 @@ if gpio_chip is None:
 
 import serial
 
-# 3. Kumpulkan semua kandidat port serial
-CANDIDATE_PORTS = ["/dev/ttyAMA0", "/dev/serial0", "/dev/ttyS0", "/dev/ttyAMA1", "/dev/ttyUSB0"]
-# Tambahkan port lain yang ada di sistem
+# 3. Kumpulkan semua kandidat port serial (Prioritas RPi 5: /dev/ttyAMA10)
+CANDIDATE_PORTS = []
+if os.path.exists("/dev/ttyAMA10"):
+    CANDIDATE_PORTS.append("/dev/ttyAMA10")
+for default_p in ["/dev/serial0", "/dev/ttyAMA0", "/dev/ttyUSB0", "/dev/ttyS0"]:
+    if os.path.exists(default_p) and default_p not in CANDIDATE_PORTS:
+        CANDIDATE_PORTS.append(default_p)
+
+# Tambahkan port lain yang mungkin ada
 for p in glob.glob("/dev/ttyAMA*") + glob.glob("/dev/ttyS*") + glob.glob("/dev/serial*") + glob.glob("/dev/ttyUSB*"):
     if p not in CANDIDATE_PORTS:
         CANDIDATE_PORTS.append(p)
 
-REQUEST = bytes.fromhex("01 04 00 01 00 02 20 0B")
+MODBUS_COMMANDS = [
+    ("Func 04 Reg 1 (Suhu/Hum Reg 1)", bytes.fromhex("01 04 00 01 00 02 20 0B")),
+    ("Func 04 Reg 0 (Suhu/Hum Reg 0)", bytes.fromhex("01 04 00 00 00 02 71 CB")),
+    ("Func 03 Reg 1 (Holding Reg 1)",   bytes.fromhex("01 03 00 01 00 02 95 CB")),
+    ("Func 03 Reg 0 (Holding Reg 0)",   bytes.fromhex("01 03 00 00 00 02 C4 0B")),
+]
 
-print("\n[3/4] Menguji pengiriman data Modbus ke SETIAP port serial:")
-print(f"Request Modbus: {REQUEST.hex().upper()}")
+print(f"\n[3/4] Kandidat Port: {CANDIDATE_PORTS}")
+print("Menguji pengiriman data Modbus dengan timing half-duplex MAX485...")
 
 sukses_port = None
 
@@ -72,7 +83,7 @@ for port in CANDIDATE_PORTS:
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
-            timeout=1.0
+            timeout=0.8
         )
         ser.reset_input_buffer()
         ser.reset_output_buffer()
@@ -81,32 +92,38 @@ for port in CANDIDATE_PORTS:
         print(f"  ❌ Gagal buka {port}: {e}")
         continue
 
-    # Coba 2 kali kirim
-    for attempt in range(1, 3):
+    for cmd_desc, req in MODBUS_COMMANDS:
         ser.reset_input_buffer()
         ser.reset_output_buffer()
 
-        # TX Mode (HIGH)
+        # 1. TX Mode (HIGH)
         lgpio.gpio_write(gpio_chip, 18, 1)
-        ser.write(REQUEST)
+        time.sleep(0.003) # Setup MAX485 driver
+
+        ser.write(req)
         ser.flush()
 
-        # RX Mode (LOW)
+        # 2. TAHAN TRANSMIT: 8 bytes @ 9600 baud = 8.3ms.
+        # Sangat krusial agar CRC 2 bytes tidak terpotong sebelum DE=LOW!
+        time.sleep(0.012)
+
+        # 3. RX Mode (LOW)
         lgpio.gpio_write(gpio_chip, 18, 0)
 
-        # Baca respons
+        # 4. Baca respons
         resp = ser.read(9)
-        print(f"  [Percobaan {attempt}] Diterima: {len(resp)} byte -> {resp.hex().upper() if resp else '(KOSONG)'}")
+        hex_resp = resp.hex().upper() if resp else '(KOSONG)'
+        print(f"  [{cmd_desc}] Diterima: {len(resp)} byte -> {hex_resp}")
 
-        if len(resp) == 9 and resp[0] == 1 and resp[1] == 4:
+        if len(resp) == 9 and resp[0] == 1 and (resp[1] in (3, 4)):
             t = int.from_bytes(resp[3:5], "big", signed=True) / 10.0
             h = int.from_bytes(resp[5:7], "big", signed=False) / 10.0
-            print(f"  🎉 BERHASIL DI PORT {port}!")
+            print(f"\n  🎉🎉 BERHASIL DI PORT {port} dengan {cmd_desc}!")
             print(f"     SUHU REAL       : {t:.1f} °C")
             print(f"     KELEMBABAN REAL : {h:.1f} % RH")
             sukses_port = port
             break
-        time.sleep(0.5)
+        time.sleep(0.2)
 
     ser.close()
     if sukses_port:
