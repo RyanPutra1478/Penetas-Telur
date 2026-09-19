@@ -55,17 +55,18 @@ class DHT11Driver:
         """Membaca DHT11 jika kernel driver IIO aktif (dtoverlay=dht11)"""
         try:
             for dev in glob.glob("/sys/bus/iio/devices/iio:device*"):
-                name_file = os.path.join(dev, "name")
-                if os.path.exists(name_file):
-                    with open(name_file, "r") as f:
-                        if "dht11" in f.read().lower():
-                            t_file = os.path.join(dev, "in_temp_input")
-                            h_file = os.path.join(dev, "in_humidityrelative_input")
-                            if os.path.exists(t_file) and os.path.exists(h_file):
-                                with open(t_file, "r") as tf, open(h_file, "r") as hf:
-                                    t = float(tf.read().strip()) / 1000.0
-                                    h = float(hf.read().strip()) / 1000.0
-                                    return t, h, True
+                t_file = os.path.join(dev, "in_temp_input")
+                h_file = os.path.join(dev, "in_humidityrelative_input")
+                if os.path.exists(t_file) and os.path.exists(h_file):
+                    try:
+                        with open(t_file, "r") as tf, open(h_file, "r") as hf:
+                            t = float(tf.read().strip()) / 1000.0
+                            h = float(hf.read().strip()) / 1000.0
+                            if 0.0 <= h <= 100.0 and -20.0 <= t <= 80.0:
+                                return round(t, 1), round(h, 1), True
+                    except (ValueError, OSError) as e:
+                        logger.debug("IIO reading retry: %s", e)
+                        continue
         except Exception:
             pass
         return None, None, False
