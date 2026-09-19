@@ -56,7 +56,7 @@ if ! command -v chromium-browser >/dev/null 2>&1; then
 fi
 
 $CHROMIUM_BIN \
-    --kiosk \
+    --start-fullscreen \
     --noerrdialogs \
     --disable-infobars \
     --no-first-run \

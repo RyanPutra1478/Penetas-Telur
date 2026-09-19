@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getWifiStatus, exitKiosk } from '../api/tetascoApi';
+import { getWifiStatus } from '../api/tetascoApi';
 import WifiModal from './WifiModal';
 
 const TopAppBar = () => {
   const [wifiModalOpen, setWifiModalOpen] = useState(false);
   const [wifiStatus, setWifiStatus] = useState({ connected: true, ssid: null });
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
 
   // Ambil status Wi-Fi saat komponen dimuat
   useEffect(() => {
@@ -18,19 +19,30 @@ const TopAppBar = () => {
 
     checkWifi();
     const interval = setInterval(checkWifi, 10000); // Poll status setiap 10 detik
+
+    // Event listener untuk update status fullscreen saat berubah
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
     return () => {
       isMounted = false;
       clearInterval(interval);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
-  const handleExitApp = () => {
-    if (window.confirm('Tutup tampilan HMI dan kembali ke Desktop Raspberry Pi? (F11)')) {
-      if (document.fullscreenElement) {
+  // Fungsi toggle Maximize / Minimize
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
-      exitKiosk();
-      window.close();
     }
   };
 
@@ -71,7 +83,7 @@ const TopAppBar = () => {
           </div>
         </div>
 
-        {/* Action Buttons: Network & Tombol Keluar (Debugging) */}
+        {/* Action Buttons: Network & Tombol Maximize/Minimize */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {/* Tombol Network / Wi-Fi Service */}
           <button
@@ -108,39 +120,39 @@ const TopAppBar = () => {
 
           <div style={{ width: 1, height: 22, background: '#E2E8F0', margin: '0 2px' }} />
 
-          {/* Tombol Keluar UI untuk Debugging */}
+          {/* Tombol Maximize / Minimize (Toggle Layar Penuh untuk VNC) */}
           <button
-            onClick={handleExitApp}
-            title="Tutup Tampilan HMI untuk Debugging (F11)"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Kecilkan Layar / Mode Jendela (Minimize)" : "Perbesar ke Layar Penuh (Maximize)"}
             style={{
               height: 36,
-              padding: '0 12px',
+              padding: '0 13px',
               borderRadius: 999,
-              border: '1.5px solid #FECACA',
+              border: isFullscreen ? '1.5px solid #CBD5E1' : '1.5px solid #BFDBFE',
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
-              background: '#FEF2F2',
+              gap: 6,
+              background: isFullscreen ? '#F8FAFC' : '#EFF6FF',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: '0 1px 4px rgba(239,68,68,0.12)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
             }}
           >
             <span
               className="material-symbols-rounded"
-              style={{ fontSize: 16, color: '#EF4444' }}
+              style={{ fontSize: 18, color: isFullscreen ? '#475569' : '#2563EB' }}
             >
-              power_settings_new
+              {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
             </span>
             <span style={{
               fontSize: 9.5,
               fontWeight: 900,
               letterSpacing: '0.05em',
-              color: '#DC2626',
+              color: isFullscreen ? '#334155' : '#1D4ED8',
               fontFamily: "'JetBrains Mono', monospace",
               textTransform: 'uppercase',
             }}>
-              KELUAR (F11)
+              {isFullscreen ? 'KECILKAN' : 'PERBESAR'}
             </span>
           </button>
         </div>
