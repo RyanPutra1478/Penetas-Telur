@@ -1,19 +1,29 @@
-"""
-TETASCO CONNECT — DRIVER SENSOR DHT11 (GPIO 6 / PIN FISIK 31)
-Mendukung multi-metode pembacaan untuk kompatibilitas Raspberry Pi 5 & 4:
-1. lgpio Pulse Counter (Native Linux C library, tanpa dependensi eksternal)
-2. adafruit-circuitpython-dht (Jika terpasang)
-3. Linux Kernel IIO Driver (/sys/bus/iio/devices)
-"""
-
 import os
 import time
 import glob
 import logging
+import subprocess
 
 logger = logging.getLogger("DHT11Driver")
 
 DHT_PIN = 6  # GPIO 6 (Pin Fisik 31)
+
+def ensure_kernel_overlay():
+    """Mencoba memuat kernel driver dtoverlay dht11 jika belum aktif"""
+    try:
+        # Cek apakah device iio dht11 sudah ada
+        for dev in glob.glob("/sys/bus/iio/devices/iio:device*"):
+            name_file = os.path.join(dev, "name")
+            if os.path.exists(name_file):
+                with open(name_file, "r") as f:
+                    if "dht11" in f.read().lower():
+                        return True
+        # Jika belum ada, coba muat overlay
+        subprocess.run(["sudo", "dtoverlay", "dht11", f"gpiopin={DHT_PIN}"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(0.5)
+    except Exception:
+        pass
+    return False
 
 class DHT11Driver:
     def __init__(self, pin=DHT_PIN):
@@ -25,6 +35,7 @@ class DHT11Driver:
         self.adafruit_device = None
         self.has_adafruit = False
 
+        ensure_kernel_overlay()
         self._init_adafruit()
 
     def _init_adafruit(self):
