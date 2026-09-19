@@ -17,10 +17,12 @@ echo "🔄 MEMULAI UPDATE TETASCO CONNECT..."
 echo "Direktori: $PROJECT_DIR"
 echo "=========================================================="
 
-# 1. Bersihkan perubahan lokal otomatis agar git pull tidak bentrok
-echo "[1/4] Mengambil pembaruan terbaru dari GitHub (git pull)..."
+# 1. Bersihkan perubahan lokal otomatis dan sinkronkan dengan branch remote
+echo "[1/4] Mengambil pembaruan terbaru dari GitHub..."
+git fetch origin
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "release")
 git checkout -- . 2>/dev/null || true
-git pull
+git reset --hard "origin/$CURRENT_BRANCH" 2>/dev/null || git pull --rebase || git pull
 
 # 2. Periksa & pasang dependensi python jika ada pembaruan
 echo "[2/4] Memeriksa dependensi Python (requirements.txt)..."
