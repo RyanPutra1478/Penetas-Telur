@@ -209,3 +209,67 @@ export async function setHydraulicMode(mode, intervalMinutes) {
     return null;
   }
 }
+
+/**
+ * Mendapatkan status Wi-Fi terkini
+ */
+export async function getWifiStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/wifi/status`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal membaca status Wi-Fi:', err.message);
+    return { connected: false, ssid: null, ip: null, signal: 0 };
+  }
+}
+
+/**
+ * Memindai jaringan Wi-Fi di sekitar
+ */
+export async function scanWifi() {
+  try {
+    const res = await fetch(`${API_BASE}/wifi/scan`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal memindai Wi-Fi:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Menghubungkan ke jaringan Wi-Fi
+ * @param {string} ssid 
+ * @param {string} [password] 
+ */
+export async function connectWifi(ssid, password) {
+  try {
+    const res = await fetch(`${API_BASE}/wifi/connect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ssid, password: password || '' }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal menghubungkan ke Wi-Fi:', err.message);
+    return { success: false, message: err.message };
+  }
+}
+
+/**
+ * Memutuskan sambungan Wi-Fi
+ */
+export async function disconnectWifi() {
+  try {
+    const res = await fetch(`${API_BASE}/wifi/disconnect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal memutus Wi-Fi:', err.message);
+    return { success: false, message: err.message };
+  }
+}
+

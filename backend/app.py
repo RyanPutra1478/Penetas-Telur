@@ -9,6 +9,7 @@ from flask_cors import CORS
 
 from hardware.gpio_controller import gpio_controller
 from hardware.hydraulic_controller import hydraulic_controller
+from hardware.wifi_manager import wifi_manager
 from sensors.dht_sensor import sensor_manager
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
@@ -264,6 +265,37 @@ def exit_kiosk_system():
     except Exception as e:
         logger.error("Gagal menutup browser kiosk: %s", e)
         return jsonify({"error": str(e)}), 500
+
+# -------------------------------------------------------------
+# Wi-Fi & Network Endpoints
+# -------------------------------------------------------------
+
+@app.route('/api/wifi/status', methods=['GET'])
+def get_wifi_status_endpoint():
+    """Mendapatkan status koneksi Wi-Fi saat ini"""
+    return jsonify(wifi_manager.get_status())
+
+@app.route('/api/wifi/scan', methods=['GET'])
+def scan_wifi_endpoint():
+    """Memindai daftar jaringan Wi-Fi di sekitar"""
+    return jsonify(wifi_manager.scan_networks())
+
+@app.route('/api/wifi/connect', methods=['POST'])
+def connect_wifi_endpoint():
+    """Menghubungkan ke jaringan Wi-Fi"""
+    data = request.get_json(silent=True) or {}
+    ssid = data.get("ssid")
+    password = data.get("password")
+    if not ssid:
+        return jsonify({"success": False, "message": "SSID wajib diisi"}), 400
+    res = wifi_manager.connect(ssid, password)
+    return jsonify(res), (200 if res.get("success") else 400)
+
+@app.route('/api/wifi/disconnect', methods=['POST'])
+def disconnect_wifi_endpoint():
+    """Memutus sambungan Wi-Fi"""
+    res = wifi_manager.disconnect()
+    return jsonify(res)
 
 # -------------------------------------------------------------
 # Static Web Server (Production Build HMI)
