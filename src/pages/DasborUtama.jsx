@@ -351,7 +351,7 @@ const DasborUtama = () => {
               fontFamily: "'JetBrains Mono', monospace",
               textTransform: 'uppercase',
             }}>
-              {isHardware ? '● SHT20 FISIK' : '● SIMULASI'}
+              {isHardware ? (sensorType === 'DHT11_GPIO' ? '● DHT11 FISIK' : '● SHT20 FISIK') : '● SIMULASI'}
             </span>
           </div>
 
@@ -467,7 +467,7 @@ const DasborUtama = () => {
               fontFamily: "'JetBrains Mono', monospace",
               textTransform: 'uppercase',
             }}>
-              {isHardware ? '● SHT20 FISIK' : '● SIMULASI'}
+              {isHardware ? (sensorType === 'DHT11_GPIO' ? '● DHT11 FISIK' : '● SHT20 FISIK') : '● SIMULASI'}
             </span>
           </div>
 
