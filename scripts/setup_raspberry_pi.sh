@@ -23,8 +23,8 @@ echo "[1/6] Menginstal dependensi sistem (Python, Chromium, Unclutter)..."
 sudo apt-get update -y
 sudo apt-get install -y python3 python3-pip python3-venv python3-gpiozero python3-rpi.gpio unclutter chromium-browser curl
 
-# Cek Node.js & npm (jika belum terpasang)
-if ! command -v npm >/dev/null 2>&1; then
+# Cek Node.js & npm (hanya jika bundle dist belum ada)
+if [ ! -d "$PROJECT_DIR/dist" ] && ! command -v npm >/dev/null 2>&1; then
     echo "Menginstal Node.js & npm..."
     sudo apt-get install -y nodejs npm
 fi
@@ -40,15 +40,25 @@ echo "[3/6] Menginstal library Python backend..."
 cd "$PROJECT_DIR"
 python3 -m pip install -r backend/requirements.txt --break-system-packages || python3 -m pip install -r backend/requirements.txt
 
-# 4. Build Frontend React HMI untuk Produksi Offline
+# 4. Verifikasi Bundle Frontend React HMI untuk Produksi Offline
 echo ""
-echo "[4/6] Membangun (build) React HMI produksi..."
+echo "[4/6] Memeriksa bundle React HMI produksi..."
 cd "$PROJECT_DIR"
-if [ ! -d "node_modules" ]; then
-    npm install
+if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+    echo "✅ Bundle produksi dist/ sudah tersedia dan siap disajikan langsung oleh backend!"
+elif [ -f "package.json" ]; then
+    echo "Membangun (build) React HMI produksi..."
+    if ! command -v npm >/dev/null 2>&1; then
+        sudo apt-get install -y nodejs npm
+    fi
+    if [ ! -d "node_modules" ]; then
+        npm install
+    fi
+    npm run build
+    echo "Build selesai! Asset produksi tersimpan di direktori dist/"
+else
+    echo "⚠️ Folder dist/ belum ditemukan. Pastikan bundle dist/ telah disertakan."
 fi
-npm run build
-echo "Build selesai! Asset produksi tersimpan di direktori dist/"
 
 # 5. Konfigurasi Izin Eksekusi Skrip
 echo ""
