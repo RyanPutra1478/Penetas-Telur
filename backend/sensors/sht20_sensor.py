@@ -1,7 +1,6 @@
 """
 TETASCO CONNECT — SHT20 / XY-MD02 RS485 MODBUS RTU DRIVER
-Implementasi 1-ke-1 dengan script testing hardware yang telah berhasil.
-Port: /dev/ttyAMA0 @ 9600 baud | DE+RE: GPIO 18 (Pin Fisik 12) via lgpio
+Port: /dev/serial0 @ 9600 baud | DE+RE: GPIO 18 (Pin Fisik 12) via lgpio
 """
 
 import os
@@ -10,7 +9,8 @@ import logging
 
 logger = logging.getLogger("SHT20Sensor")
 
-SERIAL_PORT = "/dev/ttyAMA0"
+# Port serial default di Raspberry Pi user adalah /dev/serial0
+SERIAL_PORT = "/dev/serial0"
 BAUDRATE = 9600
 DE_RE_GPIO = 18    # Physical Pin 12 -> DE + RE
 
@@ -22,6 +22,7 @@ class SHT20RS485:
     def __init__(self):
         self.ser = None
         self.gpio = None
+        self.port = SERIAL_PORT
         self.is_connected = False
         self.last_error = "Belum inisialisasi"
         self.last_temp = None
@@ -31,19 +32,30 @@ class SHT20RS485:
         self._init_sensor()
 
     def _init_sensor(self):
-        # 1. Buka lgpio chip 0
+        # 1. Buka lgpio chip (coba chip 0 untuk RPi 4/3, chip 4 untuk RPi 5)
         try:
             import lgpio
             if self.gpio is None:
-                # Coba chip 0 (RPi 4/3), fallback chip 4 (RPi 5)
                 for chip_id in [0, 4]:
                     try:
-                        self.gpio = lgpio.gpiochip_open(chip_id)
-                        lgpio.gpio_claim_output(self.gpio, DE_RE_GPIO, 0)
+                        h = lgpio.gpiochip_open(chip_id)
+                        # Coba bebaskan pin terlebih dahulu jika sebelumnya ter-claim
+                        try:
+                            lgpio.gpio_free(h, DE_RE_GPIO)
+                        except Exception:
+                            pass
+                        lgpio.gpio_claim_output(h, DE_RE_GPIO, 0) # Default: LOW (Receive)
+                        self.gpio = h
                         logger.info("lgpio chip %d DE+RE GPIO %d siap.", chip_id, DE_RE_GPIO)
                         break
-                    except Exception:
+                    except Exception as e:
+                        logger.debug("Chip %d gagal: %s", chip_id, e)
                         continue
+
+            if self.gpio is None:
+                self.last_error = "GPIO 18 busy atau tidak dapat dibuka"
+                logger.warning("Tidak dapat mengontrol GPIO 18 (mungkin sedang dipakai proses lain).")
+                return
         except ImportError:
             self.last_error = "Library lgpio tidak terinstall"
             logger.warning("Library lgpio belum terpasang.")
@@ -53,15 +65,21 @@ class SHT20RS485:
             logger.warning("Gagal setup lgpio: %s", e)
             return
 
-        # 2. Buka serial port
+        # 2. Buka serial port (/dev/serial0 utama, fallback ke /dev/ttyAMA0 / /dev/ttyUSB0)
         try:
             import serial
-            port_to_use = SERIAL_PORT
+            port_to_use = self.port
             if not os.path.exists(port_to_use):
-                for alt in ["/dev/serial0", "/dev/ttyS0", "/dev/ttyUSB0"]:
+                for alt in ["/dev/serial0", "/dev/ttyAMA0", "/dev/ttyS0", "/dev/ttyUSB0"]:
                     if os.path.exists(alt):
                         port_to_use = alt
+                        self.port = alt
                         break
+
+            if not os.path.exists(port_to_use):
+                self.last_error = "Port serial /dev/serial0 tidak ditemukan"
+                self.is_connected = False
+                return
 
             if self.ser and self.ser.is_open:
                 try:
@@ -83,13 +101,13 @@ class SHT20RS485:
             self.last_error = None
             logger.info("Serial %s berhasil dibuka @ %d baud.", port_to_use, BAUDRATE)
         except Exception as e:
-            self.last_error = f"Gagal buka serial {SERIAL_PORT}: {e}"
-            logger.warning("Gagal buka serial port %s: %s", SERIAL_PORT, e)
+            self.last_error = f"Gagal buka serial {self.port}: {e}"
+            logger.warning("Gagal buka serial port %s: %s", self.port, e)
             self.is_connected = False
 
     def read(self):
         """
-        Mengirim request Modbus dan membaca respon 9 bytes persis seperti script testing user.
+        Mengirim request Modbus dan membaca respon 9 bytes.
         Mengembalikan tuple: (temperature, humidity, is_ok)
         """
         if not self.is_connected or not self.ser or not self.ser.is_open or self.gpio is None:
@@ -110,14 +128,14 @@ class SHT20RS485:
             self.ser.write(REQUEST)
             self.ser.flush()
 
-            # 2. LANGSUNG MODE RECEIVE (LOW) - TANPA DELAY TIDUR
+            # 2. LANGSUNG MODE RECEIVE (LOW)
             lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
 
             # 3. BACA RESPONSE (9 Bytes)
             response = self.ser.read(9)
 
             if len(response) < 9:
-                self.last_error = f"Response tidak lengkap (diterima {len(response)}/9 byte: {response.hex()})"
+                self.last_error = f"Respon kurang dari 9 bytes (diterima: {len(response)} byte)"
                 return None, None, False
 
             slave_id = response[0]
@@ -140,6 +158,7 @@ class SHT20RS485:
             self.last_hum = humidity
             self.last_success_time = time.time()
             self.last_error = None
+            logger.info("[SHT20 HARDWARE REAL] Suhu: %.1f °C | Kelembaban: %.1f %%RH", temperature, humidity)
 
             return temperature, humidity, True
 
@@ -153,5 +172,20 @@ class SHT20RS485:
             except Exception:
                 pass
             return None, None, False
+
+    def close(self):
+        try:
+            import lgpio
+            if self.gpio is not None:
+                lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
+                lgpio.gpio_free(self.gpio, DE_RE_GPIO)
+                lgpio.gpiochip_close(self.gpio)
+        except Exception:
+            pass
+        if self.ser and self.ser.is_open:
+            try:
+                self.ser.close()
+            except Exception:
+                pass
 
 sht20_sensor = SHT20RS485()
