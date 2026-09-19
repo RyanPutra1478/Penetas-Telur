@@ -134,8 +134,17 @@ def get_sensor():
 
 @app.route('/api/actuators', methods=['GET'])
 def get_actuators():
-    """Mendapatkan status seluruh aktuator (heater, fan, humidifier, motor)"""
-    return jsonify(gpio_controller.get_all_actuators())
+    """Mendapatkan status seluruh aktuator (kompatibel untuk HMI LCD & Mobile Android)"""
+    acts = gpio_controller.get_all_actuators()
+    resp = dict(acts)
+    resp["success"] = True
+    resp["actuators"] = {
+        "heater": acts.get("heater", False) or acts.get("lamp_1", False) or acts.get("lamp_2", False),
+        "fan": acts.get("fan", False),
+        "humidifier": acts.get("humidifier", False) or acts.get("mist_maker", False),
+        "aux": acts.get("motor", False) or acts.get("uv_light", False)
+    }
+    return jsonify(resp)
 
 @app.route('/api/actuators/<name>', methods=['POST'])
 def set_actuator(name):
