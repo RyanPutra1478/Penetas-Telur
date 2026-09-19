@@ -189,3 +189,32 @@ class SHT20RS485:
                 pass
 
 sht20_sensor = SHT20RS485()
+
+if __name__ == '__main__':
+    import sys
+    print("==========================================================")
+    print("🥚 TETASCO CONNECT — SHT20 / XY-MD02 RS485 TESTER")
+    print(f"Port Serial   : {sht20_sensor.port}")
+    print(f"Baudrate      : {BAUDRATE}")
+    print(f"DE/RE Pin     : GPIO {DE_RE_GPIO} (Pin Fisik 12)")
+    print(f"Status Buka   : {'TERHUBUNG' if sht20_sensor.is_connected else 'GAGAL (' + str(sht20_sensor.last_error) + ')'}")
+    print("==========================================================")
+
+    if not sht20_sensor.is_connected:
+        print(f"❌ Tidak dapat membuka hardware: {sht20_sensor.last_error}")
+        sys.exit(1)
+
+    print("Membaca sensor secara real-time (tekan Ctrl+C untuk keluar)...\n")
+    try:
+        while True:
+            temp, hum, ok = sht20_sensor.read()
+            if ok:
+                print(f"✅ [SHT20 FISIK] Suhu: {temp:.1f} °C  |  Kelembaban: {hum:.1f} % RH")
+            else:
+                print(f"❌ Gagal baca: {sht20_sensor.last_error}")
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        print("\nDihentikan.")
+    finally:
+        sht20_sensor.close()
+
