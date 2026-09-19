@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { exitKiosk } from '../api/tetascoApi';
 
 const TopAppBar = () => {
   const [cloud,   setCloud]   = useState(true);
@@ -10,6 +11,16 @@ const TopAppBar = () => {
     { key:'network', icon:'wifi',                   label:'Network', on: network, set: setNetwork, colorOn:'#3B82F6', bgOn:'#DBEAFE', textOn:'#1E40AF' },
     { key:'alarm',   icon:'notifications_active',   label:'Alarm',   on: alarm,   set: setAlarm,   colorOn:'#EF4444', bgOn:'#FEE2E2', textOn:'#991B1B' },
   ];
+
+  const handleExitApp = () => {
+    if (window.confirm('Tutup tampilan HMI dan kembali ke Desktop Raspberry Pi? (F11)')) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+      exitKiosk();
+      window.close();
+    }
+  };
 
   return (
     <header style={{
@@ -66,7 +77,7 @@ const TopAppBar = () => {
         </div>
       </div>
 
-      {/* Status Buttons */}
+      {/* Status Buttons & Exit Button */}
       <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
         {statusItems.map(item => (
           <button key={item.key} onClick={() => item.set(!item.on)} style={{
@@ -93,6 +104,44 @@ const TopAppBar = () => {
             }}>{item.label}</span>
           </button>
         ))}
+
+        <div style={{ width: 1, height: 20, background: '#E2E8F0', margin: '0 2px' }} />
+
+        {/* Tombol Tutup Tampilan Kiosk (F11) */}
+        <button
+          onClick={handleExitApp}
+          title="Tutup Tampilan HMI (F11)"
+          style={{
+            height: 32,
+            padding: '0 10px',
+            borderRadius: 999,
+            border: '1.5px solid #FECACA',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            background: '#FEF2F2',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 1px 4px rgba(239,68,68,0.12)',
+          }}
+        >
+          <span
+            className="material-symbols-rounded"
+            style={{ fontSize: 15, color: '#EF4444' }}
+          >
+            power_settings_new
+          </span>
+          <span style={{
+            fontSize: 8.5,
+            fontWeight: 900,
+            letterSpacing: '0.05em',
+            color: '#DC2626',
+            fontFamily: "'JetBrains Mono', monospace",
+            textTransform: 'uppercase',
+          }}>
+            KELUAR (F11)
+          </span>
+        </button>
       </div>
       <div className="batik-ribbon-strip" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
     </header>

@@ -251,6 +251,20 @@ def shutdown_system():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/system/exit-kiosk', methods=['POST'])
+def exit_kiosk_system():
+    """Tutup tampilan Chromium kiosk di Raspberry Pi untuk keluar ke desktop OS"""
+    logger.info("Permintaan keluar dari mode kiosk (exit-kiosk) diterima.")
+    try:
+        import subprocess
+        # Tutup proses browser Chromium
+        subprocess.Popen(["killall", "chromium-browser"])
+        subprocess.Popen(["killall", "chromium"])
+        return jsonify({"status": "ok", "message": "Mode Kiosk ditutup, kembali ke desktop OS."})
+    except Exception as e:
+        logger.error("Gagal menutup browser kiosk: %s", e)
+        return jsonify({"error": str(e)}), 500
+
 # -------------------------------------------------------------
 # Static Web Server (Production Build HMI)
 # -------------------------------------------------------------

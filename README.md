@@ -134,48 +134,65 @@ cp scripts/tetasco-kiosk.desktop ~/.config/autostart/tetasco.desktop
 | `GET` | `/api/health` | Status kesehatan backend & mode GPIO (hardware / simulated). |
 | `GET` | `/api/sensor` | Data suhu (°C) dan kelembaban (% RH) terkini. |
 | `GET` | `/api/actuators` | Status hidup/mati seluruh relay saat ini. |
-| `POST` | `/api/actuators/<name>` | Menghidupkan/mematikan aktuator (`heater`, `fan`, `humidifier`, `motor`). Payload: `{"state": true}`. |
+| `POST` | `/api/actuators/<name>` | Menghidupkan/mematikan aktuator (`lamp_1`, `lamp_2`, `fan`, `mist_maker`, `uv_light`, `motor`). |
 | `POST` | `/api/emergency-stop` | Mematikan seluruh relay secara instan (Emergency). |
-| `GET/POST` | `/api/control/mode` | Mengambil atau mengubah mode Auto/Manual, target suhu, target kelembaban, dan profil spesies. |
+| `GET/POST` | `/api/control/mode` | Mengambil atau mengubah target suhu, kelembaban, dan profil spesies. |
+| `POST` | `/api/system/exit-kiosk` | Menutup browser Chromium kiosk di Raspberry Pi untuk keluar ke desktop OS (Tombol F11). |
+| `POST` | `/api/system/shutdown` | Mematikan daya Raspberry Pi secara aman (`sudo poweroff`). |
 
 ---
 
-## 📁 Struktur Direktori
+## 📁 Struktur Proyek & Pengelompokan Kategori
+
+Seluruh berkas proyek telah dikelompokkan secara rapi berdasarkan kategori fungsinya:
 
 ```text
 Penetas-Telur/
-├── backend/
-│   ├── app.py                     # Entry point Flask server, REST API & static server
-│   ├── requirements.txt           # Dependensi Python (flask, gpiozero, rpi-lgpio)
-│   ├── hardware/
-│   │   └── gpio_controller.py     # Kontroler GPIO 22, 26, 4, 13 + fallback simulasi
-│   └── sensors/
-│       └── dht_sensor.py          # Driver sensor DHT & simulasi responsif
-├── dist/                          # Hasil kompilasi produksi React (siap saji offline)
-├── scripts/
-│   ├── setup_raspberry_pi.sh      # Skrip instalasi otomatis Raspberry Pi
-│   ├── start_tetasco.sh           # Skrip startup backend + Chromium kiosk
-│   ├── tetasco-backend.service    # Systemd service untuk background daemon
-│   └── tetasco-kiosk.desktop      # Konfigurasi autostart layar sentuh
-├── src/
-│   ├── api/
-│   │   └── tetascoApi.js          # Klien komunikasi lokal React ke Flask
-│   ├── components/
-│   │   ├── BottomNavBar.jsx       # Navigasi bawah 5 tab ergonomis
-│   │   ├── Layout.jsx             # Shell layout HMI
-│   │   └── TopAppBar.jsx          # Header status sistem & brand
-│   ├── pages/
-│   │   ├── DasborUtama.jsx        # Telemetri suhu/RH & 4 slider aktuator
-│   │   ├── KontrolLingkungan.jsx  # Kontrol target, mode Auto/Manual, & profil
-│   │   ├── PemantauanBatch.jsx    # Grafik riwayat inkubasi
-│   │   ├── KameraLangsung.jsx     # Live camera feed & kontrol PTZ
-│   │   └── StatusSistem.jsx       # Log alarm & kesehatan sistem
-│   ├── App.jsx                    # Router
-│   ├── index.css                  # Desain sistem Batik Nusantara & Color Tokens
-│   └── main.jsx                   # React root
-├── package.json
-├── vite.config.js                 # Proxy localhost:5001 untuk mode dev
-└── README.md
+│
+├── ⚙️ [KATEGORI 1: HARDWARE & BACKEND]
+│   └── backend/
+│       ├── app.py                     # Entry point Flask server, REST API, & smart control loop
+│       ├── requirements.txt           # Dependensi Python (flask, flask-cors, gpiozero, rpi-lgpio)
+│       ├── hardware/
+│       │   ├── gpio_controller.py     # Kontroler 6 Relay: Lampu 1, Lampu 2, Kipas, Pelembab, UV, Motor
+│       │   └── hydraulic_controller.py# Kontroler Motor Hidrolik & Limit Switch Proteksi
+│       └── sensors/
+│           └── dht_sensor.py          # Driver sensor DHT11/DHT22 dengan fallback simulator otomatis
+│
+├── 🎨 [KATEGORI 2: TAMPILAN & FRONTEND HMI]
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── tetascoApi.js          # Jembatan komunikasi Frontend ke Backend API
+│   │   ├── components/
+│   │   │   ├── TopAppBar.jsx          # Header status sistem, brand Batik, & tombol KELUAR (F11)
+│   │   │   ├── BottomNavBar.jsx       # Navigasi bawah 5 tab ergonomis (HOME, KONTROL, BATCH, KAMERA, PROFIL)
+│   │   │   ├── Layout.jsx             # Shell layout pembungkus tampilan
+│   │   │   └── AnimalIcons.jsx        # Ikon vektor unggas (Ayam, Bebek, Puyuh, Kalkun, Angsa, Kustom)
+│   │   ├── pages/
+│   │   │   ├── DasborUtama.jsx        # Dasbor utama: 3 panel sensor + 6 slider kontrol aktuator
+│   │   │   ├── KontrolLingkungan.jsx  # Pengaturan Suhu Target & Kelembaban Target per unggas
+│   │   │   ├── PemantauanBatch.jsx    # Grafik riwayat telemetri suhu & kelembaban
+│   │   │   ├── KameraLangsung.jsx     # Live stream kamera & kontrol PTZ
+│   │   │   └── ProfilSistem.jsx       # Profil peternak mandiri, nama farm, kontak, & kapasitas
+│   │   ├── App.jsx                    # Root router & listener global tombol F11 untuk tutup kiosk
+│   │   ├── index.css                  # Design System Batik Nusantara, tipografi 7" touch, & color tokens
+│   │   └── main.jsx                   # React DOM render entry point
+│   ├── dist/                          # Bundle produksi React HMI (langsung disajikan offline oleh Flask)
+│   ├── index.html                     # HTML Template induk
+│   ├── vite.config.js                 # Konfigurasi bundler Vite
+│   └── package.json                   # Dependensi frontend React
+│
+├── 🐧 [KATEGORI 3: SISTEM & DEPLOYMENT RASPBERRY PI]
+│   └── scripts/
+│       ├── setup_raspberry_pi.sh      # Skrip instalasi otomatis 1-klik untuk Raspberry Pi baru
+│       ├── start_tetasco.sh           # Skrip startup utama (menjalankan backend + Chromium kiosk)
+│       ├── tetasco-backend.service    # Konfigurasi background daemon systemd
+│       └── tetasco-kiosk.desktop      # Autostart autologin session Chromium kiosk mode
+│
+└── 📐 [KATEGORI 4: DESAIN FISIK & 3D CAD]
+    └── cad/
+        ├── 3d_model_lemari.blend      # File 3D Blender konstruksi lemari mesin penetas
+        └── 3d_model_lemari.blend1     # Backup model 3D CAD
 ```
 
 ---
