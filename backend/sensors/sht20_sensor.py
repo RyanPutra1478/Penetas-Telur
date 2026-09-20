@@ -6,6 +6,7 @@ Port: /dev/serial0 @ 9600 baud | DE+RE: GPIO 18 (Pin Fisik 12) via lgpio
 import os
 import time
 import logging
+import subprocess
 
 logger = logging.getLogger("SHT20Sensor")
 
@@ -166,8 +167,12 @@ class SHT20RS485:
             self.ser.reset_output_buffer()
 
             # 1. MODE TRANSMIT (HIGH)
-            lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
-            time.sleep(0.003) # Waktu setup driver MAX485 sebelum pengiriman
+            if self.gpio is not None:
+                try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
+                except Exception: pass
+            try: subprocess.run(["pinctrl", "set", "18", "op", "dh"], stderr=subprocess.DEVNULL)
+            except Exception: pass
+            time.sleep(0.005) # Waktu setup driver MAX485 sebelum pengiriman
 
             # Kirim request Modbus
             self.ser.write(cmd_bytes)
@@ -177,7 +182,11 @@ class SHT20RS485:
             time.sleep(0.012)
 
             # 2. KEMBALI KE MODE RECEIVE (LOW)
-            lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
+            if self.gpio is not None:
+                try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
+                except Exception: pass
+            try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
+            except Exception: pass
 
             # 3. BACA RESPONSE (9 Bytes)
             response = self.ser.read(9)
