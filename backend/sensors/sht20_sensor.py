@@ -143,6 +143,8 @@ class SHT20RS485:
 
         try:
             import lgpio
+        except ImportError:
+            pass
 
         cmd_name, cmd_bytes = MODBUS_COMMANDS[self.active_cmd_index]
 
