@@ -4,6 +4,7 @@ import time
 import threading
 import platform
 import logging
+import subprocess
 
 logger = logging.getLogger("HydraulicController")
 
@@ -20,6 +21,67 @@ PIN_LIMIT_MIN      = int(os.getenv("PIN_LIMIT_MIN", 6))       # Feedback Limit M
 
 DEAD_TIME_DELAY = 0.15     # Jeda proteksi interlock (150ms) saat pergantian arah
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "hydraulic_config.json")
+
+def read_hardware_pin(pin: int):
+    """
+    Membaca level biner fisik (0 atau 1) langsung dari register SoC.
+    Bekerja langsung di level kernel meskipun pin sedang dipakai proses lain.
+    """
+    if platform.system().lower() != "linux":
+        return None
+    # 1. Coba pinctrl (Raspberry Pi OS Bookworm / Pi 5)
+    try:
+        out = subprocess.check_output(["pinctrl", "get", str(pin)], stderr=subprocess.DEVNULL, text=True).strip()
+        if "|" in out:
+            after = out.split("|")[1].lower()
+            if "hi" in after or "1" in after:
+                return 1
+            elif "lo" in after or "0" in after:
+                return 0
+    except Exception:
+        pass
+    # 2. Coba raspi-gpio
+    try:
+        out = subprocess.check_output(f"raspi-gpio get {pin}", shell=True, stderr=subprocess.DEVNULL, text=True).strip()
+        if "level=1" in out:
+            return 1
+        elif "level=0" in out:
+            return 0
+    except Exception:
+        pass
+    # 3. Coba gpioget
+    try:
+        out = subprocess.check_output(f"gpioget 4 {pin} 2>/dev/null || gpioget 0 {pin} 2>/dev/null", shell=True, text=True).strip()
+        if out in ("0", "1"):
+            return int(out)
+    except Exception:
+        pass
+    return None
+
+def write_hardware_pin(pin: int, val: int) -> bool:
+    """
+    Menulis level biner fisik (0 atau 1) langsung ke register GPIO.
+    Fail-safe mutlak jika library userspace terkunci.
+    """
+    if platform.system().lower() != "linux":
+        return False
+    drive = "dh" if val == 1 else "dl"
+    try:
+        subprocess.run(["pinctrl", "set", str(pin), "op", drive], check=True, stderr=subprocess.DEVNULL)
+        return True
+    except Exception:
+        pass
+    try:
+        subprocess.run(["raspi-gpio", "set", str(pin), "op", drive], check=True, stderr=subprocess.DEVNULL)
+        return True
+    except Exception:
+        pass
+    try:
+        subprocess.run(f"gpioset 4 {pin}={val} 2>/dev/null || gpioset 0 {pin}={val} 2>/dev/null", shell=True)
+        return True
+    except Exception:
+        pass
+    return False
 
 def load_config():
     """Membaca konfigurasi polaritas yang tersimpan atau menggunakan default"""
@@ -212,7 +274,8 @@ class HydraulicController:
 
     def get_raw_limits(self):
         """Mendapatkan nilai tegangan biner mentah (0 atau 1) dari Pin 5 & 6"""
-        if not self.is_simulated and self.gpio_handle is not None:
+        # 1. Coba via lgpio
+        if self.gpio_handle is not None:
             try:
                 import lgpio
                 v_max = lgpio.gpio_read(self.gpio_handle, PIN_LIMIT_MAX)
@@ -220,37 +283,37 @@ class HydraulicController:
                 return v_max, v_min, True
             except Exception:
                 pass
+
+        # 2. Coba baca via register SoC langsung (pinctrl / raspi-gpio / gpioget)
+        v_max = read_hardware_pin(PIN_LIMIT_MAX)
+        v_min = read_hardware_pin(PIN_LIMIT_MIN)
+        if v_max is not None and v_min is not None:
+            return v_max, v_min, True
+
         return None, None, False
 
     def _read_limits(self):
         """Membaca status terkini limit switch feedback hardware"""
-        if not self.is_simulated:
-            # Baca via lgpio jika tersedia
-            if self.gpio_handle is not None:
-                try:
-                    import lgpio
-                    val_max = lgpio.gpio_read(self.gpio_handle, PIN_LIMIT_MAX)
-                    val_min = lgpio.gpio_read(self.gpio_handle, PIN_LIMIT_MIN)
-                    self.raw_max = val_max
-                    self.raw_min = val_min
-                    # Active-LOW (Default): tersentuh jika 0 (GND)
-                    # Active-HIGH: tersentuh jika 1 (3.3V)
-                    self.limit_max = bool(val_max == 1 if self.limit_active_high else val_max == 0)
-                    self.limit_min = bool(val_min == 1 if self.limit_active_high else val_min == 0)
-                    return self.limit_max, self.limit_min
-                except Exception:
-                    pass
+        v_max, v_min, is_hw = self.get_raw_limits()
+        if is_hw and v_max is not None and v_min is not None:
+            self.raw_max = v_max
+            self.raw_min = v_min
+            # Active-LOW (Default): tersentuh jika 0 (GND)
+            # Active-HIGH: tersentuh jika 1 (3.3V)
+            self.limit_max = bool(v_max == 1 if self.limit_active_high else v_max == 0)
+            self.limit_min = bool(v_min == 1 if self.limit_active_high else v_min == 0)
+            return self.limit_max, self.limit_min
 
-            # Baca via gpiozero
-            if self.btn_limit_max and self.btn_limit_min:
-                try:
-                    self.limit_max = bool(self.btn_limit_max.is_pressed)
-                    self.limit_min = bool(self.btn_limit_min.is_pressed)
-                    return self.limit_max, self.limit_min
-                except Exception:
-                    pass
+        # Baca via gpiozero jika tersedia
+        if self.btn_limit_max and self.btn_limit_min:
+            try:
+                self.limit_max = bool(self.btn_limit_max.is_pressed)
+                self.limit_min = bool(self.btn_limit_min.is_pressed)
+                return self.limit_max, self.limit_min
+            except Exception:
+                pass
 
-        # Pada mode simulasi
+        # Pada mode simulasi (hanya jika register fisik sama sekali tidak terbaca)
         self.limit_min = (self.sim_position <= 1.0)
         self.limit_max = (self.sim_position >= 99.0)
         return self.limit_max, self.limit_min
@@ -263,45 +326,58 @@ class HydraulicController:
             up_state = False
             down_state = False
 
-        if not self.is_simulated:
-            # Tulis via lgpio
-            if self.gpio_handle is not None:
-                try:
-                    import lgpio
-                    val_active = 1 if self.output_active_high else 0
-                    val_inactive = 0 if self.output_active_high else 1
+        val_active = 1 if self.output_active_high else 0
+        val_inactive = 0 if self.output_active_high else 1
 
-                    if up_state:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
-                        time.sleep(DEAD_TIME_DELAY)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_active)
-                    elif down_state:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
-                        time.sleep(DEAD_TIME_DELAY)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_active)
-                    else:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
-                    return
-                except Exception as e:
-                    logger.error("Error penulisan lgpio hidrolik: %s", e)
+        # 1. Tulis via lgpio jika handle tersedia
+        if self.gpio_handle is not None:
+            try:
+                import lgpio
+                if up_state:
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
+                    time.sleep(DEAD_TIME_DELAY)
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_active)
+                elif down_state:
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
+                    time.sleep(DEAD_TIME_DELAY)
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_active)
+                else:
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
+                    lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
+                return
+            except Exception as e:
+                logger.error("Error penulisan lgpio hidrolik: %s", e)
 
-            # Tulis via gpiozero
-            if self.dev_up and self.dev_down:
-                try:
-                    if up_state:
-                        self.dev_down.off()
-                        time.sleep(DEAD_TIME_DELAY)
-                        self.dev_up.on()
-                    elif down_state:
-                        self.dev_up.off()
-                        time.sleep(DEAD_TIME_DELAY)
-                        self.dev_down.on()
-                    else:
-                        self.dev_up.off()
-                        self.dev_down.off()
-                except Exception as e:
-                    logger.error("Error penulisan gpiozero hidrolik: %s", e)
+        # 2. Tulis via gpiozero jika ada
+        if self.dev_up and self.dev_down:
+            try:
+                if up_state:
+                    self.dev_down.off()
+                    time.sleep(DEAD_TIME_DELAY)
+                    self.dev_up.on()
+                elif down_state:
+                    self.dev_up.off()
+                    time.sleep(DEAD_TIME_DELAY)
+                    self.dev_down.on()
+                else:
+                    self.dev_up.off()
+                    self.dev_down.off()
+                return
+            except Exception as e:
+                logger.error("Error penulisan gpiozero hidrolik: %s", e)
+
+        # 3. Fallback register SoC langsung (pinctrl / raspi-gpio)
+        if up_state:
+            write_hardware_pin(PIN_HYDRAULIC_DOWN, val_inactive)
+            time.sleep(DEAD_TIME_DELAY)
+            write_hardware_pin(PIN_HYDRAULIC_UP, val_active)
+        elif down_state:
+            write_hardware_pin(PIN_HYDRAULIC_UP, val_inactive)
+            time.sleep(DEAD_TIME_DELAY)
+            write_hardware_pin(PIN_HYDRAULIC_DOWN, val_active)
+        else:
+            write_hardware_pin(PIN_HYDRAULIC_UP, val_inactive)
+            write_hardware_pin(PIN_HYDRAULIC_DOWN, val_inactive)
 
     def start_oscillation(self) -> dict:
         """
