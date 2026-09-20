@@ -126,19 +126,8 @@ class SHT20RS485:
             self.is_connected = False
 
     def _switch_port_or_cmd(self):
-        """Auto failover port atau perintah Modbus jika terus gagal"""
-        candidates = get_candidate_ports()
-        if len(candidates) > 1:
-            try:
-                curr_idx = candidates.index(self.port) if self.port in candidates else 0
-                next_port = candidates[(curr_idx + 1) % len(candidates)]
-                logger.info("Mencoba ganti port serial dari %s ke %s", self.port, next_port)
-                self.port = next_port
-                self._init_sensor()
-            except Exception:
-                pass
-
-        # Switch juga variasi perintah Modbus
+        """Auto failover variasi perintah Modbus jika pembacaan gagal"""
+        self.port = "/dev/ttyAMA0"
         self.active_cmd_index = (self.active_cmd_index + 1) % len(MODBUS_COMMANDS)
 
     def read(self):
