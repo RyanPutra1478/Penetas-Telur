@@ -247,6 +247,44 @@ def handle_hydraulic_mode():
     res = hydraulic_controller.set_mode(mode, interval)
     return jsonify({"status": "ok", "hydraulic": res})
 
+@app.route('/api/hydraulic/polarity', methods=['GET', 'POST'])
+def handle_hydraulic_polarity():
+    """Membaca atau mengubah polaritas output relay dan limit switch"""
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        if "output_active_high" in data:
+            hydraulic_controller.set_output_polarity(bool(data["output_active_high"]))
+        if "limit_active_high" in data:
+            hydraulic_controller.set_limit_polarity(bool(data["limit_active_high"]))
+    return jsonify({
+        "output_active_high": hydraulic_controller.output_active_high,
+        "limit_active_high": hydraulic_controller.limit_active_high,
+        "backend": hydraulic_controller.hardware_backend
+    })
+
+@app.route('/api/hydraulic/test-output', methods=['POST'])
+def handle_hydraulic_test_output():
+    """Menguji pin output UP, DOWN, atau BLINK secara langsung"""
+    data = request.get_json(silent=True) or {}
+    action = str(data.get("action", "")).lower()
+    duration = float(data.get("duration", 2.0))
+
+    if action == "up":
+        hydraulic_controller.force_output(True, False)
+        return jsonify({"status": "ok", "action": "up", "message": f"Output UP (Pin 13) aktif"})
+    elif action == "down":
+        hydraulic_controller.force_output(False, True)
+        return jsonify({"status": "ok", "action": "down", "message": f"Output DOWN (Pin 19) aktif"})
+    elif action == "blink":
+        # Jalankan di background thread agar tidak memblokir HTTP request
+        threading.Thread(target=hydraulic_controller.blink_test, args=(3, 1.0), daemon=True).start()
+        return jsonify({"status": "ok", "action": "blink", "message": "Blink test dimulai (3 siklus)"})
+    elif action == "stop":
+        hydraulic_controller.force_output(False, False)
+        return jsonify({"status": "ok", "action": "stop", "message": "Seluruh output dimatikan"})
+    else:
+        return jsonify({"error": "Action harus 'up', 'down', 'blink', atau 'stop'"}), 400
+
 @app.route('/api/system/exit-kiosk', methods=['POST'])
 def exit_kiosk():
     """Menutup browser Chromium kiosk dan kembali ke desktop Raspberry Pi OS"""

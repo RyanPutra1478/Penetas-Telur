@@ -107,6 +107,9 @@ class GPIOController:
         res['heater'] = res.get('lamp_1', False) or res.get('lamp_2', False)
         res['humidifier'] = res.get('mist_maker', False)
         res['motor'] = hydraulic_controller.is_oscillating
+        res['hydraulic_state'] = hydraulic_controller.state
+        res['limit_max'] = hydraulic_controller.limit_max
+        res['limit_min'] = hydraulic_controller.limit_min
         return res
 
     def emergency_stop(self) -> dict:

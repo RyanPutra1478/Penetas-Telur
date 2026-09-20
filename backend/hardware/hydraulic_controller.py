@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import threading
 import platform
@@ -17,12 +18,38 @@ PIN_HYDRAULIC_DOWN = int(os.getenv("PIN_HYDRAULIC_DOWN", 19)) # Output DOWN (tur
 PIN_LIMIT_MAX      = int(os.getenv("PIN_LIMIT_MAX", 5))       # Feedback Limit MAX (Batas Atas / Max Angle)
 PIN_LIMIT_MIN      = int(os.getenv("PIN_LIMIT_MIN", 6))       # Feedback Limit MIN (Batas Bawah / Min Angle)
 
-# Logika Polaritas Aktif
-OUTPUT_ACTIVE_HIGH = True  # True: HIGH = Nyala, False: LOW = Nyala (Relay Active-LOW)
-# Default limit switch di industri/RPi adalah Active-LOW (GND dengan internal pull-up)
-LIMIT_ACTIVE_HIGH  = os.getenv("LIMIT_ACTIVE_HIGH", "false").lower() in ("true", "1", "yes")
-
 DEAD_TIME_DELAY = 0.15     # Jeda proteksi interlock (150ms) saat pergantian arah
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "hydraulic_config.json")
+
+def load_config():
+    """Membaca konfigurasi polaritas yang tersimpan atau menggunakan default"""
+    cfg = {
+        "output_active_high": True,  # True: 3.3V=ON, False: 0V=ON (Active-LOW)
+        "limit_active_high": False   # True: 3.3V=Tersentuh, False: GND=Tersentuh
+    }
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if "output_active_high" in data:
+                    cfg["output_active_high"] = bool(data["output_active_high"])
+                if "limit_active_high" in data:
+                    cfg["limit_active_high"] = bool(data["limit_active_high"])
+        except Exception as e:
+            logger.warning("Gagal membaca %s: %s", CONFIG_PATH, e)
+    return cfg
+
+def save_config(cfg):
+    """Menyimpan konfigurasi polaritas agar persisten saat reboot"""
+    try:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception as e:
+        logger.warning("Gagal menyimpan %s: %s", CONFIG_PATH, e)
+
+saved_cfg = load_config()
+OUTPUT_ACTIVE_HIGH = saved_cfg["output_active_high"]
+LIMIT_ACTIVE_HIGH  = saved_cfg["limit_active_high"]
 
 class HydraulicController:
     """
@@ -40,7 +67,10 @@ class HydraulicController:
         self.state = "IDLE"           # "IDLE", "UP", "DOWN", "STOP"
         self.is_oscillating = False   # True saat slider Penggerak Rak menyala
         self.target_direction = "UP"  # "UP" atau "DOWN"
-        self.limit_active_high = LIMIT_ACTIVE_HIGH # False = Active-LOW (GND), True = Active-HIGH
+        
+        cfg = load_config()
+        self.limit_active_high = cfg["limit_active_high"]   # False = Active-LOW (GND), True = Active-HIGH
+        self.output_active_high = cfg["output_active_high"] # True = Active-HIGH (3.3V=ON), False = Active-LOW (0V=ON)
         
         # State Limit Switch
         self.limit_max = False
@@ -57,6 +87,8 @@ class HydraulicController:
         self.dev_down = None
         self.btn_limit_max = None
         self.btn_limit_min = None
+        self.hardware_backend = "none"
+        self.hardware_error = None
 
         self._running = True
         self._init_hardware()
@@ -69,6 +101,7 @@ class HydraulicController:
         if platform.system().lower() != "linux":
             logger.info("OS Non-Linux (%s). Motor Hidrolik berjalan dalam mode SIMULASI.", platform.system())
             self.is_simulated = True
+            self.hardware_backend = "simulated"
             return
 
         # 1. Coba inisialisasi via lgpio (Native Linux / Raspberry Pi 5 & 4)
@@ -81,7 +114,8 @@ class HydraulicController:
                     for p in [PIN_HYDRAULIC_UP, PIN_HYDRAULIC_DOWN]:
                         try: lgpio.gpio_free(h, p)
                         except Exception: pass
-                        lgpio.gpio_claim_output(h, p, 0 if OUTPUT_ACTIVE_HIGH else 1)
+                        init_val = 0 if self.output_active_high else 1
+                        lgpio.gpio_claim_output(h, p, init_val)
                     
                     # Input Limit MAX & MIN (Pull-UP untuk Active-LOW ke GND)
                     pull = lgpio.SET_PULL_DOWN if self.limit_active_high else lgpio.SET_PULL_UP
@@ -92,11 +126,14 @@ class HydraulicController:
 
                     self.gpio_handle = h
                     self.chip_id = c
-                    logger.info("Hardware Hidrolik Siap via lgpio (chip %d): UP=GPIO%d, DOWN=GPIO%d, MAX=GPIO%d, MIN=GPIO%d (Polaritas Limit: %s)",
+                    self.hardware_backend = f"lgpio (chip {c})"
+                    logger.info("Hardware Hidrolik Siap via lgpio (chip %d): UP=GPIO%d, DOWN=GPIO%d, MAX=GPIO%d, MIN=GPIO%d (Output: %s, Limit: %s)",
                                 c, PIN_HYDRAULIC_UP, PIN_HYDRAULIC_DOWN, PIN_LIMIT_MAX, PIN_LIMIT_MIN,
+                                "Active-HIGH (3.3V=ON)" if self.output_active_high else "Active-LOW (0V=ON)",
                                 "Active-HIGH (3.3V)" if self.limit_active_high else "Active-LOW (GND)")
                     return
-                except Exception:
+                except Exception as ex_chip:
+                    self.hardware_error = str(ex_chip)
                     continue
         except ImportError:
             pass
@@ -104,20 +141,39 @@ class HydraulicController:
         # 2. Fallback via gpiozero
         try:
             from gpiozero import DigitalOutputDevice, Button
-            self.dev_up = DigitalOutputDevice(PIN_HYDRAULIC_UP, active_high=OUTPUT_ACTIVE_HIGH, initial_value=False)
-            self.dev_down = DigitalOutputDevice(PIN_HYDRAULIC_DOWN, active_high=OUTPUT_ACTIVE_HIGH, initial_value=False)
+            self.dev_up = DigitalOutputDevice(PIN_HYDRAULIC_UP, active_high=self.output_active_high, initial_value=False)
+            self.dev_down = DigitalOutputDevice(PIN_HYDRAULIC_DOWN, active_high=self.output_active_high, initial_value=False)
             self.btn_limit_max = Button(PIN_LIMIT_MAX, pull_up=not self.limit_active_high)
             self.btn_limit_min = Button(PIN_LIMIT_MIN, pull_up=not self.limit_active_high)
+            self.hardware_backend = "gpiozero"
             logger.info("Hardware Hidrolik Siap via gpiozero: UP=GPIO%d, DOWN=GPIO%d, MAX=GPIO%d, MIN=GPIO%d",
                         PIN_HYDRAULIC_UP, PIN_HYDRAULIC_DOWN, PIN_LIMIT_MAX, PIN_LIMIT_MIN)
         except Exception as e:
             logger.warning("Gagal inisialisasi hardware Hidrolik: %s. Menggunakan mode SIMULASI.", e)
             self.is_simulated = True
+            self.hardware_backend = "simulated"
+            if not self.hardware_error:
+                self.hardware_error = str(e)
+
+    def set_output_polarity(self, active_high: bool):
+        """Mengubah polaritas output (True: 3.3V/HIGH = ON, False: 0V/LOW = ON) dan menyimpannya"""
+        with self.lock:
+            self.output_active_high = bool(active_high)
+            save_config({
+                "output_active_high": self.output_active_high,
+                "limit_active_high": self.limit_active_high
+            })
+            self._hw_set_outputs(False, False)
+            logger.info("Polaritas Output Hidrolik diubah & disimpan: %s", "Active-HIGH (3.3V=ON)" if self.output_active_high else "Active-LOW (0V=ON)")
 
     def set_limit_polarity(self, active_high: bool):
-        """Mengubah polaritas pembacaan limit switch (Active-LOW GND vs Active-HIGH 3.3V)"""
+        """Mengubah polaritas pembacaan limit switch (Active-LOW GND vs Active-HIGH 3.3V) dan menyimpannya"""
         with self.lock:
             self.limit_active_high = bool(active_high)
+            save_config({
+                "output_active_high": self.output_active_high,
+                "limit_active_high": self.limit_active_high
+            })
             if not self.is_simulated and self.gpio_handle is not None:
                 try:
                     import lgpio
@@ -128,6 +184,7 @@ class HydraulicController:
                         lgpio.gpio_claim_input(self.gpio_handle, p, pull)
                 except Exception:
                     pass
+            logger.info("Polaritas Limit Switch diubah & disimpan: %s", "Active-HIGH (3.3V)" if self.limit_active_high else "Active-LOW (GND)")
 
     def get_raw_limits(self):
         """Mendapatkan nilai tegangan biner mentah (0 atau 1) dari Pin 5 & 6"""
@@ -187,21 +244,20 @@ class HydraulicController:
             if self.gpio_handle is not None:
                 try:
                     import lgpio
-                    # Jika ganti arah, matikan yang sedang menyala terlebih dahulu
-                    val_up = 1 if (up_state if OUTPUT_ACTIVE_HIGH else not up_state) else 0
-                    val_down = 1 if (down_state if OUTPUT_ACTIVE_HIGH else not down_state) else 0
+                    val_active = 1 if self.output_active_high else 0
+                    val_inactive = 0 if self.output_active_high else 1
 
                     if up_state:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, 0 if OUTPUT_ACTIVE_HIGH else 1)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
                         time.sleep(DEAD_TIME_DELAY)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, 1 if OUTPUT_ACTIVE_HIGH else 0)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_active)
                     elif down_state:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, 0 if OUTPUT_ACTIVE_HIGH else 1)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
                         time.sleep(DEAD_TIME_DELAY)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, 1 if OUTPUT_ACTIVE_HIGH else 0)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_active)
                     else:
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, 0 if OUTPUT_ACTIVE_HIGH else 1)
-                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, 0 if OUTPUT_ACTIVE_HIGH else 1)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_UP, val_inactive)
+                        lgpio.gpio_write(self.gpio_handle, PIN_HYDRAULIC_DOWN, val_inactive)
                     return
                 except Exception as e:
                     logger.error("Error penulisan lgpio hidrolik: %s", e)
@@ -365,6 +421,46 @@ class HydraulicController:
 
             time.sleep(step_dt)
 
+    def force_output(self, up_state: bool, down_state: bool):
+        """
+        Pengujian langsung pin fisik tanpa terhalang limit switch (tetap ada interlock safety).
+        Sangat berguna untuk memverifikasi apakah lampu LED indikator di relay menyala.
+        """
+        with self.lock:
+            if up_state:
+                self.state = "UP"
+                self.target_direction = "UP"
+                self._hw_set_outputs(True, False)
+            elif down_state:
+                self.state = "DOWN"
+                self.target_direction = "DOWN"
+                self._hw_set_outputs(False, True)
+            else:
+                self.state = "IDLE"
+                self._hw_set_outputs(False, False)
+
+    def blink_test(self, cycles: int = 3, delay: float = 1.0):
+        """
+        Tes kedip bergantian antara UP (Pin 13) dan DOWN (Pin 19)
+        untuk menguji lampu indikator relay secara visual.
+        """
+        logger.info("Memulai Blink Test (%d siklus, jeda %.1fs)...", cycles, delay)
+        for i in range(cycles):
+            logger.info("Blink [%d/%d]: NAIK (Pin %d) ON", i+1, cycles, PIN_HYDRAULIC_UP)
+            self.force_output(up_state=True, down_state=False)
+            time.sleep(delay)
+
+            self.force_output(up_state=False, down_state=False)
+            time.sleep(0.3)
+
+            logger.info("Blink [%d/%d]: TURUN (Pin %d) ON", i+1, cycles, PIN_HYDRAULIC_DOWN)
+            self.force_output(up_state=False, down_state=True)
+            time.sleep(delay)
+
+            self.force_output(up_state=False, down_state=False)
+            time.sleep(0.3)
+        logger.info("Blink Test Selesai. Seluruh output OFF.")
+
     def get_status(self) -> dict:
         """Mengembalikan status menyeluruh sistem hidrolik untuk API & UI"""
         return {
@@ -373,6 +469,12 @@ class HydraulicController:
             "target_direction": self.target_direction,  # Arah tujuan gerakan saat ini
             "limit_max": bool(self.limit_max),          # True jika batas atas tersentuh
             "limit_min": bool(self.limit_min),          # True jika batas bawah tersentuh
+            "raw_max": self.raw_max,
+            "raw_min": self.raw_min,
+            "output_active_high": self.output_active_high,
+            "limit_active_high": self.limit_active_high,
+            "backend": self.hardware_backend,
+            "hardware_error": self.hardware_error,
             "simulated": self.is_simulated,
             "position_percent": round(self.sim_position, 1) if self.is_simulated else (100 if self.limit_max else (0 if self.limit_min else 50))
         }
