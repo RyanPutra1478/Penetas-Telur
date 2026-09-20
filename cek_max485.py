@@ -21,24 +21,39 @@ print("🔬 DIAGNOSTIK LANGSUNG MODUL MAX485 & SENSOR SHT20")
 print(f"Port Hardware : {PORT} (Pin 8 TX & Pin 10 RX)")
 print("=" * 68)
 
+# Inisialisasi handle lgpio persistent agar switching DE/RE berlangsung instan (< 5 mikrodetik)
+_lgpio_handle = None
+_lgpio_mod = None
+try:
+    import lgpio
+    _lgpio_mod = lgpio
+    for chip in [4, 0]:
+        try:
+            h = lgpio.gpiochip_open(chip)
+            try:
+                lgpio.gpio_free(h, 18)
+            except Exception:
+                pass
+            lgpio.gpio_claim_output(h, 18, 0)
+            _lgpio_handle = h
+            break
+        except Exception:
+            pass
+except Exception:
+    pass
+
 def set_pin18(val: int):
-    """Mengatur level logika Pin 12 (GPIO 18) via pinctrl & lgpio"""
+    """Mengatur level logika Pin 12 (GPIO 18) secara instan tanpa latency subprocess"""
+    if _lgpio_handle is not None and _lgpio_mod is not None:
+        try:
+            _lgpio_mod.gpio_write(_lgpio_handle, 18, val)
+            return
+        except Exception:
+            pass
+    # Fallback jika lgpio tidak tersedia
     drive = "dh" if val == 1 else "dl"
     try:
         subprocess.run(["pinctrl", "set", "18", "op", drive], stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
-    try:
-        import lgpio
-        for chip in [4, 0]:
-            try:
-                h = lgpio.gpiochip_open(chip)
-                lgpio.gpio_claim_output(h, 18, val)
-                lgpio.gpio_write(h, 18, val)
-                lgpio.gpiochip_close(h)
-                break
-            except Exception:
-                pass
     except Exception:
         pass
 
@@ -129,15 +144,17 @@ for desc, baud, req in SCAN_LIST:
 
         # TX
         set_pin18(1)
-        time.sleep(0.005)
+        time.sleep(0.002)
         ser.write(req)
         ser.flush()
-        time.sleep(0.012)
-        # RX
+        # Berikan jeda sangat singkat (1.5 ms) untuk bit stop terakhir dari FIFO UART
+        time.sleep(15.0 / baud)
+        # Langsung RX
         set_pin18(0)
 
-        time.sleep(0.05)
-        resp = ser.read(9)
+        # Tunggu respon sensor
+        time.sleep(0.02)
+        resp = ser.read(16)
         hex_data = resp.hex().upper() if resp else "(0 byte)"
         print(f"  * [{desc}]: Diterima {len(resp)} byte -> {hex_data}")
 

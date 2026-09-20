@@ -153,26 +153,28 @@ class SHT20RS485:
             if self.gpio is not None:
                 try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
                 except Exception: pass
-            try: subprocess.run(["pinctrl", "set", "18", "op", "dh"], stderr=subprocess.DEVNULL)
-            except Exception: pass
-            time.sleep(0.005) # Waktu setup driver MAX485 sebelum pengiriman
+            else:
+                try: subprocess.run(["pinctrl", "set", "18", "op", "dh"], stderr=subprocess.DEVNULL)
+                except Exception: pass
+            time.sleep(0.002)
 
             # Kirim request Modbus
             self.ser.write(cmd_bytes)
             self.ser.flush()
 
-            # TAHAN TRANSMIT: Tunggu seluruh 8 bytes fisik tuntas keluar kabel (8 bytes @ 9600 = ~8.3ms)
-            time.sleep(0.012)
+            # TAHAN TRANSMIT: Sisa bit stop terakhir (~1.5ms)
+            time.sleep(15.0 / BAUDRATE)
 
             # 2. KEMBALI KE MODE RECEIVE (LOW)
             if self.gpio is not None:
                 try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
                 except Exception: pass
-            try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
-            except Exception: pass
+            else:
+                try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
+                except Exception: pass
 
-            # 3. BACA RESPONSE (9 Bytes)
-            response = self.ser.read(9)
+            # 3. BACA RESPONSE (hingga 16 Bytes)
+            response = self.ser.read(16)
 
             if len(response) < 9:
                 self.consecutive_fails += 1
