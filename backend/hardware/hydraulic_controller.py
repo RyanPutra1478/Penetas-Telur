@@ -155,6 +155,30 @@ class HydraulicController:
             if not self.hardware_error:
                 self.hardware_error = str(e)
 
+    def reinit_hardware(self) -> bool:
+        """Mematikan handle lama dan mencoba klaim pin hardware ulang jika proses pengunci sudah dimatikan"""
+        with self.lock:
+            if self.gpio_handle is not None:
+                try:
+                    import lgpio
+                    lgpio.gpiochip_close(self.gpio_handle)
+                except Exception:
+                    pass
+                self.gpio_handle = None
+            if self.dev_up:
+                try: self.dev_up.close()
+                except Exception: pass
+                self.dev_up = None
+            if self.dev_down:
+                try: self.dev_down.close()
+                except Exception: pass
+                self.dev_down = None
+            self.is_simulated = False
+            self.hardware_backend = "none"
+            self.hardware_error = None
+            self._init_hardware()
+            return not self.is_simulated
+
     def set_output_polarity(self, active_high: bool):
         """Mengubah polaritas output (True: 3.3V/HIGH = ON, False: 0V/LOW = ON) dan menyimpannya"""
         with self.lock:
