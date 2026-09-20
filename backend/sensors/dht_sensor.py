@@ -47,22 +47,7 @@ class SensorManager:
         dt = max(0.1, min(2.0, now - self.last_read_time))
         self.last_read_time = now
 
-        # 1. Prioritas Utama: Baca dari DHT11 pada GPIO 6
-        t_dht, h_dht, ok_dht = dht11_driver.read()
-        if ok_dht and t_dht is not None and h_dht is not None:
-            self.is_hardware_active = True
-            self.active_sensor_type = "DHT11_GPIO"
-            self.cached_reading = {
-                "temperature": t_dht,
-                "humidity": h_dht,
-                "sensor": "DHT11_GPIO",
-                "is_hardware": True,
-                "status": "hardware_ok",
-                "error": None
-            }
-            return self.cached_reading
-
-        # 2. Alternatif: Coba baca dari SHT20 RS485 Modbus RTU
+        # 1. Prioritas Utama: Baca dari SHT20 RS485 Modbus RTU (Sensor Industri Terkalibrasi)
         t_sht, h_sht, ok_sht = sht20_sensor.read()
         if ok_sht and t_sht is not None and h_sht is not None:
             self.is_hardware_active = True
@@ -71,6 +56,21 @@ class SensorManager:
                 "temperature": t_sht,
                 "humidity": h_sht,
                 "sensor": "SHT20_RS485",
+                "is_hardware": True,
+                "status": "hardware_ok",
+                "error": None
+            }
+            return self.cached_reading
+
+        # 2. Alternatif: Baca dari DHT11 pada GPIO 23
+        t_dht, h_dht, ok_dht = dht11_driver.read()
+        if ok_dht and t_dht is not None and h_dht is not None:
+            self.is_hardware_active = True
+            self.active_sensor_type = "DHT11_GPIO"
+            self.cached_reading = {
+                "temperature": t_dht,
+                "humidity": h_dht,
+                "sensor": "DHT11_GPIO",
                 "is_hardware": True,
                 "status": "hardware_ok",
                 "error": None

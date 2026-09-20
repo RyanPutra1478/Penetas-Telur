@@ -82,17 +82,11 @@ class SHT20RS485:
                         continue
 
             if self.gpio is None:
-                self.last_error = "GPIO 18 busy atau tidak dapat dibuka"
-                logger.warning("Tidak dapat mengontrol GPIO 18 (mungkin sedang dipakai proses lain).")
-                return
+                logger.info("DE/RE Pin 18 akan dikendalikan via fail-safe pinctrl hardware.")
         except ImportError:
-            self.last_error = "Library lgpio tidak terinstall"
-            logger.warning("Library lgpio belum terpasang.")
-            return
+            logger.info("Library lgpio tidak terpasang, menggunakan pinctrl hardware.")
         except Exception as e:
-            self.last_error = f"Error lgpio: {e}"
-            logger.warning("Gagal setup lgpio: %s", e)
-            return
+            logger.info("Fallback pinctrl untuk DE/RE: %s", e)
 
         # 2. Buka serial port
         try:
@@ -153,9 +147,9 @@ class SHT20RS485:
         Dilengkapi timing presisi half-duplex MAX485.
         Mengembalikan tuple: (temperature, humidity, is_ok)
         """
-        if not self.is_connected or not self.ser or not self.ser.is_open or self.gpio is None:
+        if not self.is_connected or not self.ser or not self.ser.is_open:
             self._init_sensor()
-            if not self.is_connected or not self.ser or self.gpio is None:
+            if not self.is_connected or not self.ser:
                 return None, None, False
 
         try:
