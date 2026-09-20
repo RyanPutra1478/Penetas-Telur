@@ -9,8 +9,8 @@ import logging
 
 logger = logging.getLogger("SHT20Sensor")
 
-# Port serial default di Raspberry Pi user adalah /dev/serial0
-SERIAL_PORT = "/dev/serial0"
+# Port serial terkonfirmasi di hardware Raspberry Pi header Pin 8 & 10 adalah /dev/ttyAMA0
+SERIAL_PORT = "/dev/ttyAMA0"
 BAUDRATE = 9600
 DE_RE_GPIO = 18    # Physical Pin 12 -> DE + RE
 
@@ -30,18 +30,17 @@ REQUEST = MODBUS_COMMANDS[0][1]
 def get_candidate_ports():
     """
     Mengembalikan daftar port serial prioritas.
-    Jika /dev/ttyAMA10 ada (Raspberry Pi 5), prioritaskan ttyAMA10
-    karena pin header 8 & 10 pada Pi 5 adalah ttyAMA10.
+    /dev/ttyAMA0 adalah port terkonfirmasi untuk Pin 8 (TX) & Pin 10 (RX).
     """
     candidates = []
-    if os.path.exists("/dev/ttyAMA10"):
-        candidates.append("/dev/ttyAMA10")
-    if os.path.exists("/dev/serial0"):
-        candidates.append("/dev/serial0")
     if os.path.exists("/dev/ttyAMA0"):
         candidates.append("/dev/ttyAMA0")
+    if os.path.exists("/dev/serial0"):
+        candidates.append("/dev/serial0")
     if os.path.exists("/dev/ttyUSB0"):
         candidates.append("/dev/ttyUSB0")
+    if os.path.exists("/dev/ttyAMA10"):
+        candidates.append("/dev/ttyAMA10")
     if os.path.exists("/dev/ttyS0"):
         candidates.append("/dev/ttyS0")
     return candidates

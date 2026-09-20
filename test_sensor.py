@@ -66,11 +66,13 @@ print("  Pin DE/RE diset ke mode DENGAR / TERIMA (LOW).")
 
 import serial
 
-# 3. Kumpulkan port serial (Prioritas RPi 5: /dev/ttyAMA10)
+# 3. Kumpulkan port serial (Terkonfirmasi aktif: /dev/ttyAMA0)
 CANDIDATE_PORTS = []
-if os.path.exists("/dev/ttyAMA10"):
-    CANDIDATE_PORTS.append("/dev/ttyAMA10")
-for default_p in ["/dev/serial0", "/dev/ttyAMA0", "/dev/ttyUSB0", "/dev/ttyS0"]:
+if os.path.exists("/dev/ttyAMA0"):
+    CANDIDATE_PORTS.append("/dev/ttyAMA0")
+if os.path.exists("/dev/serial0"):
+    CANDIDATE_PORTS.append("/dev/serial0")
+for default_p in ["/dev/ttyUSB0", "/dev/ttyAMA10", "/dev/ttyS0"]:
     if os.path.exists(default_p) and default_p not in CANDIDATE_PORTS:
         CANDIDATE_PORTS.append(default_p)
 
