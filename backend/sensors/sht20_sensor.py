@@ -144,78 +144,83 @@ class SHT20RS485:
         try:
             import lgpio
 
-            cmd_name, cmd_bytes = MODBUS_COMMANDS[self.active_cmd_index]
+        cmd_name, cmd_bytes = MODBUS_COMMANDS[self.active_cmd_index]
 
-            self.ser.reset_input_buffer()
-            self.ser.reset_output_buffer()
-
-            # 1. MODE TRANSMIT (HIGH)
-            if self.gpio is not None:
-                try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
-                except Exception: pass
-            else:
-                try: subprocess.run(["pinctrl", "set", "18", "op", "dh"], stderr=subprocess.DEVNULL)
-                except Exception: pass
-            time.sleep(0.002)
-
-            # Kirim request Modbus
-            self.ser.write(cmd_bytes)
-            self.ser.flush()
-
-            # 2. KEMBALI KE MODE RECEIVE (LOW) SECARA INSTAN
-            if self.gpio is not None:
-                try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
-                except Exception: pass
-            else:
-                try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
-                except Exception: pass
-
-            # 3. BACA RESPONSE
-            response = self.ser.read(9)
-
-            if len(response) < 8:
-                self.consecutive_fails += 1
-                self.last_error = f"Respon kurang dari 8 bytes (diterima: {len(response)} byte pada {self.port})"
-                if self.consecutive_fails >= 4:
-                    self._switch_port_or_cmd()
-                    self.consecutive_fails = 0
-                return None, None, False
-
-            # Format 1: Normal 9 bytes (01 04 04 T_H T_L H_H H_L CRC_L CRC_H)
-            if len(response) >= 9 and response[0] == 1 and (response[1] in (3, 4)):
-                raw_t = int.from_bytes(response[3:5], byteorder="big", signed=True)
-                raw_h = int.from_bytes(response[5:7], byteorder="big", signed=False)
-            # Format 2: Toleransi 8 bytes jika Slave ID terpotong transisi bus (04 04 T_H T_L H_H H_L CRC_L CRC_H)
-            elif len(response) >= 8 and (response[0] in (3, 4)) and response[1] == 4:
-                raw_t = int.from_bytes(response[2:4], byteorder="big", signed=True)
-                raw_h = int.from_bytes(response[4:6], byteorder="big", signed=False)
-            else:
-                self.last_error = f"Format respon tidak dikenali: {response.hex().upper()}"
-                self.consecutive_fails += 1
-                return None, None, False
-
-            temperature = round(raw_t / 10.0, 1)
-            humidity = round(raw_h / 10.0, 1)
-
-            self.last_temp = temperature
-            self.last_hum = humidity
-            self.last_success_time = time.time()
-            self.last_error = None
-            self.consecutive_fails = 0
-            logger.info("[SHT20 HARDWARE REAL] Suhu: %.1f °C | Kelembaban: %.1f %%RH (via %s)", temperature, humidity, self.port)
-
-            return temperature, humidity, True
-
-        except Exception as e:
-            self.last_error = f"Exception saat read: {e}"
-            logger.debug("Exception baca SHT20: %s", e)
+        for attempt in range(2):
             try:
-                import lgpio
+                self.ser.reset_input_buffer()
+                self.ser.reset_output_buffer()
+
+                # 1. MODE TRANSMIT (HIGH)
                 if self.gpio is not None:
-                    lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
-            except Exception:
-                pass
-            return None, None, False
+                    try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 1)
+                    except Exception: pass
+                else:
+                    try: subprocess.run(["pinctrl", "set", "18", "op", "dh"], stderr=subprocess.DEVNULL)
+                    except Exception: pass
+                time.sleep(0.001)
+
+                # Kirim request Modbus
+                self.ser.write(cmd_bytes)
+                self.ser.flush()
+
+                # 2. KEMBALI KE MODE RECEIVE (LOW) SECARA INSTAN
+                if self.gpio is not None:
+                    try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
+                    except Exception: pass
+                else:
+                    try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
+                    except Exception: pass
+
+                # 3. BACA RESPONSE DENGAN BUFFER SEARCHING
+                time.sleep(0.025)
+                available = self.ser.in_waiting
+                response = self.ser.read(max(available, 9))
+
+                if len(response) >= 8:
+                    # Cari header Modbus yang valid di dalam stream byte
+                    idx = -1
+                    is_full_frame = False
+                    for i in range(len(response) - 7):
+                        if response[i] == 1 and response[i+1] in (3, 4) and response[i+2] == 4 and (i + 9 <= len(response)):
+                            idx = i
+                            is_full_frame = True
+                            break
+                        elif response[i] in (3, 4) and response[i+1] == 4 and (i + 8 <= len(response)):
+                            idx = i
+                            is_full_frame = False
+                            break
+
+                    if idx != -1:
+                        if is_full_frame:
+                            raw_t = int.from_bytes(response[idx+3:idx+5], byteorder="big", signed=True)
+                            raw_h = int.from_bytes(response[idx+5:idx+7], byteorder="big", signed=False)
+                        else:
+                            raw_t = int.from_bytes(response[idx+2:idx+4], byteorder="big", signed=True)
+                            raw_h = int.from_bytes(response[idx+4:idx+6], byteorder="big", signed=False)
+
+                        temperature = round(raw_t / 10.0, 1)
+                        humidity = round(raw_h / 10.0, 1)
+
+                        if 0.0 <= temperature <= 80.0 and 0.0 <= humidity <= 100.0:
+                            self.last_temp = temperature
+                            self.last_hum = humidity
+                            self.last_success_time = time.time()
+                            self.last_error = None
+                            self.consecutive_fails = 0
+                            return temperature, humidity, True
+
+                # Jika attempt pertama gagal, tunggu sejenak sebelum retry
+                if attempt == 0:
+                    time.sleep(0.03)
+
+            except Exception as e:
+                self.last_error = f"Exception saat read (attempt {attempt+1}): {e}"
+                if attempt == 0:
+                    time.sleep(0.03)
+
+        self.consecutive_fails += 1
+        return None, None, False
 
     def close(self):
         try:

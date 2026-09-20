@@ -62,6 +62,12 @@ class SensorManager:
             }
             return self.cached_reading
 
+        # 1b. GRACE PERIOD (Tahan Nilai Terakhir Hardware):
+        # Jika hardware SHT20 pernah berhasil dalam 15 detik terakhir, JANGAN langsung jatuh ke simulasi!
+        # Tahan nilai terakhir agar HMI tetap stabil dan tidak melompat-lompat ke 37°C
+        if self.is_hardware_active and (now - sht20_sensor.last_success_time) < 15.0:
+            return self.cached_reading
+
         # 2. Alternatif: Baca dari DHT11 pada GPIO 23
         t_dht, h_dht, ok_dht = dht11_driver.read()
         if ok_dht and t_dht is not None and h_dht is not None:
@@ -77,7 +83,7 @@ class SensorManager:
             }
             return self.cached_reading
 
-        # 3. Fallback: Simulasi Dinamis Fisik Inkubator
+        # 3. Fallback: Simulasi Dinamis Fisik Inkubator (Hanya jika hardware benar-benar mati > 15 detik)
         self.is_hardware_active = False
         self.active_sensor_type = "simulated"
 
