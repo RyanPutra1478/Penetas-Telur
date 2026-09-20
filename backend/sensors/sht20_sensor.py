@@ -173,8 +173,8 @@ class SHT20RS485:
                 try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
                 except Exception: pass
 
-            # 3. BACA RESPONSE (hingga 16 Bytes)
-            response = self.ser.read(16)
+            # 3. BACA RESPONSE (9 Bytes, kembali instan begitu 9 bytes tiba)
+            response = self.ser.read(9)
 
             if len(response) < 9:
                 self.consecutive_fails += 1

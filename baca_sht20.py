@@ -100,8 +100,8 @@ def main():
             # 4. Masuk mode TERIMA (RX)
             set_dere(0)
 
-            # 5. Baca respon (sampai 16 bytes)
-            resp = ser.read(16)
+            # 5. Baca respon 9 bytes (Langsung return seketika 9 bytes tiba tanpa nunggu timeout)
+            resp = ser.read(9)
 
             if len(resp) == 9 and resp[0] == 1 and resp[1] == 4:
                 raw_t = int.from_bytes(resp[3:5], "big", signed=True)
