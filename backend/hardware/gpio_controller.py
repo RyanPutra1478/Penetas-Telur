@@ -65,11 +65,11 @@ class GPIOController:
         elif name == 'humidifier':
             return self.set_actuator('mist_maker', b_state)
         elif name in ('motor', 'aux'):
-            # Jika memicu motor lama, arahkan ke hidrolik
+            # Mengaktifkan/mematikan osilasi bolak-balik penggerak rak hidrolik
             if b_state:
-                hydraulic_controller.move_up()
+                hydraulic_controller.start_oscillation()
             else:
-                hydraulic_controller.stop()
+                hydraulic_controller.stop_oscillation()
             return b_state
 
         if name not in PIN_CONFIG:
@@ -97,7 +97,7 @@ class GPIOController:
         elif name == 'humidifier':
             return self.states.get('mist_maker', False)
         elif name in ('motor', 'aux'):
-            return hydraulic_controller.state in ("UP", "DOWN")
+            return hydraulic_controller.is_oscillating
         return self.states.get(name, False)
 
     def get_all_actuators(self) -> dict:
@@ -106,7 +106,7 @@ class GPIOController:
         # Tambahkan alias kemudahan integrasi UI
         res['heater'] = res.get('lamp_1', False) or res.get('lamp_2', False)
         res['humidifier'] = res.get('mist_maker', False)
-        res['motor'] = hydraulic_controller.state in ("UP", "DOWN")
+        res['motor'] = hydraulic_controller.is_oscillating
         return res
 
     def emergency_stop(self) -> dict:
