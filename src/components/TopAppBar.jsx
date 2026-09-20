@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { getWifiStatus } from '../api/tetascoApi';
+import { getWifiStatus, getCloudStatus } from '../api/tetascoApi';
 import WifiModal from './WifiModal';
+import CloudModal from './CloudModal';
 
 const TopAppBar = () => {
   const [wifiModalOpen, setWifiModalOpen] = useState(false);
+  const [cloudModalOpen, setCloudModalOpen] = useState(false);
   const [wifiStatus, setWifiStatus] = useState({ connected: true, ssid: null });
+  const [cloudStatus, setCloudStatus] = useState({ is_online: false, mode: 'offline', cloud_url: 'https://tetasco.my.id' });
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
 
-  // Ambil status Wi-Fi saat komponen dimuat
+  // Ambil status Wi-Fi dan Cloud saat komponen dimuat
   useEffect(() => {
     let isMounted = true;
-    const checkWifi = async () => {
-      const status = await getWifiStatus();
-      if (isMounted && status) {
-        setWifiStatus(status);
+    const checkNetworkAndCloud = async () => {
+      try {
+        const [wStatus, cStatus] = await Promise.all([
+          getWifiStatus(),
+          getCloudStatus(),
+        ]);
+        if (isMounted) {
+          if (wStatus) setWifiStatus(wStatus);
+          if (cStatus) setCloudStatus(cStatus);
+        }
+      } catch (e) {
+        // Safe failover
       }
     };
 
-    checkWifi();
-    const interval = setInterval(checkWifi, 10000); // Poll status setiap 10 detik
+    checkNetworkAndCloud();
+    const interval = setInterval(checkNetworkAndCloud, 8000); // Poll status setiap 8 detik
 
     // Event listener untuk update status fullscreen saat berubah
     const handleFullscreenChange = () => {
@@ -83,8 +94,41 @@ const TopAppBar = () => {
           </div>
         </div>
 
-        {/* Action Buttons: Network & Tombol Maximize/Minimize */}
+        {/* Action Buttons: Network, Cloud Sync, & Tombol Maximize/Minimize */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Tombol Dual-Mode Cloud Sync (Online / Offline) */}
+          <button
+            onClick={() => setCloudModalOpen(true)}
+            title="Status Cloud Sync (tetasco.my.id) — Klik untuk detail & pengaturan"
+            style={{
+              height: 36,
+              padding: '0 13px',
+              borderRadius: 999,
+              border: cloudStatus.is_online ? '1.5px solid #A7F3D0' : '1.5px solid #E2E8F0',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: cloudStatus.is_online ? '#ECFDF5' : '#F8FAFC',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: cloudStatus.is_online ? '0 0 0 1.5px rgba(16,185,129,0.2)' : 'none',
+            }}
+          >
+            <span className="material-symbols-rounded" style={{
+              fontSize: 18,
+              color: cloudStatus.is_online ? '#059669' : '#94A3B8',
+              transition: 'color 0.2s',
+            }}>
+              {cloudStatus.is_online ? 'cloud_done' : 'cloud_off'}
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 900, letterSpacing: '0.05em',
+              color: cloudStatus.is_online ? '#065F46' : '#64748B',
+              fontFamily: "'JetBrains Mono', monospace",
+              textTransform: 'uppercase',
+            }}>
+              {cloudStatus.is_online ? 'ONLINE' : 'OFFLINE'}
+            </span>
+          </button>
+
           {/* Tombol Network / Wi-Fi Service */}
           <button
             onClick={() => setWifiModalOpen(true)}
@@ -166,6 +210,16 @@ const TopAppBar = () => {
         onClose={() => setWifiModalOpen(false)}
         onStatusChange={(isConnected) => {
           setWifiStatus(prev => ({ ...prev, connected: isConnected }));
+        }}
+      />
+
+      {/* Popup Layanan Cloud Sync & Dual-Mode */}
+      <CloudModal
+        isOpen={cloudModalOpen}
+        onClose={() => setCloudModalOpen(false)}
+        cloudStatus={cloudStatus}
+        onRefresh={() => {
+          getCloudStatus().then(st => st && setCloudStatus(st));
         }}
       />
     </>

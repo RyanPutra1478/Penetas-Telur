@@ -273,3 +273,48 @@ export async function disconnectWifi() {
   }
 }
 
+/**
+ * Mendapatkan status Cloud Sync (Dual-Mode: Online/Offline)
+ */
+export async function getCloudStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/cloud/status`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { is_online: false, mode: 'offline', cloud_url: 'https://tetasco.my.id', last_sync_status: 'Offline (Lokal)' };
+  }
+}
+
+/**
+ * Memicu sinkronisasi cloud manual seketika
+ */
+export async function triggerCloudSync() {
+  try {
+    const res = await fetch(`${API_BASE}/cloud/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await res.json();
+  } catch (err) {
+    return { is_online: false, mode: 'offline', last_error: err.message };
+  }
+}
+
+/**
+ * Memperbarui konfigurasi cloud (ID perangkat, interval)
+ */
+export async function setCloudConfig(config) {
+  try {
+    const res = await fetch(`${API_BASE}/cloud/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
+
+

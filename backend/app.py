@@ -10,6 +10,7 @@ from flask_cors import CORS
 from hardware.gpio_controller import gpio_controller
 from hardware.hydraulic_controller import hydraulic_controller
 from hardware.wifi_manager import wifi_manager
+from hardware.cloud_sync import cloud_sync
 from sensors.dht_sensor import sensor_manager
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
@@ -111,9 +112,11 @@ def get_health():
     return jsonify({
         "status": "ok",
         "app": "Tetasco Connect Backend",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "simulated": gpio_controller.is_simulated,
         "sensor_mode": "hardware" if sensor_manager.is_hardware_active else "simulated",
+        "cloud_mode": cloud_sync.mode,
+        "cloud_online": cloud_sync.is_online,
         "uptime": round(time.time() - start_time, 1)
     })
 
@@ -334,6 +337,28 @@ def exit_kiosk_system():
         return jsonify({"error": str(e)}), 500
 
 # -------------------------------------------------------------
+# Cloud Sync & Dual-Mode Endpoints (tetasco.my.id)
+# -------------------------------------------------------------
+
+@app.route('/api/cloud/status', methods=['GET'])
+def get_cloud_status():
+    """Mendapatkan status koneksi cloud, mode saat ini, dan status sinkronisasi"""
+    return jsonify(cloud_sync.get_status())
+
+@app.route('/api/cloud/sync', methods=['POST'])
+def trigger_cloud_sync():
+    """Memicu sinkronisasi manual ke server cloud seketika"""
+    res = cloud_sync.sync_now()
+    return jsonify(res)
+
+@app.route('/api/cloud/config', methods=['POST'])
+def set_cloud_config():
+    """Memperbarui konfigurasi sinkronisasi cloud"""
+    data = request.get_json(silent=True) or {}
+    res = cloud_sync.update_config(data)
+    return jsonify(res)
+
+# -------------------------------------------------------------
 # Wi-Fi & Network Endpoints
 # -------------------------------------------------------------
 
@@ -390,6 +415,7 @@ def serve_frontend(path):
 def handle_exit(signum, frame):
     logger.info("Sinyal penghentian diterima (%s). Mematikan sistem...", signum)
     stop_event.set()
+    cloud_sync.stop()
     gpio_controller.cleanup()
     sys.exit(0)
 
@@ -398,14 +424,18 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
 
-    # Jalankan loop kontrol cerdas di background
+    # 1. Jalankan loop kontrol cerdas di background
     control_thread = threading.Thread(target=smart_control_loop, daemon=True)
     control_thread.start()
+
+    # 2. Jalankan background worker sinkronisasi cloud tetasco.my.id (Dual-Mode)
+    cloud_sync.start(sensor_manager, gpio_controller)
 
     logger.info("==================================================")
     logger.info("🥚 TETASCO CONNECT — BACKEND GPIO & SENSOR SERVER")
     logger.info("Port: 5001 | Host: 0.0.0.0 (Localhost & Network)")
     logger.info("Akses HMI lokal: http://127.0.0.1:5001")
+    logger.info("Cloud Base URL : %s (Unit ID: %d)", cloud_sync.config.get('cloud_base_url'), cloud_sync.config.get('tetasco_id'))
     logger.info("==================================================")
 
     # Jalankan Flask Server di port 5001
