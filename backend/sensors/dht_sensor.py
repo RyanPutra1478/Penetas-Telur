@@ -6,13 +6,13 @@ from .dht11_driver import dht11_driver, DHT_PIN
 
 logger = logging.getLogger("SensorManager")
 
-# Pin default DHT sensor (GPIO 6 / Pin Fisik 31)
+# Pin default DHT sensor (GPIO 23 / Pin Fisik 16)
 DEFAULT_DHT_PIN = DHT_PIN
 
 class SensorManager:
     """
     Manager sensor Suhu & Kelembaban multi-protokol:
-    1. DHT11 GPIO 6 (Pin Fisik 31) - Prioritas Utama Saat Ini Sesuai Permintaan User
+    1. DHT11 GPIO 23 (Pin Fisik 16) - Prioritas Utama Saat Ini Sesuai Permintaan User
     2. SHT20 RS485 Modbus RTU (Alternatif Industri)
     3. Simulasi Fisik Dinamis Real-Time (Fallback Otomatis jika hardware belum terhubung)
     """

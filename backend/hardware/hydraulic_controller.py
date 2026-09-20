@@ -15,7 +15,7 @@ PIN_HYDRAULIC_DOWN = int(os.getenv("PIN_HYDRAULIC_DOWN", 19)) # Output DOWN (tur
 
 # Input GPIO membaca feedback Limit Switch (Hardware Angle Sensor)
 PIN_LIMIT_MAX      = int(os.getenv("PIN_LIMIT_MAX", 5))       # Feedback Limit MAX (Batas Atas / Max Angle)
-PIN_LIMIT_MIN      = int(os.getenv("PIN_LIMIT_MIN", 23))      # Feedback Limit MIN (Batas Bawah / Min Angle)
+PIN_LIMIT_MIN      = int(os.getenv("PIN_LIMIT_MIN", 6))       # Feedback Limit MIN (Batas Bawah / Min Angle)
 
 # Logika Polaritas Aktif
 OUTPUT_ACTIVE_HIGH = True  # True: HIGH = Nyala, False: LOW = Nyala (Relay Active-LOW)

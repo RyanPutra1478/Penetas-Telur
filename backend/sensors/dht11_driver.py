@@ -6,7 +6,7 @@ import subprocess
 
 logger = logging.getLogger("DHT11Driver")
 
-DHT_PIN = 6  # GPIO 6 (Pin Fisik 31)
+DHT_PIN = 23  # GPIO 23 (Pin Fisik 16)
 
 def ensure_kernel_overlay():
     """Mencoba memuat kernel driver dtoverlay dht11 jika belum aktif"""

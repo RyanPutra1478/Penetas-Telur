@@ -12,11 +12,11 @@ import glob
 import subprocess
 
 print("==========================================================")
-print("🌡️  TETASCO CONNECT — DIAGNOSTIK & PEMBACA DHT11 (GPIO 6)")
+print("🌡️  TETASCO CONNECT — DIAGNOSTIK & PEMBACA DHT11 (GPIO 23)")
 print("==========================================================")
-print("Pin DATA       : GPIO 6 (Pin Fisik 31)")
+print("Pin DATA       : GPIO 23 (Pin Fisik 16)")
 print("Pin VCC        : 3.3V atau 5V (Pin Fisik 1 atau 2/4)")
-print("Pin GND        : Ground (Pin Fisik 6, 9, 30, atau 39)")
+print("Pin GND        : Ground (Pin Fisik 6, 9, 14, 20, 25, 30, atau 39)")
 print("==========================================================")
 
 # 1. Cek & Aktifkan Kernel Driver (Cara paling akurat di Raspberry Pi)
@@ -35,9 +35,9 @@ for dev in glob.glob("/sys/bus/iio/devices/iio:device*"):
             pass
 
 if not has_iio:
-    print("  -> Mencoba memuat driver kernel: sudo dtoverlay dht11 gpiopin=6")
+    print("  -> Mencoba memuat driver kernel: sudo dtoverlay dht11 gpiopin=23")
     try:
-        res = subprocess.run(["sudo", "dtoverlay", "dht11", "gpiopin=6"], capture_output=True, text=True)
+        res = subprocess.run(["sudo", "dtoverlay", "dht11", "gpiopin=23"], capture_output=True, text=True)
         time.sleep(0.8)
         for dev in glob.glob("/sys/bus/iio/devices/iio:device*"):
             name_file = os.path.join(dev, "name")
@@ -50,20 +50,20 @@ if not has_iio:
     except Exception as e:
         print(f"  Gagal memuat overlay: {e}")
 
-# 2. Cek Tegangan Pin GPIO 6 saat Idle
-print("\n[2] Memeriksa tegangan listrik pin GPIO 6 saat diam (Idle):")
+# 2. Cek Tegangan Pin GPIO 23 saat Idle
+print("\n[2] Memeriksa tegangan listrik pin GPIO 23 saat diam (Idle):")
 try:
-    pctrl = subprocess.check_output("pinctrl get 6 2>/dev/null || raspi-gpio get 6 2>/dev/null", shell=True, text=True).strip()
-    print(f"  Status Pin 6: {pctrl}")
+    pctrl = subprocess.check_output("pinctrl get 23 2>/dev/null || raspi-gpio get 23 2>/dev/null", shell=True, text=True).strip()
+    print(f"  Status Pin 23: {pctrl}")
     if "lo" in pctrl.lower() and "hi" not in pctrl.lower():
-        print("  ⚠️ PERINGATAN: Pin 6 bertegangan LOW (0V) saat diam!")
+        print("  ⚠️ PERINGATAN: Pin 23 bertegangan LOW (0V) saat diam!")
         print("     Kabel DATA harus bertegangan HIGH (3.3V/5V) saat tidak mengirim data.")
         print("     Kemungkinan:")
         print("     a. Pin VCC dan DATA tertukar pada modul DHT11.")
         print("     b. Modul DHT11 belum mendapatkan kabel VCC/Ground.")
         print("     c. Modul butuh resistor pull-up 4.7k-10k ohm antara VCC dan DATA.")
     else:
-        print("  ✅ Pin 6 bertegangan HIGH (Pull-up normal).")
+        print("  ✅ Pin 23 bertegangan HIGH (Pull-up normal).")
 except Exception:
     print("  (Tidak dapat mengecek pinctrl)")
 
