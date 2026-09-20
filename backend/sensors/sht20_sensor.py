@@ -162,10 +162,7 @@ class SHT20RS485:
             self.ser.write(cmd_bytes)
             self.ser.flush()
 
-            # TAHAN TRANSMIT: Sisa bit stop terakhir (~1.5ms)
-            time.sleep(15.0 / BAUDRATE)
-
-            # 2. KEMBALI KE MODE RECEIVE (LOW)
+            # 2. KEMBALI KE MODE RECEIVE (LOW) SECARA INSTAN
             if self.gpio is not None:
                 try: lgpio.gpio_write(self.gpio, DE_RE_GPIO, 0)
                 except Exception: pass
@@ -173,37 +170,32 @@ class SHT20RS485:
                 try: subprocess.run(["pinctrl", "set", "18", "op", "dl"], stderr=subprocess.DEVNULL)
                 except Exception: pass
 
-            # 3. BACA RESPONSE (9 Bytes, kembali instan begitu 9 bytes tiba)
+            # 3. BACA RESPONSE
             response = self.ser.read(9)
 
-            if len(response) < 9:
+            if len(response) < 8:
                 self.consecutive_fails += 1
-                self.last_error = f"Respon kurang dari 9 bytes (diterima: {len(response)} byte pada {self.port})"
-                
-                # Jika sudah 4x gagal beruntun, coba port/command alternatif
+                self.last_error = f"Respon kurang dari 8 bytes (diterima: {len(response)} byte pada {self.port})"
                 if self.consecutive_fails >= 4:
                     self._switch_port_or_cmd()
                     self.consecutive_fails = 0
-
                 return None, None, False
 
-            slave_id = response[0]
-            function_code = response[1]
-            byte_count = response[2]
-
-            # Validasi respon Modbus (Slave 1, Function 3 atau 4, byte count 4)
-            if slave_id != 1 or (function_code not in (3, 4)) or byte_count != 4:
-                self.last_error = f"Validasi gagal: ID={slave_id}, Func={function_code}, Count={byte_count}"
+            # Format 1: Normal 9 bytes (01 04 04 T_H T_L H_H H_L CRC_L CRC_H)
+            if len(response) >= 9 and response[0] == 1 and (response[1] in (3, 4)):
+                raw_t = int.from_bytes(response[3:5], byteorder="big", signed=True)
+                raw_h = int.from_bytes(response[5:7], byteorder="big", signed=False)
+            # Format 2: Toleransi 8 bytes jika Slave ID terpotong transisi bus (04 04 T_H T_L H_H H_L CRC_L CRC_H)
+            elif len(response) >= 8 and (response[0] in (3, 4)) and response[1] == 4:
+                raw_t = int.from_bytes(response[2:4], byteorder="big", signed=True)
+                raw_h = int.from_bytes(response[4:6], byteorder="big", signed=False)
+            else:
+                self.last_error = f"Format respon tidak dikenali: {response.hex().upper()}"
                 self.consecutive_fails += 1
                 return None, None, False
 
-            # Suhu: signed 16-bit
-            temperature_raw = int.from_bytes(response[3:5], byteorder="big", signed=True)
-            temperature = round(temperature_raw / 10.0, 1)
-
-            # Kelembaban: unsigned 16-bit
-            humidity_raw = int.from_bytes(response[5:7], byteorder="big", signed=False)
-            humidity = round(humidity_raw / 10.0, 1)
+            temperature = round(raw_t / 10.0, 1)
+            humidity = round(raw_h / 10.0, 1)
 
             self.last_temp = temperature
             self.last_hum = humidity

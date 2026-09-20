@@ -88,31 +88,34 @@ def main():
 
             # 1. Masuk mode KIRIM (TX)
             set_dere(1)
-            time.sleep(0.002)
+            time.sleep(0.001)
 
             # 2. Kirim request Modbus
             ser.write(REQ_CMD)
             ser.flush()
 
-            # 3. Tahan sejenak untuk bit stop terakhir (~1.5ms) lalu langsung dengar
-            time.sleep(15.0 / BAUDRATE)
-
-            # 4. Masuk mode TERIMA (RX)
+            # 3. Langsung masuk mode TERIMA (RX) tanpa delay agar byte pertama tidak kepotong
             set_dere(0)
 
-            # 5. Baca respon 9 bytes (Langsung return seketika 9 bytes tiba tanpa nunggu timeout)
+            # 4. Baca respon (timeout 0.3s)
             resp = ser.read(9)
 
+            # Validasi respon: normal 9 bytes (01 04 04 ...) atau 8 bytes jika ID 01 terpotong sedikit (04 04 ...)
             if len(resp) == 9 and resp[0] == 1 and resp[1] == 4:
                 raw_t = int.from_bytes(resp[3:5], "big", signed=True)
                 raw_h = int.from_bytes(resp[5:7], "big", signed=False)
                 temp = raw_t / 10.0
                 hum = raw_h / 10.0
                 success_count += 1
-
-                # Visual status bar
-                bar_t = "█" * int(min(temp, 45) / 3)
                 print(f"[{t_now} | #{count:03d}]  🌡️  Suhu: {temp:5.1f} °C  |  💧 Kelembaban: {hum:5.1f} % RH   [OK #{success_count}]")
+            elif len(resp) == 8 and resp[0] == 4 and resp[1] == 4:
+                # Toleransi jika byte 01 terpotong timing: 04 04 T_H T_L H_H H_L CRC CRC
+                raw_t = int.from_bytes(resp[2:4], "big", signed=True)
+                raw_h = int.from_bytes(resp[4:6], "big", signed=False)
+                temp = raw_t / 10.0
+                hum = raw_h / 10.0
+                success_count += 1
+                print(f"[{t_now} | #{count:03d}]  🌡️  Suhu: {temp:5.1f} °C  |  💧 Kelembaban: {hum:5.1f} % RH   [OK #{success_count} (Auto-sync)]")
             elif len(resp) > 0:
                 print(f"[{t_now} | #{count:03d}]  ⚠️ Data parsial: {len(resp)} byte ({resp.hex().upper()})")
             else:

@@ -118,6 +118,7 @@ def get_health():
     })
 
 @app.route('/api/sensor', methods=['GET'])
+@app.route('/api/sensors', methods=['GET'])
 def get_sensor():
     """Mendapatkan data telemetri suhu & kelembaban real-time"""
     acts = gpio_controller.get_all_actuators()
