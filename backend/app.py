@@ -168,9 +168,19 @@ def get_actuators():
     resp["success"] = True
     resp["actuators"] = {
         "heater": acts.get("heater", False) or acts.get("lamp_1", False) or acts.get("lamp_2", False),
+        "heater_1": acts.get("lamp_1", False),
+        "heater_2": acts.get("lamp_2", False),
+        "lamp_1": acts.get("lamp_1", False),
+        "lamp_2": acts.get("lamp_2", False),
+        "lamp1": acts.get("lamp_1", False),
+        "lamp2": acts.get("lamp_2", False),
         "fan": acts.get("fan", False),
         "humidifier": acts.get("humidifier", False) or acts.get("mist_maker", False),
-        "aux": acts.get("motor", False) or acts.get("uv_light", False)
+        "mist_maker": acts.get("mist_maker", False),
+        "aux": acts.get("motor", False) or acts.get("uv_light", False),
+        "motor": acts.get("motor", False),
+        "uv": acts.get("uv_light", False),
+        "uv_light": acts.get("uv_light", False),
     }
     return jsonify(resp)
 
@@ -201,24 +211,44 @@ def set_actuator(name):
 def handle_fan_action(action):
     st = action.lower() in ("on", "1", "true")
     new_state = gpio_controller.set_actuator("fan", st)
+    cloud_sync.push_device_state("fan", new_state)
     return jsonify({'success': True, 'message': f'Fan {action.upper()}', 'fan': new_state})
 
 @app.route('/api/relay/<action>', methods=['POST'])
 def handle_relay_action(action):
     st = action.lower() in ("on", "1", "true")
     new_state = gpio_controller.set_actuator("lamp_1", st)
-    return jsonify({'success': True, 'message': f'Heater {action.upper()}', 'heater': new_state})
+    cloud_sync.push_device_state("heater_1", new_state)
+    return jsonify({'success': True, 'message': f'Heater 1 {action.upper()}', 'heater': new_state, 'heater_1': new_state})
+
+@app.route('/api/heater-2/<action>', methods=['POST'])
+@app.route('/api/heater_2/<action>', methods=['POST'])
+def handle_heater2_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("lamp_2", st)
+    cloud_sync.push_device_state("heater_2", new_state)
+    return jsonify({'success': True, 'message': f'Heater 2 {action.upper()}', 'heater_2': new_state})
+
+@app.route('/api/uv/<action>', methods=['POST'])
+@app.route('/api/uv_light/<action>', methods=['POST'])
+def handle_uv_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("uv_light", st)
+    cloud_sync.push_device_state("uv", new_state)
+    return jsonify({'success': True, 'message': f'UV Light {action.upper()}', 'uv': new_state})
 
 @app.route('/api/humidifier/<action>', methods=['POST'])
 def handle_humidifier_action(action):
     st = action.lower() in ("on", "1", "true")
     new_state = gpio_controller.set_actuator("mist_maker", st)
+    cloud_sync.push_device_state("humidifier", new_state)
     return jsonify({'success': True, 'message': f'Humidifier {action.upper()}', 'humidifier': new_state})
 
 @app.route('/api/motor/<action>', methods=['POST'])
 def handle_motor_action(action):
     st = action.lower() in ("on", "1", "true")
     new_state = gpio_controller.set_actuator("motor", st)
+    cloud_sync.push_device_state("motor", new_state)
     return jsonify({'success': True, 'message': f'Motor {action.upper()}', 'motor': new_state})
 
 @app.route('/api/emergency-stop', methods=['POST'])
@@ -227,7 +257,7 @@ def emergency_stop():
     control_state["auto"] = False
     states = gpio_controller.emergency_stop()
     # Beritahu cloud server semua perangkat mati
-    for dev in ["fan", "heater", "humidifier", "motor"]:
+    for dev in ["fan", "heater", "heater_1", "heater_2", "humidifier", "motor", "uv"]:
         cloud_sync.push_device_state(dev, False)
     return jsonify({
         "message": "Seluruh aktuator dimatikan (Emergency Stop)",

@@ -177,13 +177,19 @@ class CloudSyncManager:
         # Mapping nama aktuator lokal ke endpoint perangkat di cloud server
         mapping = {
             "fan": f"/api/tetasco/{tetasco_id}/devices/fan/{action}",
-            "heater": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "heater": f"/api/tetasco/{tetasco_id}/devices/heater/{action}",
             "lamp_1": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
             "heater_1": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "lamp1": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "lamp_2": f"/api/tetasco/{tetasco_id}/devices/heater-2/{action}",
+            "heater_2": f"/api/tetasco/{tetasco_id}/devices/heater-2/{action}",
+            "lamp2": f"/api/tetasco/{tetasco_id}/devices/heater-2/{action}",
             "humidifier": f"/api/tetasco/{tetasco_id}/devices/humidifier/{action}",
             "mist_maker": f"/api/tetasco/{tetasco_id}/devices/humidifier/{action}",
             "motor": f"/api/tetasco/{tetasco_id}/devices/motor/{action}",
             "aux": f"/api/tetasco/{tetasco_id}/devices/motor/{action}",
+            "uv": f"/api/tetasco/{tetasco_id}/devices/uv/{action}",
+            "uv_light": f"/api/tetasco/{tetasco_id}/devices/uv/{action}",
         }
 
         endpoint = mapping.get(device_name)
@@ -267,8 +273,16 @@ class CloudSyncManager:
                                 self.gpio_controller.set_actuator("fan", devs["fan"])
                             if "heater_1" in devs:
                                 self.gpio_controller.set_actuator("lamp_1", devs["heater_1"])
+                            if "heater_2" in devs:
+                                self.gpio_controller.set_actuator("lamp_2", devs["heater_2"])
                             if "humidifier" in devs:
                                 self.gpio_controller.set_actuator("mist_maker", devs["humidifier"])
+                            if "uv" in devs:
+                                self.gpio_controller.set_actuator("uv_light", devs["uv"])
+                            elif "uv_light" in devs:
+                                self.gpio_controller.set_actuator("uv_light", devs["uv_light"])
+                            if "motor" in devs:
+                                self.gpio_controller.set_actuator("motor", devs["motor"])
                 else:
                     if self.is_online:
                         logger.info("⚪ [KONEKSI TERPUTUS] Tidak ada internet/Wi-Fi. Otomatis beralih ke MODE OFFLINE (Lokal Mandiri).")

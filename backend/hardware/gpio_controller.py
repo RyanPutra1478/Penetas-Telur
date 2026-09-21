@@ -69,12 +69,18 @@ class GPIOController:
         """Mengatur status on/off sebuah aktuator relay"""
         b_state = bool(state)
 
-        # Dukungan alias backward compatibility
-        if name == 'heater':
+        # Dukungan alias backward compatibility & cross-platform naming
+        if name in ('heater', 'all_heaters'):
             self.set_actuator('lamp_1', b_state)
             self.set_actuator('lamp_2', b_state)
             return b_state
-        elif name == 'humidifier':
+        elif name in ('heater_1', 'heater1', 'lamp1'):
+            return self.set_actuator('lamp_1', b_state)
+        elif name in ('heater_2', 'heater2', 'lamp2'):
+            return self.set_actuator('lamp_2', b_state)
+        elif name in ('uv', 'lamp_uv'):
+            return self.set_actuator('uv_light', b_state)
+        elif name in ('humidifier', 'mist'):
             return self.set_actuator('mist_maker', b_state)
         elif name in ('motor', 'aux'):
             # Mengaktifkan/mematikan osilasi bolak-balik penggerak rak hidrolik
@@ -104,9 +110,15 @@ class GPIOController:
 
     def get_actuator(self, name: str) -> bool:
         """Mendapatkan status terkini sebuah aktuator"""
-        if name == 'heater':
+        if name in ('heater', 'all_heaters'):
             return self.states.get('lamp_1', False) or self.states.get('lamp_2', False)
-        elif name == 'humidifier':
+        elif name in ('heater_1', 'heater1', 'lamp1'):
+            return self.states.get('lamp_1', False)
+        elif name in ('heater_2', 'heater2', 'lamp2'):
+            return self.states.get('lamp_2', False)
+        elif name in ('uv', 'lamp_uv'):
+            return self.states.get('uv_light', False)
+        elif name in ('humidifier', 'mist'):
             return self.states.get('mist_maker', False)
         elif name in ('motor', 'aux'):
             return hydraulic_controller.is_oscillating
@@ -115,10 +127,16 @@ class GPIOController:
     def get_all_actuators(self) -> dict:
         """Mendapatkan status seluruh aktuator (termasuk alias untuk UI)"""
         res = dict(self.states)
-        # Tambahkan alias kemudahan integrasi UI
+        # Tambahkan alias kemudahan integrasi UI & Cloud Device Sync
         res['heater'] = res.get('lamp_1', False) or res.get('lamp_2', False)
+        res['heater_1'] = res.get('lamp_1', False)
+        res['heater_2'] = res.get('lamp_2', False)
+        res['lamp1'] = res.get('lamp_1', False)
+        res['lamp2'] = res.get('lamp_2', False)
+        res['uv'] = res.get('uv_light', False)
         res['humidifier'] = res.get('mist_maker', False)
         res['motor'] = hydraulic_controller.is_oscillating
+        res['aux'] = hydraulic_controller.is_oscillating
         res['hydraulic_state'] = hydraulic_controller.state
         res['limit_max'] = hydraulic_controller.limit_max
         res['limit_min'] = hydraulic_controller.limit_min
