@@ -183,6 +183,8 @@ def set_actuator(name):
 
     try:
         new_state = gpio_controller.set_actuator(name, bool(data["state"]))
+        # Sinkronkan status saklar ke server cloud jika online
+        cloud_sync.push_device_state(name, new_state)
         return jsonify({
             "name": name,
             "state": new_state,
@@ -196,6 +198,9 @@ def emergency_stop():
     """Mematikan semua aktuator secara darurat"""
     control_state["auto"] = False
     states = gpio_controller.emergency_stop()
+    # Beritahu cloud server semua perangkat mati
+    for dev in ["fan", "heater", "humidifier", "motor"]:
+        cloud_sync.push_device_state(dev, False)
     return jsonify({
         "message": "Seluruh aktuator dimatikan (Emergency Stop)",
         "auto": False,
@@ -402,7 +407,12 @@ def set_cloud_config():
 
 @app.route('/api/profile', methods=['GET'])
 def get_farmer_profile():
-    """Mendapatkan profil peternak dan identitas lemari inkubator"""
+    """Mendapatkan profil peternak dan identitas lemari inkubator (otomatis sinkron dengan database server saat Online)"""
+    if cloud_sync.is_online:
+        try:
+            cloud_sync.fetch_cloud_account_info()
+        except Exception:
+            pass
     return jsonify(profile_manager.get_profile())
 
 @app.route('/api/profile', methods=['POST'])

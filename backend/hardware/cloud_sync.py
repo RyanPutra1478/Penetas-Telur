@@ -166,6 +166,48 @@ class CloudSyncManager:
             pass
         return None
 
+    def push_device_state(self, device_name: str, state: bool):
+        """Mengirimkan status aktuator lokal ke endpoint cloud server jika sedang Online"""
+        if not self.is_online:
+            return
+
+        tetasco_id = self.config["tetasco_id"]
+        action = "on" if state else "off"
+
+        # Mapping nama aktuator lokal ke endpoint perangkat di cloud server
+        mapping = {
+            "fan": f"/api/tetasco/{tetasco_id}/devices/fan/{action}",
+            "heater": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "lamp_1": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "heater_1": f"/api/tetasco/{tetasco_id}/devices/heater-1/{action}",
+            "humidifier": f"/api/tetasco/{tetasco_id}/devices/humidifier/{action}",
+            "mist_maker": f"/api/tetasco/{tetasco_id}/devices/humidifier/{action}",
+            "motor": f"/api/tetasco/{tetasco_id}/devices/motor/{action}",
+            "aux": f"/api/tetasco/{tetasco_id}/devices/motor/{action}",
+        }
+
+        endpoint = mapping.get(device_name)
+        if not endpoint:
+            return
+
+        url = f"{self.config['cloud_base_url']}{endpoint}"
+
+        def _async_push():
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=b"",
+                    headers={"User-Agent": "Tetasco-RPi-Client/1.0"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=4) as resp:
+                    if resp.getcode() == 200:
+                        logger.info("☁️ [DEVICE SYNC] Status aktuator %s -> %s terkirim ke cloud", device_name, action)
+            except Exception as e:
+                logger.warning("Gagal mengirim status aktuator %s ke cloud: %s", device_name, e)
+
+        threading.Thread(target=_async_push, daemon=True, name=f"PushDevice-{device_name}").start()
+
     def sync_now(self) -> dict:
         """Memicu sinkronisasi manual saat ini juga"""
         is_healthy = self.check_cloud_health()
