@@ -78,19 +78,32 @@ const TopAppBar = () => {
         position: 'relative',
       }}>
         {/* Brand: Tetasco Logo & Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div
+          onClick={() => navigate('/')}
+          style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+          title="Beranda Tetasco"
+        >
           <div style={{
             width: 44, height: 44,
-            borderRadius: 13,
-            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #D97706 100%)',
+            borderRadius: 12,
+            background: '#FAF8F5',
+            border: '1.5px solid #E2E8F0',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(124,58,237,0.35)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
             flexShrink: 0,
-            position: 'relative',
             overflow: 'hidden',
+            padding: 2,
           }}>
-            <div className="batik-overlay-white" style={{ position: 'absolute', inset: 0, opacity: 0.3 }} />
-            <span className="material-symbols-rounded" style={{ fontSize: 25, color: '#FFF', position: 'relative', zIndex: 1 }}>egg_alt</span>
+            <img
+              src="/tetasco_logo.jpg"
+              alt="Logo Tetasco"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                borderRadius: 9,
+              }}
+            />
           </div>
           <div>
             <span style={{ fontSize: 18, fontWeight: 900, color: '#0F172A', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
