@@ -87,7 +87,7 @@ def load_config():
     """Membaca konfigurasi polaritas yang tersimpan atau menggunakan default"""
     cfg = {
         "output_active_high": True,  # True: 3.3V=ON, False: 0V=ON (Active-LOW)
-        "limit_active_high": False   # True: 3.3V=Tersentuh, False: GND=Tersentuh
+        "limit_active_high": True   # True: 3.3V=Tersentuh, False: GND=Tersentuh
     }
     if os.path.exists(CONFIG_PATH):
         try:
