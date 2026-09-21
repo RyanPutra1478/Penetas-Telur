@@ -193,6 +193,34 @@ def set_actuator(name):
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
 
+# -------------------------------------------------------------
+# Endpoints Kompatibilitas FastAPI Backend (tetasco-backend)
+# -------------------------------------------------------------
+
+@app.route('/api/fan/<action>', methods=['POST'])
+def handle_fan_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("fan", st)
+    return jsonify({'success': True, 'message': f'Fan {action.upper()}', 'fan': new_state})
+
+@app.route('/api/relay/<action>', methods=['POST'])
+def handle_relay_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("lamp_1", st)
+    return jsonify({'success': True, 'message': f'Heater {action.upper()}', 'heater': new_state})
+
+@app.route('/api/humidifier/<action>', methods=['POST'])
+def handle_humidifier_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("mist_maker", st)
+    return jsonify({'success': True, 'message': f'Humidifier {action.upper()}', 'humidifier': new_state})
+
+@app.route('/api/motor/<action>', methods=['POST'])
+def handle_motor_action(action):
+    st = action.lower() in ("on", "1", "true")
+    new_state = gpio_controller.set_actuator("motor", st)
+    return jsonify({'success': True, 'message': f'Motor {action.upper()}', 'motor': new_state})
+
 @app.route('/api/emergency-stop', methods=['POST'])
 def emergency_stop():
     """Mematikan semua aktuator secara darurat"""
