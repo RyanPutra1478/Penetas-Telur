@@ -627,7 +627,7 @@ const DasborUtama = () => {
                 color: '#FFFFFF',
                 letterSpacing: '0.03em',
               }}>
-                {deviceStatus === 'RUNNING' ? `AKTIF · TELUR ${activeProfile}` : 'SIAGA · BELUM DIVERIFIKASI'}
+                {deviceStatus === 'RUNNING' && activeProfile ? `AKTIF · TELUR ${activeProfile}` : 'STATUS: SIAGA'}
               </span>
             </div>
           </div>
@@ -641,23 +641,23 @@ const DasborUtama = () => {
           background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
           border: '1.5px solid #FCD34D',
           borderRadius: 12,
-          padding: '8px 14px',
+          padding: '8px 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexShrink: 0,
           boxShadow: '0 2px 8px rgba(245,158,11,0.15)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="material-symbols-rounded" style={{ fontSize: 22, color: '#D97706' }}>
               pause_circle
             </span>
-            <div>
-              <span style={{ fontSize: 11, fontWeight: 900, color: '#92400E', letterSpacing: '0.02em' }}>
-                MESIN DALAM KONDISI SIAGA (STANDBY)
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#92400E', letterSpacing: '0.04em' }}>
+                STATUS: MESIN SIAGA
               </span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#B45309', marginLeft: 8 }}>
-                Relay pemanas & kipas nonaktif aman. Silakan verifikasi profil telur untuk memulai.
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B45309' }}>
+                Belum ada penetasan aktif. Pilih jenis telur untuk memulai inkubasi.
               </span>
             </div>
           </div>
@@ -668,19 +668,19 @@ const DasborUtama = () => {
               color: '#FFFFFF',
               border: 'none',
               borderRadius: 8,
-              padding: '5px 12px',
-              fontSize: 10,
+              padding: '6px 14px',
+              fontSize: 10.5,
               fontWeight: 900,
               fontFamily: "'JetBrains Mono', monospace",
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
+              gap: 6,
               boxShadow: '0 2px 6px rgba(217,119,6,0.3)',
             }}
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 15 }}>play_circle</span>
-            VERIFIKASI & MULAI
+            <span className="material-symbols-rounded" style={{ fontSize: 16 }}>egg_alt</span>
+            PILIH TELUR
           </button>
         </div>
       )}

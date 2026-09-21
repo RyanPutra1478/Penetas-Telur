@@ -30,9 +30,10 @@ control_state = {
     "auto": False,                      # Default MANUAL agar relay tidak menyala-mati sendiri
     "target_temp": 37.8,
     "target_hum": 55.0,
-    "profile": "AYAM",
-    "current_day": 1,
+    "profile": None,                    # Saat SIAGA tidak ada pilihan profil yang aktif
+    "current_day": 0,
     "total_days": 21,
+    "incubation_start_time": None,
     "rack_timer_interval_minutes": 120, # Putar rak setiap 2 jam
     "rack_rotation_duration_seconds": 15,
     "last_rack_rotation": time.time(),
@@ -212,10 +213,17 @@ def handle_control_mode():
                 control_state["device_status"] = new_status
                 if new_status == "STANDBY":
                     control_state["auto"] = False
+                    control_state["profile"] = None
+                    control_state["current_day"] = 0
+                    control_state["incubation_start_time"] = None
                     gpio_controller.turn_off_all()
-                    logger.info("Mesin beralih ke Mode SIAGA (STANDBY). Seluruh relay dimatikan.")
+                    logger.info("Mesin beralih ke Mode SIAGA (STANDBY). Seluruh relay dimatikan & pilihan profil dinonaktifkan.")
                 elif new_status == "RUNNING":
                     control_state["auto"] = True
+                    if not control_state.get("incubation_start_time"):
+                        control_state["incubation_start_time"] = time.time()
+                    if control_state.get("current_day", 0) == 0:
+                        control_state["current_day"] = 1
                     logger.info("Mesin beralih ke Mode AKTIF (RUNNING). Kontrol otomatis dimulai.")
 
         if "auto" in data:
@@ -225,13 +233,23 @@ def handle_control_mode():
         if "target_hum" in data:
             control_state["target_hum"] = round(float(data["target_hum"]), 1)
         if "profile" in data:
-            control_state["profile"] = str(data["profile"]).upper()
-        if "current_day" in data:
-            control_state["current_day"] = max(1, int(data["current_day"]))
+            val = data["profile"]
+            control_state["profile"] = str(val).upper() if val else None
         if "total_days" in data:
             control_state["total_days"] = max(1, int(data["total_days"]))
+        if "current_day" in data:
+            control_state["current_day"] = max(1, int(data["current_day"]))
+            # Jika diset manual, sesuaikan incubation_start_time
+            if control_state.get("device_status") == "RUNNING":
+                days_offset = (control_state["current_day"] - 1) * 86400
+                control_state["incubation_start_time"] = time.time() - days_offset
 
         logger.info("Pengaturan kontrol diperbarui: %s", control_state)
+
+    # Hitung progres hari secara otomatis jika mesin sedang berjalan (RUNNING)
+    if control_state.get("device_status") == "RUNNING" and control_state.get("incubation_start_time"):
+        elapsed_days = int((time.time() - control_state["incubation_start_time"]) / 86400) + 1
+        control_state["current_day"] = min(control_state.get("total_days", 21), max(1, elapsed_days))
 
     return jsonify(control_state)
 

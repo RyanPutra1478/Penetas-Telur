@@ -12,11 +12,11 @@ const profiles = [
 ];
 
 const KontrolLingkungan = () => {
-  const [selected, setSelected] = useState(0);
-  const [temp, setTemp] = useState(profiles[0].temp);
-  const [hum,  setHum]  = useState(profiles[0].hum);
-  const [currentDay, setCurrentDay] = useState(1);
-  const [totalDays, setTotalDays] = useState(profiles[0].days);
+  const [selected, setSelected] = useState(null); // null saat SIAGA: tidak ada pilihan yang aktif
+  const [temp, setTemp] = useState(37.8);
+  const [hum,  setHum]  = useState(55.0);
+  const [currentDay, setCurrentDay] = useState(0);
+  const [totalDays, setTotalDays] = useState(21);
   const [heaterActive, setHeaterActive] = useState(false);
   const [deviceStatus, setDeviceStatus] = useState('STANDBY'); // 'STANDBY' atau 'RUNNING'
 
@@ -25,9 +25,9 @@ const KontrolLingkungan = () => {
   const [pendingProfileIdx, setPendingProfileIdx] = useState(null);
   const [showPauseModal, setShowPauseModal] = useState(false);
 
-  const p = profiles[selected];
-  const isKustom = p.name === 'KUSTOM';
-  const canAdjust = isKustom;
+  const p = selected !== null ? profiles[selected] : profiles[0];
+  const isKustom = selected !== null && p.name === 'KUSTOM';
+  const canAdjust = isKustom && deviceStatus === 'RUNNING';
 
   // Baca setpoint dari backend saat halaman dimuat
   useEffect(() => {
@@ -38,12 +38,17 @@ const KontrolLingkungan = () => {
         const acts = await getActuators();
         if (!isMounted) return;
         if (mode) {
-          if (mode.device_status) setDeviceStatus(mode.device_status);
+          if (mode.device_status) {
+            setDeviceStatus(mode.device_status);
+            if (mode.device_status === 'STANDBY') {
+              setSelected(null);
+            }
+          }
           if (mode.target_temp !== undefined) setTemp(mode.target_temp);
           if (mode.target_hum !== undefined) setHum(mode.target_hum);
           if (mode.current_day !== undefined) setCurrentDay(mode.current_day);
           if (mode.total_days !== undefined) setTotalDays(mode.total_days);
-          if (mode.profile) {
+          if (mode.device_status === 'RUNNING' && mode.profile) {
             const idx = profiles.findIndex(pr => pr.name.toUpperCase() === mode.profile.toUpperCase());
             if (idx !== -1) setSelected(idx);
           }
@@ -77,8 +82,8 @@ const KontrolLingkungan = () => {
     setTemp(chosen.temp);
     setHum(chosen.hum);
     setTotalDays(chosen.days);
-    setCurrentDay(1); // Mulai dari hari ke-1 untuk telur baru
-    setDeviceStatus('RUNNING'); // Otomatis aktifkan mesin saat profil diverifikasi!
+    setCurrentDay(1); // Mulai dari hari ke-1
+    setDeviceStatus('RUNNING'); // Otomatis aktifkan mesin saat profil diverifikasi
     setShowConfirmModal(false);
 
     await setControlMode({
@@ -95,20 +100,12 @@ const KontrolLingkungan = () => {
   // Ubah status mesin ke STANDBY (Jeda)
   const confirmPauseToStandby = async () => {
     setDeviceStatus('STANDBY');
+    setSelected(null); // Saat siaga, tidak ada pilihan yang aktif
+    setCurrentDay(0);
     setShowPauseModal(false);
     await setControlMode({
       device_status: 'STANDBY',
       auto: false,
-    });
-  };
-
-  // Slider Progres Hari
-  const handleDayChange = (newDay) => {
-    const clamped = Math.max(1, Math.min(totalDays, newDay));
-    setCurrentDay(clamped);
-    setControlMode({
-      current_day: clamped,
-      total_days: totalDays,
     });
   };
 
@@ -125,16 +122,15 @@ const KontrolLingkungan = () => {
   };
 
   const pendingP = pendingProfileIdx !== null ? profiles[pendingProfileIdx] : null;
-  const isHatchingPhase = currentDay > (totalDays - 3);
-  const progressPercent = Math.min(100, Math.round((currentDay / totalDays) * 100));
+  const progressPercent = totalDays > 0 ? Math.min(100, Math.round((currentDay / totalDays) * 100)) : 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
 
-      {/* Row 1: Profile Selection Buttons */}
+      {/* Row 1: Profile Selection Buttons (Dalam mode SIAGA, SEMUA tombol dalam status netral/nonaktif) */}
       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         {profiles.map((pr, i) => {
-          const active = selected === i;
+          const active = deviceStatus === 'RUNNING' && selected === i;
           const AnimalIcon = pr.icon;
           return (
             <button
@@ -142,100 +138,83 @@ const KontrolLingkungan = () => {
               onClick={() => handleProfileClick(i)}
               style={{
                 flex: 1,
-                padding: '7px 4px',
+                padding: '9px 4px',
                 borderRadius: 14,
-                border: `2px solid ${active ? pr.color : pr.border}`,
+                border: `2px solid ${active ? pr.color : '#E2E8F0'}`,
                 background: active ? pr.bg : '#FFFFFF',
                 cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                boxShadow: active ? `0 4px 14px ${pr.color}35` : '0 1px 4px rgba(0,0,0,0.05)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                boxShadow: active ? `0 4px 14px ${pr.color}35` : '0 1px 4px rgba(0,0,0,0.04)',
                 transition: 'all 0.2s ease',
               }}
             >
-              <AnimalIcon size={20} color={active ? pr.color : '#94A3B8'} />
-              <span style={{ fontSize: 11, fontWeight: 900, color: active ? pr.color : '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: "'JetBrains Mono', monospace" }}>{pr.name}</span>
-              <span style={{ fontSize: 9.5, fontWeight: 700, color: active ? pr.color : '#94A3B8' }}>{pr.durasi}</span>
+              <AnimalIcon size={22} color={active ? pr.color : '#94A3B8'} />
+              <span style={{
+                fontSize: 11, fontWeight: 900,
+                color: active ? pr.color : '#64748B',
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                {pr.name}
+              </span>
+              <span style={{ fontSize: 9.5, fontWeight: 700, color: active ? pr.color : '#94A3B8' }}>
+                {pr.durasi}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Row 2: Status Perangkat & Active Profile Bar */}
+      {/* Row 2: Progres Hari Penetasan Otomatis (Tanpa tombol +/- & tanpa fase berlebih) */}
       <div style={{
-        background: deviceStatus === 'RUNNING'
-          ? 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)'
-          : 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
-        border: `1.5px solid ${deviceStatus === 'RUNNING' ? '#A7F3D0' : '#FCD34D'}`,
-        borderRadius: 12,
-        padding: '7px 14px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        background: '#FFFFFF',
+        borderRadius: 14,
+        border: '1.5px solid #E2E8F0',
+        padding: '12px 18px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         flexShrink: 0,
       }}>
-        {/* Left: Device Status & Active Egg */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            background: deviceStatus === 'RUNNING' ? '#059669' : '#D97706',
-            color: '#FFFFFF',
-            padding: '2px 8px', borderRadius: 999,
-            fontSize: 9.5, fontWeight: 900,
-            fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: '0.05em',
-          }}>
-            <span className="material-symbols-rounded" style={{ fontSize: 13 }}>
-              {deviceStatus === 'RUNNING' ? 'play_circle' : 'pause_circle'}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 20, color: deviceStatus === 'RUNNING' ? '#4F46E5' : '#94A3B8' }}>
+              hourglass_top
             </span>
-            {deviceStatus === 'RUNNING' ? 'MESIN AKTIF' : 'MESIN SIAGA'}
+            <span style={{ fontSize: 12, fontWeight: 900, color: '#1E293B', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              Progres Penetasan
+            </span>
+            <span style={{
+              fontSize: 11, fontWeight: 900,
+              color: deviceStatus === 'RUNNING' ? '#4F46E5' : '#64748B',
+              background: deviceStatus === 'RUNNING' ? '#EEF2FF' : '#F1F5F9',
+              padding: '2px 9px', borderRadius: 999,
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              {deviceStatus === 'RUNNING'
+                ? `Hari ke-${currentDay} dari ${totalDays} Hari (${progressPercent}%)`
+                : 'Mesin Siaga · Belum Ada Telur Dipilih'}
+            </span>
           </div>
 
-          <span style={{
-            fontSize: 11, fontWeight: 900,
-            color: deviceStatus === 'RUNNING' ? '#065F46' : '#92400E',
-            fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
-          }}>
-            TELUR: {p.name} ({p.durasi}) · Target: {temp.toFixed(1)}°C & {hum}% RH
-          </span>
-        </div>
-
-        {/* Right: Action Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {deviceStatus === 'STANDBY' ? (
-            <button
-              onClick={() => {
-                setPendingProfileIdx(selected);
-                setShowConfirmModal(true);
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: 8,
-                padding: '4px 12px',
-                fontSize: 10,
-                fontWeight: 900,
-                fontFamily: "'JetBrains Mono', monospace",
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 5,
-                boxShadow: '0 2px 6px rgba(16,185,129,0.3)',
-              }}
-            >
-              <span className="material-symbols-rounded" style={{ fontSize: 14 }}>verified</span>
-              VERIFIKASI & AKTIFKAN
-            </button>
-          ) : (
+          {/* Action Jeda ke Siaga jika sedang berjalan */}
+          {deviceStatus === 'RUNNING' && (
             <button
               onClick={() => setShowPauseModal(true)}
               style={{
-                background: 'rgba(239,68,68,0.12)',
-                color: '#DC2626',
-                border: '1px solid #FCA5A5',
+                background: '#FEF2F2',
+                border: '1px solid #FECACA',
                 borderRadius: 8,
-                padding: '4px 10px',
+                padding: '3px 10px',
                 fontSize: 10,
-                fontWeight: 900,
-                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 800,
+                color: '#DC2626',
                 cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
               <span className="material-symbols-rounded" style={{ fontSize: 14 }}>pause</span>
@@ -243,100 +222,26 @@ const KontrolLingkungan = () => {
             </button>
           )}
         </div>
-      </div>
 
-      {/* Row 3: Daily Progress Slider Card */}
-      <div style={{
-        background: '#FFFFFF',
-        borderRadius: 14,
-        border: '1.5px solid #E2E8F0',
-        padding: '10px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <span className="material-symbols-rounded" style={{ fontSize: 18, color: '#6366F1' }}>calendar_month</span>
-            <span style={{ fontSize: 12, fontWeight: 900, color: '#1E293B', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              Progres Hari Penetasan
-            </span>
-            <span style={{
-              fontSize: 11, fontWeight: 900, color: '#4F46E5',
-              background: '#EEF2FF', padding: '1px 8px', borderRadius: 999,
-              fontFamily: "'JetBrains Mono', monospace",
-            }}>
-              Hari ke-{currentDay} dari {totalDays} Hari ({progressPercent}%)
-            </span>
-          </div>
-
-          <span style={{
-            fontSize: 9.5, fontWeight: 800,
-            padding: '2px 8px', borderRadius: 999,
-            background: isHatchingPhase ? '#FEF2F2' : '#F0FDF4',
-            color: isHatchingPhase ? '#DC2626' : '#15803D',
-            border: `1px solid ${isHatchingPhase ? '#FECACA' : '#BBF7D0'}`,
-            fontFamily: "'JetBrains Mono', monospace",
-          }}>
-            {isHatchingPhase ? '⚠ FASE KRITIS MENETAS (HATCHER)' : 'FASE PENGERAMAN (INKUBASI)'}
-          </span>
-        </div>
-
-        {/* Interactive Track & Touch Stepper */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button
-            onClick={() => handleDayChange(currentDay - 1)}
-            disabled={currentDay <= 1}
-            style={{
-              width: 34, height: 34, borderRadius: 8,
-              border: '1.5px solid #CBD5E1',
-              background: currentDay <= 1 ? '#F8FAFC' : '#F1F5F9',
-              color: currentDay <= 1 ? '#94A3B8' : '#334155',
-              fontWeight: 900, fontSize: 18,
-              cursor: currentDay <= 1 ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            −
-          </button>
-
-          <input
-            type="range"
-            min={1}
-            max={totalDays}
-            value={currentDay}
-            onChange={(e) => handleDayChange(Number(e.target.value))}
-            style={{
-              flex: 1,
-              height: 8,
-              accentColor: '#4F46E5',
-              cursor: 'pointer',
-            }}
-          />
-
-          <button
-            onClick={() => handleDayChange(currentDay + 1)}
-            disabled={currentDay >= totalDays}
-            style={{
-              width: 34, height: 34, borderRadius: 8,
-              border: '1.5px solid #CBD5E1',
-              background: currentDay >= totalDays ? '#F8FAFC' : '#F1F5F9',
-              color: currentDay >= totalDays ? '#94A3B8' : '#334155',
-              fontWeight: 900, fontSize: 18,
-              cursor: currentDay >= totalDays ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            +
-          </button>
+        {/* Automatic Visual Progress Bar */}
+        <div style={{
+          width: '100%',
+          height: 9,
+          background: '#F1F5F9',
+          borderRadius: 999,
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            width: deviceStatus === 'RUNNING' ? `${progressPercent}%` : '0%',
+            height: '100%',
+            background: 'linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%)',
+            borderRadius: 999,
+            transition: 'width 0.4s ease',
+          }} />
         </div>
       </div>
 
-      {/* Row 4: Main Setpoint Controls (Suhu & Kelembaban) */}
+      {/* Row 3: Main Setpoint Controls (Suhu & Kelembaban) */}
       <div style={{ display: 'flex', gap: 12, flex: 1, minHeight: 0 }}>
 
         {/* 1. SUHU TARGET */}
@@ -387,13 +292,13 @@ const KontrolLingkungan = () => {
           {/* Big Number Display */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6, my: 'auto', position: 'relative', zIndex: 1 }}>
             <span style={{
-              fontSize: 48, fontWeight: 900, color: '#EA580C',
+              fontSize: 52, fontWeight: 900, color: '#EA580C',
               lineHeight: 1, fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: '-0.03em',
             }}>
               {temp.toFixed(1)}
             </span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#FB923C' }}>°C</span>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#FB923C' }}>°C</span>
           </div>
 
           {/* Plus / Minus Buttons */}
@@ -404,7 +309,7 @@ const KontrolLingkungan = () => {
                 onClick={fn}
                 disabled={!canAdjust}
                 style={{
-                  flex: 1, height: 42, borderRadius: 12, fontSize: 22, fontWeight: 900,
+                  flex: 1, height: 44, borderRadius: 12, fontSize: 22, fontWeight: 900,
                   border: 'none',
                   cursor: canAdjust ? 'pointer' : 'not-allowed',
                   background: canAdjust ? '#FFEDD5' : '#F1F5F9',
@@ -464,13 +369,13 @@ const KontrolLingkungan = () => {
           {/* Big Number Display */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6, my: 'auto', position: 'relative', zIndex: 1 }}>
             <span style={{
-              fontSize: 48, fontWeight: 900, color: '#2563EB',
+              fontSize: 52, fontWeight: 900, color: '#2563EB',
               lineHeight: 1, fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: '-0.03em',
             }}>
               {hum}
             </span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
           </div>
 
           {/* Plus / Minus Buttons */}
@@ -481,7 +386,7 @@ const KontrolLingkungan = () => {
                 onClick={fn}
                 disabled={!canAdjust}
                 style={{
-                  flex: 1, height: 42, borderRadius: 12, fontSize: 22, fontWeight: 900,
+                  flex: 1, height: 44, borderRadius: 12, fontSize: 22, fontWeight: 900,
                   border: 'none',
                   cursor: canAdjust ? 'pointer' : 'not-allowed',
                   background: canAdjust ? '#DBEAFE' : '#F1F5F9',
@@ -514,7 +419,7 @@ const KontrolLingkungan = () => {
           <div style={{
             background: '#FFFFFF',
             borderRadius: 20,
-            maxWidth: 520, width: '100%',
+            maxWidth: 500, width: '100%',
             boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
             border: '2px solid #E2E8F0',
             overflow: 'hidden',
@@ -531,7 +436,7 @@ const KontrolLingkungan = () => {
                 {React.createElement(pendingP.icon, { size: 28, color: '#FFFFFF' })}
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 900, letterSpacing: '0.02em' }}>
-                    {deviceStatus === 'STANDBY' ? 'VERIFIKASI & AKTIFKAN PENETASAN' : 'KONFIRMASI GANTI PROFIL TELUR'}
+                    {deviceStatus === 'STANDBY' ? 'VERIFIKASI & MULAI PENETASAN' : 'KONFIRMASI GANTI PROFIL TELUR'}
                   </div>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.85)' }}>
                     {pendingP.desc}
@@ -557,11 +462,11 @@ const KontrolLingkungan = () => {
               <div style={{ fontSize: 12, color: '#334155', fontWeight: 600, lineHeight: 1.4 }}>
                 {deviceStatus === 'STANDBY' ? (
                   <span>
-                    Anda akan memulai siklus penetasan untuk telur <strong>{pendingP.name}</strong>. Mesin akan berpindah dari status <strong>SIAGA</strong> ke <strong>AKTIF</strong>, dan pemanas serta sirkulasi akan mulai bekerja otomatis.
+                    Anda akan memulai penetasan untuk telur <strong>{pendingP.name}</strong>. Mesin akan aktif dan kontrol suhu serta kelembaban mulai bekerja.
                   </span>
                 ) : (
                   <span>
-                    Anda akan mengubah jenis telur aktif dari <strong>{p.name}</strong> ke <strong>{pendingP.name}</strong>. Target lingkungan inkubator akan disesuaikan.
+                    Anda akan mengubah jenis telur menjadi <strong>{pendingP.name}</strong>. Target lingkungan akan disesuaikan.
                   </span>
                 )}
               </div>
@@ -592,25 +497,11 @@ const KontrolLingkungan = () => {
                   background: '#F5F3FF', border: '1.5px solid #DDD6FE',
                   borderRadius: 12, padding: '10px 8px', textAlign: 'center',
                 }}>
-                  <div style={{ fontSize: 9.5, fontWeight: 800, color: '#6D28D9' }}>SIKLUS PENUH</div>
+                  <div style={{ fontSize: 9.5, fontWeight: 800, color: '#6D28D9' }}>DURASI SIKLUS</div>
                   <div style={{ fontSize: 20, fontWeight: 900, color: '#7C3AED', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
                     {pendingP.days} Hari
                   </div>
                 </div>
-              </div>
-
-              {/* Safety Guidance Box */}
-              <div style={{
-                background: '#F8FAFC', border: '1px solid #E2E8F0',
-                borderRadius: 10, padding: '9px 12px',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}>
-                <span className="material-symbols-rounded" style={{ fontSize: 20, color: '#10B981' }}>
-                  shield
-                </span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#475569' }}>
-                  Sistem perlindungan termal aktif. Seluruh aktuator diawasi batas aman suhu inkubasi.
-                </span>
               </div>
             </div>
 
@@ -645,7 +536,7 @@ const KontrolLingkungan = () => {
                 }}
               >
                 <span className="material-symbols-rounded" style={{ fontSize: 16 }}>check_circle</span>
-                {deviceStatus === 'STANDBY' ? 'VERIFIKASI & AKTIFKAN' : 'YA, GANTI TELUR'}
+                {deviceStatus === 'STANDBY' ? 'VERIFIKASI & MULAI' : 'YA, GANTI TELUR'}
               </button>
             </div>
           </div>
@@ -682,15 +573,15 @@ const KontrolLingkungan = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 900, color: '#0F172A' }}>
-                    JEDA KE MODE SIAGA (STANDBY)?
+                    JEDA KE MODE SIAGA?
                   </div>
                   <div style={{ fontSize: 11, color: '#64748B' }}>
-                    Seluruh relay pemanas, kipas, dan pelembab akan dimatikan.
+                    Seluruh pemanas dan sirkulasi akan dinonaktifkan.
                   </div>
                 </div>
               </div>
               <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.4 }}>
-                Gunakan mode siaga saat Anda ingin memeriksa kabin, membersihkan rak, atau mengganti wadah air. Anda dapat mengaktifkannya kembali kapan saja.
+                Mesin akan kembali ke mode siaga dan pilihan jenis telur akan dinonaktifkan sampai Anda memverifikasi jenis telur baru.
               </div>
             </div>
 
