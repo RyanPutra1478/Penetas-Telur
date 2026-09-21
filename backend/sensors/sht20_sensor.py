@@ -58,6 +58,8 @@ class SHT20RS485:
         self.last_temp = None
         self.last_hum = None
         self.last_success_time = 0
+        self.de_re_pin = DE_RE_GPIO
+        self.has_lgpio = False
 
         self._init_sensor()
 
@@ -83,10 +85,13 @@ class SHT20RS485:
 
             if self.gpio is None:
                 logger.info("DE/RE Pin 18 akan dikendalikan via fail-safe pinctrl hardware.")
+            self.has_lgpio = self.gpio is not None
         except ImportError:
             logger.info("Library lgpio tidak terpasang, menggunakan pinctrl hardware.")
+            self.has_lgpio = False
         except Exception as e:
             logger.info("Fallback pinctrl untuk DE/RE: %s", e)
+            self.has_lgpio = False
 
         # 2. Buka serial port
         try:
@@ -179,27 +184,34 @@ class SHT20RS485:
                 available = self.ser.in_waiting
                 response = self.ser.read(max(available, 9))
 
-                if len(response) >= 8:
+                if len(response) >= 7:
                     # Cari header Modbus yang valid di dalam stream byte
                     idx = -1
-                    is_full_frame = False
-                    for i in range(len(response) - 7):
+                    mode = 0 # 1=full 9-byte, 2=8-byte (04 04), 3=7-byte (04 T_H T_L H_H H_L)
+                    for i in range(len(response) - 6):
                         if response[i] == 1 and response[i+1] in (3, 4) and response[i+2] == 4 and (i + 9 <= len(response)):
                             idx = i
-                            is_full_frame = True
+                            mode = 1
                             break
                         elif response[i] in (3, 4) and response[i+1] == 4 and (i + 8 <= len(response)):
                             idx = i
-                            is_full_frame = False
+                            mode = 2
+                            break
+                        elif response[i] == 4 and (i + 7 <= len(response)):
+                            idx = i
+                            mode = 3
                             break
 
                     if idx != -1:
-                        if is_full_frame:
+                        if mode == 1:
                             raw_t = int.from_bytes(response[idx+3:idx+5], byteorder="big", signed=True)
                             raw_h = int.from_bytes(response[idx+5:idx+7], byteorder="big", signed=False)
-                        else:
+                        elif mode == 2:
                             raw_t = int.from_bytes(response[idx+2:idx+4], byteorder="big", signed=True)
                             raw_h = int.from_bytes(response[idx+4:idx+6], byteorder="big", signed=False)
+                        else:
+                            raw_t = int.from_bytes(response[idx+1:idx+3], byteorder="big", signed=True)
+                            raw_h = int.from_bytes(response[idx+3:idx+5], byteorder="big", signed=False)
 
                         temperature = round(raw_t / 10.0, 1)
                         humidity = round(raw_h / 10.0, 1)

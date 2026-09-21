@@ -88,38 +88,44 @@ def main():
 
             # 1. Masuk mode KIRIM (TX)
             set_dere(1)
-            time.sleep(0.001)
+            time.sleep(0.002)
 
             # 2. Kirim request Modbus
             ser.write(REQ_CMD)
             ser.flush()
 
-            # 3. Langsung masuk mode TERIMA (RX) tanpa delay agar byte pertama tidak kepotong
+            # 3. Masuk mode TERIMA (RX)
             set_dere(0)
+            time.sleep(0.02)
 
-            # 4. Baca respon (timeout 0.3s)
-            resp = ser.read(9)
+            # 4. Baca respon
+            resp = ser.read(max(ser.in_waiting, 9))
 
-            # Validasi respon: normal 9 bytes (01 04 04 ...) atau 8 bytes jika ID 01 terpotong sedikit (04 04 ...)
-            if len(resp) == 9 and resp[0] == 1 and resp[1] == 4:
+            temp = None
+            hum = None
+            if len(resp) >= 9 and resp[0] == 1 and resp[1] == 4 and resp[2] == 4:
                 raw_t = int.from_bytes(resp[3:5], "big", signed=True)
                 raw_h = int.from_bytes(resp[5:7], "big", signed=False)
                 temp = raw_t / 10.0
                 hum = raw_h / 10.0
-                success_count += 1
-                print(f"[{t_now} | #{count:03d}]  🌡️  Suhu: {temp:5.1f} °C  |  💧 Kelembaban: {hum:5.1f} % RH   [OK #{success_count}]")
-            elif len(resp) == 8 and resp[0] == 4 and resp[1] == 4:
-                # Toleransi jika byte 01 terpotong timing: 04 04 T_H T_L H_H H_L CRC CRC
+            elif len(resp) >= 8 and resp[0] == 4 and resp[1] == 4:
                 raw_t = int.from_bytes(resp[2:4], "big", signed=True)
                 raw_h = int.from_bytes(resp[4:6], "big", signed=False)
                 temp = raw_t / 10.0
                 hum = raw_h / 10.0
+            elif len(resp) >= 7 and resp[0] == 4:
+                raw_t = int.from_bytes(resp[1:3], "big", signed=True)
+                raw_h = int.from_bytes(resp[3:5], "big", signed=False)
+                temp = raw_t / 10.0
+                hum = raw_h / 10.0
+
+            if temp is not None and hum is not None and (0.0 <= temp <= 80.0) and (0.0 <= hum <= 100.0):
                 success_count += 1
-                print(f"[{t_now} | #{count:03d}]  🌡️  Suhu: {temp:5.1f} °C  |  💧 Kelembaban: {hum:5.1f} % RH   [OK #{success_count} (Auto-sync)]")
+                print(f"[{t_now} | #{count:03d}]  🌡️  Suhu: {temp:5.1f} °C  |  💧 Kelembaban: {hum:5.1f} % RH   [OK #{success_count}]", flush=True)
             elif len(resp) > 0:
-                print(f"[{t_now} | #{count:03d}]  ⚠️ Data parsial: {len(resp)} byte ({resp.hex().upper()})")
+                print(f"[{t_now} | #{count:03d}]  ⚠️ Data parsial: {len(resp)} byte ({resp.hex(' ').upper()})", flush=True)
             else:
-                print(f"[{t_now} | #{count:03d}]  ⚪ Timeout: 0 byte diterima (Sensor tidak merespon)")
+                print(f"[{t_now} | #{count:03d}]  ⚪ Timeout: 0 byte diterima (Sensor tidak merespon)", flush=True)
 
             time.sleep(1.0)
 
