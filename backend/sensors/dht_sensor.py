@@ -11,50 +11,48 @@ DEFAULT_DHT_PIN = DHT_PIN
 
 class SensorManager:
     """
-    Manager sensor Suhu & Kelembaban multi-protokol:
-    1. DHT11 GPIO 23 (Pin Fisik 16) - Prioritas Utama Saat Ini Sesuai Permintaan User
-    2. SHT20 RS485 Modbus RTU (Alternatif Industri)
-    3. Simulasi Fisik Dinamis Real-Time (Fallback Otomatis jika hardware belum terhubung)
+    Manager sensor Suhu & Kelembaban:
+    1. SHT20 RS485 Modbus RTU (Sensor Industri Terkalibrasi)
+    2. DHT11 GPIO 23 (Alternatif Sensor Fisik)
+    Tanpa injeksi data simulasi fiktif yang fluktuatif.
     """
     def __init__(self, dht_pin=DEFAULT_DHT_PIN):
         self.dht_pin = dht_pin
         self.is_hardware_active = False
-        self.active_sensor_type = "DHT11_GPIO"
+        self.active_sensor_type = "SHT20_RS485"
         self.dht_device = None
 
-        # State internal untuk pembacaan stabil & simulasi dinamis
-        self.simulated_temp = 37.6
-        self.simulated_hum = 55.4
         self.last_read_time = time.time()
         self.cached_reading = {
-            "temperature": 37.6,
-            "humidity": 55.4,
-            "status": "simulated"
+            "temperature": 37.5,
+            "humidity": 55.0,
+            "sensor": "SHT20_RS485",
+            "is_hardware": False,
+            "status": "waiting_sensor",
+            "error": None
         }
 
         self._init_sensor()
 
     def _init_sensor(self):
-        self.active_sensor_type = "DHT11_GPIO"
-        logger.info("Sensor DHT11 pada GPIO %d siap sebagai sensor utama.", self.dht_pin)
+        self.active_sensor_type = "SHT20_RS485"
+        logger.info("SensorManager diinisialisasi (SHT20 RS485 & DHT11 GPIO %d).", self.dht_pin)
 
     def read(self, heater_on: bool = False, fan_on: bool = False, humidifier_on: bool = False) -> dict:
         """
-        Membaca suhu & kelembaban dari sensor hardware fisik (DHT11 / SHT20)
-        atau menghitung simulasi dinamika termal inkubator jika hardware belum terpasang.
+        Membaca suhu & kelembaban murni dari sensor fisik (SHT20 / DHT11).
         """
         now = time.time()
-        dt = max(0.1, min(2.0, now - self.last_read_time))
         self.last_read_time = now
 
-        # 1. Prioritas Utama: Baca dari SHT20 RS485 Modbus RTU (Sensor Industri Terkalibrasi)
+        # 1. Prioritas Utama: Baca dari SHT20 RS485 Modbus RTU (Sensor Industri)
         t_sht, h_sht, ok_sht = sht20_sensor.read()
         if ok_sht and t_sht is not None and h_sht is not None:
             self.is_hardware_active = True
             self.active_sensor_type = "SHT20_RS485"
             self.cached_reading = {
-                "temperature": t_sht,
-                "humidity": h_sht,
+                "temperature": round(float(t_sht), 1),
+                "humidity": round(float(h_sht), 1),
                 "sensor": "SHT20_RS485",
                 "is_hardware": True,
                 "status": "hardware_ok",
@@ -62,9 +60,7 @@ class SensorManager:
             }
             return self.cached_reading
 
-        # 1b. GRACE PERIOD (Tahan Nilai Terakhir Hardware):
-        # Jika hardware SHT20 pernah berhasil dalam 15 detik terakhir, JANGAN langsung jatuh ke simulasi!
-        # Tahan nilai terakhir agar HMI tetap stabil dan tidak melompat-lompat ke 37°C
+        # 1b. Tahan nilai terakhir hardware jika baru saja berhasil
         if self.is_hardware_active and (now - sht20_sensor.last_success_time) < 15.0:
             return self.cached_reading
 
@@ -74,8 +70,8 @@ class SensorManager:
             self.is_hardware_active = True
             self.active_sensor_type = "DHT11_GPIO"
             self.cached_reading = {
-                "temperature": t_dht,
-                "humidity": h_dht,
+                "temperature": round(float(t_dht), 1),
+                "humidity": round(float(h_dht), 1),
                 "sensor": "DHT11_GPIO",
                 "is_hardware": True,
                 "status": "hardware_ok",
@@ -83,39 +79,11 @@ class SensorManager:
             }
             return self.cached_reading
 
-        # 3. Fallback: Simulasi Dinamis Fisik Inkubator (Hanya jika hardware benar-benar mati > 15 detik)
+        # 3. Jika sensor fisik belum terbaca, kembalikan nilai cache terakhir secara stabil
         self.is_hardware_active = False
-        self.active_sensor_type = "simulated"
-
-        if heater_on and not fan_on:
-            self.simulated_temp += 0.08 * dt
-        elif fan_on:
-            self.simulated_temp -= 0.06 * dt
-        else:
-            target_ambient = 36.8
-            self.simulated_temp += (target_ambient - self.simulated_temp) * 0.02 * dt
-
-        if humidifier_on:
-            self.simulated_hum += 0.25 * dt
-        elif fan_on:
-            self.simulated_hum -= 0.15 * dt
-        else:
-            self.simulated_hum -= 0.03 * dt
-
-        t_jitter = random.uniform(-0.04, 0.04)
-        h_jitter = random.uniform(-0.1, 0.1)
-
-        temp_final = round(max(25.0, min(45.0, self.simulated_temp + t_jitter)), 1)
-        hum_final = round(max(20.0, min(95.0, self.simulated_hum + h_jitter)), 1)
-
-        self.cached_reading = {
-            "temperature": temp_final,
-            "humidity": hum_final,
-            "sensor": "simulated",
-            "is_hardware": False,
-            "status": "simulated",
-            "error": sht20_sensor.last_error
-        }
+        self.cached_reading["is_hardware"] = False
+        self.cached_reading["status"] = "sensor_offline"
+        self.cached_reading["error"] = sht20_sensor.last_error or "Sensor belum merespon"
         return self.cached_reading
 
 sensor_manager = SensorManager()

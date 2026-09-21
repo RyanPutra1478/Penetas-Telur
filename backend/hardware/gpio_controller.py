@@ -32,6 +32,7 @@ class GPIOController:
         self.devices = {}
         self.states = {name: False for name in PIN_CONFIG}
         self._init_hardware()
+        self.turn_off_all()
 
     def _init_hardware(self):
         if platform.system().lower() != "linux":
@@ -52,6 +53,17 @@ class GPIOController:
         except Exception as e:
             logger.warning("Gagal inisialisasi gpiozero hardware: %s. Beralih ke SIMULASI GPIO.", e)
             self.is_simulated = True
+
+    def turn_off_all(self):
+        """Mematikan seluruh relay output secara eksplisit demi keselamatan awal (fresh boot)"""
+        for name in PIN_CONFIG:
+            self.states[name] = False
+            if not self.is_simulated and name in self.devices:
+                try:
+                    self.devices[name].off()
+                except Exception:
+                    pass
+        logger.info("Seluruh relay aktuator dipastikan OFF (Kondisi Siaga).")
 
     def set_actuator(self, name: str, state: bool) -> bool:
         """Mengatur status on/off sebuah aktuator relay"""

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSensorData, getActuators, setActuator, getFarmerProfile } from '../api/tetascoApi';
+import { getSensorData, getActuators, setActuator, getFarmerProfile, getControlMode } from '../api/tetascoApi';
 
 /* ================================================
    Slider Toggle — Ramah Layar Sentuh 7 Inci
@@ -176,7 +176,8 @@ const DasborUtama = () => {
   const [targetTemp, setTargetTemp] = useState(37.8);
   const [targetHum, setTargetHum] = useState(55.0);
   const [isHardware, setIsHardware] = useState(false);
-  const [sensorType, setSensorType] = useState('simulated');
+  const [deviceStatus, setDeviceStatus] = useState('STANDBY');
+  const [activeProfile, setActiveProfile] = useState('AYAM');
   const [farmerProfile, setFarmerProfile] = useState({
     nama_lemari: 'Tetasco 01',
     nama_peternak: 'Peternak Tetasco',
@@ -192,16 +193,21 @@ const DasborUtama = () => {
       try {
         pollCount++;
         // Ambil profil setiap 5x polling (~6 detik)
-        const promises = [getSensorData(), getActuators()];
+        const promises = [getSensorData(), getActuators(), getControlMode()];
         if (pollCount % 5 === 1) {
           promises.push(getFarmerProfile());
         }
 
-        const [sensor, acts, profile] = await Promise.all(promises);
+        const [sensor, acts, mode, profile] = await Promise.all(promises);
         if (!isMounted) return;
 
         if (profile) {
           setFarmerProfile(prev => ({ ...prev, ...profile }));
+        }
+
+        if (mode) {
+          if (mode.device_status) setDeviceStatus(mode.device_status);
+          if (mode.profile) setActiveProfile(mode.profile);
         }
 
         if (sensor) {
@@ -368,14 +374,15 @@ const DasborUtama = () => {
             </span>
           </div>
 
-          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca & Indikator Sumber Sensor */}
+          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', position: 'relative', zIndex: 1, my: 'auto' }}>
+            {/* Angka Suhu */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
               <span style={{
-                fontSize: 32,
+                fontSize: 38,
                 fontWeight: 900,
                 color: '#EA580C',
-                lineHeight: 1.0,
+                lineHeight: 1,
                 fontFamily: "'JetBrains Mono', monospace",
                 letterSpacing: '-0.02em',
               }}>
@@ -383,19 +390,6 @@ const DasborUtama = () => {
               </span>
               <span style={{ fontSize: 16, fontWeight: 900, color: '#FB923C' }}>°C</span>
             </div>
-            <span style={{
-              fontSize: 8.5,
-              fontWeight: 800,
-              padding: '2px 6px',
-              borderRadius: 6,
-              background: isHardware ? '#DCFCE7' : '#FEF3C7',
-              color: isHardware ? '#166534' : '#B45309',
-              border: `1px solid ${isHardware ? '#86EFAC' : '#FCD34D'}`,
-              fontFamily: "'JetBrains Mono', monospace",
-              textTransform: 'uppercase',
-            }}>
-              {isHardware ? (sensorType === 'DHT11_GPIO' ? '● DHT11 FISIK' : '● SHT20 FISIK') : '● SIMULASI'}
-            </span>
           </div>
 
           {/* 3. Bawah: Status Pill */}
@@ -484,14 +478,15 @@ const DasborUtama = () => {
             </span>
           </div>
 
-          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca & Indikator Sumber Sensor */}
+          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', position: 'relative', zIndex: 1, my: 'auto' }}>
+            {/* Angka Kelembaban */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
               <span style={{
-                fontSize: 32,
+                fontSize: 38,
                 fontWeight: 900,
                 color: '#2563EB',
-                lineHeight: 1.0,
+                lineHeight: 1,
                 fontFamily: "'JetBrains Mono', monospace",
                 letterSpacing: '-0.02em',
               }}>
@@ -499,19 +494,6 @@ const DasborUtama = () => {
               </span>
               <span style={{ fontSize: 15, fontWeight: 900, color: '#60A5FA' }}>% RH</span>
             </div>
-            <span style={{
-              fontSize: 8.5,
-              fontWeight: 800,
-              padding: '2px 6px',
-              borderRadius: 6,
-              background: isHardware ? '#DCFCE7' : '#FEF3C7',
-              color: isHardware ? '#166534' : '#B45309',
-              border: `1px solid ${isHardware ? '#86EFAC' : '#FCD34D'}`,
-              fontFamily: "'JetBrains Mono', monospace",
-              textTransform: 'uppercase',
-            }}>
-              {isHardware ? (sensorType === 'DHT11_GPIO' ? '● DHT11 FISIK' : '● SHT20 FISIK') : '● SIMULASI'}
-            </span>
           </div>
 
           {/* 3. Bawah: Status Pill */}
@@ -627,31 +609,81 @@ const DasborUtama = () => {
             </div>
           </div>
 
-          {/* 3. Bawah: Status Pill 1 Lemari = 1 Akun */}
+          {/* 3. Bawah: Status Pill */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'rgba(0,0,0,0.25)',
+              background: deviceStatus === 'RUNNING' ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)',
               padding: '3px 9px', borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.25)',
+              border: `1px solid ${deviceStatus === 'RUNNING' ? 'rgba(74,222,128,0.5)' : 'rgba(252,211,77,0.5)'}`,
             }}>
               <div style={{
                 width: 6, height: 6, borderRadius: '50%',
-                background: '#4ADE80',
-                boxShadow: '0 0 6px #4ADE80',
+                background: deviceStatus === 'RUNNING' ? '#4ADE80' : '#FCD34D',
+                boxShadow: deviceStatus === 'RUNNING' ? '0 0 6px #4ADE80' : '0 0 6px #FCD34D',
               }} />
               <span style={{
                 fontSize: 9.5, fontWeight: 800,
                 color: '#FFFFFF',
                 letterSpacing: '0.03em',
               }}>
-                1 Lemari · 1 Akun Peternak
+                {deviceStatus === 'RUNNING' ? `AKTIF · TELUR ${activeProfile}` : 'SIAGA · BELUM DIVERIFIKASI'}
               </span>
             </div>
           </div>
         </div>
 
       </div>
+
+      {/* Banner Siaga Jika Mesin Belum Aktif */}
+      {deviceStatus === 'STANDBY' && (
+        <div style={{
+          background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
+          border: '1.5px solid #FCD34D',
+          borderRadius: 12,
+          padding: '8px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+          boxShadow: '0 2px 8px rgba(245,158,11,0.15)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 22, color: '#D97706' }}>
+              pause_circle
+            </span>
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#92400E', letterSpacing: '0.02em' }}>
+                MESIN DALAM KONDISI SIAGA (STANDBY)
+              </span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#B45309', marginLeft: 8 }}>
+                Relay pemanas & kipas nonaktif aman. Silakan verifikasi profil telur untuk memulai.
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/control')}
+            style={{
+              background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: 8,
+              padding: '5px 12px',
+              fontSize: 10,
+              fontWeight: 900,
+              fontFamily: "'JetBrains Mono', monospace",
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              boxShadow: '0 2px 6px rgba(217,119,6,0.3)',
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: 15 }}>play_circle</span>
+            VERIFIKASI & MULAI
+          </button>
+        </div>
+      )}
 
       {/* ===== 6 CONTROL CARDS (3 KOLOM × 2 BARIS) ===== */}
       <div style={{

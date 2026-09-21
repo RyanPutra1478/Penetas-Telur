@@ -26,10 +26,13 @@ CORS(app)
 
 # State Kontrol Cerdas (Smart Controller State)
 control_state = {
+    "device_status": "STANDBY",         # Default SIAGA saat fresh boot (aktuator aman mati)
     "auto": False,                      # Default MANUAL agar relay tidak menyala-mati sendiri
     "target_temp": 37.8,
     "target_hum": 55.0,
     "profile": "AYAM",
+    "current_day": 1,
+    "total_days": 21,
     "rack_timer_interval_minutes": 120, # Putar rak setiap 2 jam
     "rack_rotation_duration_seconds": 15,
     "last_rack_rotation": time.time(),
@@ -55,8 +58,8 @@ def smart_control_loop():
             temp = reading["temperature"]
             hum = reading["humidity"]
 
-            # Kontrol otomatis HANYA berjalan jika mode AUTO aktif DAN sensor fisik benar-benar terhubung
-            if control_state["auto"] and sensor_manager.is_hardware_active:
+            # Kontrol otomatis HANYA berjalan jika status perangkat RUNNING, mode AUTO aktif, DAN sensor fisik terhubung
+            if control_state.get("device_status") == "RUNNING" and control_state["auto"] and sensor_manager.is_hardware_active:
                 target_t = control_state["target_temp"]
                 target_h = control_state["target_hum"]
 
@@ -200,9 +203,21 @@ def emergency_stop():
 
 @app.route('/api/control/mode', methods=['GET', 'POST'])
 def handle_control_mode():
-    """Mengambil atau mengatur mode Auto/Manual, target suhu & target kelembaban"""
+    """Mengambil atau mengatur mode Auto/Manual, target suhu & kelembaban, serta status operasional perangkat"""
     if request.method == 'POST':
         data = request.get_json(silent=True) or {}
+        if "device_status" in data:
+            new_status = str(data["device_status"]).upper()
+            if new_status in ("STANDBY", "RUNNING"):
+                control_state["device_status"] = new_status
+                if new_status == "STANDBY":
+                    control_state["auto"] = False
+                    gpio_controller.turn_off_all()
+                    logger.info("Mesin beralih ke Mode SIAGA (STANDBY). Seluruh relay dimatikan.")
+                elif new_status == "RUNNING":
+                    control_state["auto"] = True
+                    logger.info("Mesin beralih ke Mode AKTIF (RUNNING). Kontrol otomatis dimulai.")
+
         if "auto" in data:
             control_state["auto"] = bool(data["auto"])
         if "target_temp" in data:
@@ -211,6 +226,10 @@ def handle_control_mode():
             control_state["target_hum"] = round(float(data["target_hum"]), 1)
         if "profile" in data:
             control_state["profile"] = str(data["profile"]).upper()
+        if "current_day" in data:
+            control_state["current_day"] = max(1, int(data["current_day"]))
+        if "total_days" in data:
+            control_state["total_days"] = max(1, int(data["total_days"]))
 
         logger.info("Pengaturan kontrol diperbarui: %s", control_state)
 

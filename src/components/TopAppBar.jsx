@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { getWifiStatus, getCloudStatus } from '../api/tetascoApi';
+import { useNavigate } from 'react-router-dom';
+import { getWifiStatus, getCloudStatus, getControlMode } from '../api/tetascoApi';
 import WifiModal from './WifiModal';
 import CloudModal from './CloudModal';
 
 const TopAppBar = () => {
+  const navigate = useNavigate();
   const [wifiModalOpen, setWifiModalOpen] = useState(false);
   const [cloudModalOpen, setCloudModalOpen] = useState(false);
   const [wifiStatus, setWifiStatus] = useState({ connected: true, ssid: null });
   const [cloudStatus, setCloudStatus] = useState({ is_online: false, mode: 'offline', cloud_url: 'https://tetasco.my.id' });
+  const [deviceStatus, setDeviceStatus] = useState('STANDBY');
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
 
-  // Ambil status Wi-Fi dan Cloud saat komponen dimuat
+  // Ambil status Wi-Fi, Cloud, dan Status Perangkat saat komponen dimuat
   useEffect(() => {
     let isMounted = true;
-    const checkNetworkAndCloud = async () => {
+    const checkStatus = async () => {
       try {
-        const [wStatus, cStatus] = await Promise.all([
+        const [wStatus, cStatus, ctrl] = await Promise.all([
           getWifiStatus(),
           getCloudStatus(),
+          getControlMode(),
         ]);
         if (isMounted) {
           if (wStatus) setWifiStatus(wStatus);
           if (cStatus) setCloudStatus(cStatus);
+          if (ctrl && ctrl.device_status) setDeviceStatus(ctrl.device_status);
         }
       } catch (e) {
         // Safe failover
       }
     };
 
-    checkNetworkAndCloud();
-    const interval = setInterval(checkNetworkAndCloud, 8000); // Poll status setiap 8 detik
+    checkStatus();
+    const interval = setInterval(checkStatus, 4000); // Poll status setiap 4 detik
 
     // Event listener untuk update status fullscreen saat berubah
     const handleFullscreenChange = () => {
@@ -94,8 +99,41 @@ const TopAppBar = () => {
           </div>
         </div>
 
-        {/* Action Buttons: Network, Cloud Sync, & Tombol Maximize/Minimize */}
+        {/* Action Buttons: Status Perangkat, Network, Cloud Sync, & Tombol Maximize/Minimize */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Tombol Status Perangkat (SIAGA / AKTIF) */}
+          <button
+            onClick={() => navigate('/control')}
+            title={deviceStatus === 'RUNNING' ? 'Status: AKTIF (Inkubasi Berjalan) — Klik untuk Buka Kontrol' : 'Status: SIAGA (Standby) — Klik untuk Pilih Telur & Mulai'}
+            style={{
+              height: 36,
+              padding: '0 12px',
+              borderRadius: 999,
+              border: deviceStatus === 'RUNNING' ? '1.5px solid #86EFAC' : '1.5px solid #FCD34D',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: deviceStatus === 'RUNNING' ? '#F0FDF4' : '#FFFBEB',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: deviceStatus === 'RUNNING' ? '0 0 0 1.5px rgba(34,197,94,0.2)' : '0 0 0 1.5px rgba(245,158,11,0.2)',
+            }}
+          >
+            <span className="material-symbols-rounded" style={{
+              fontSize: 18,
+              color: deviceStatus === 'RUNNING' ? '#16A34A' : '#D97706',
+              transition: 'color 0.2s',
+            }}>
+              {deviceStatus === 'RUNNING' ? 'play_circle' : 'pause_circle'}
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 900, letterSpacing: '0.05em',
+              color: deviceStatus === 'RUNNING' ? '#15803D' : '#B45309',
+              fontFamily: "'JetBrains Mono', monospace",
+              textTransform: 'uppercase',
+            }}>
+              {deviceStatus === 'RUNNING' ? 'AKTIF' : 'SIAGA'}
+            </span>
+          </button>
+
           {/* Tombol Dual-Mode Cloud Sync (Online / Offline) */}
           <button
             onClick={() => setCloudModalOpen(true)}
