@@ -317,4 +317,38 @@ export async function setCloudConfig(config) {
   }
 }
 
+/**
+ * Mendapatkan profil peternak dan lemari inkubator
+ */
+export async function getFarmerProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/profile`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal membaca profil peternak:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Memperbarui profil peternak dan lemari inkubator secara persisten
+ * @param {Object} data 
+ */
+export async function updateFarmerProfile(data) {
+  try {
+    const res = await fetch(`${API_BASE}/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal memperbarui profil:', err.message);
+    return null;
+  }
+}
+
+
 

@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const navItems = [
   { icon: 'home',      label: 'HOME',    path: '/',        color: '#6366F1', bg: '#EEF2FF' },
   { icon: 'tune',      label: 'KONTROL', path: '/control', color: '#F97316', bg: '#FFF7ED' },
-  { icon: 'layers',    label: 'BATCH',   path: '/batch',   color: '#22C55E', bg: '#F0FDF4' },
   { icon: 'videocam',  label: 'KAMERA',  path: '/camera',  color: '#14B8A6', bg: '#F0FDFA' },
   { icon: 'person',    label: 'PROFIL',  path: '/profil',  color: '#64748B', bg: '#F8FAFC' },
 ];

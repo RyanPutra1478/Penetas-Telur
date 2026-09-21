@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { getSensorData, getActuators, setActuator } from '../api/tetascoApi';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getSensorData, getActuators, setActuator, getFarmerProfile } from '../api/tetascoApi';
 
 /* ================================================
    Slider Toggle — Ramah Layar Sentuh 7 Inci
@@ -167,23 +168,42 @@ const DasborUtama = () => {
   const [sinarUV,  setSinarUV]  = useState(false);
   const [rakGerak, setRakGerak] = useState(false);
 
+  const navigate = useNavigate();
+  const lastActionTimeRef = useRef({});
+
   const [tempVal, setTempVal] = useState(37.8);
   const [humVal, setHumVal] = useState(55.0);
   const [targetTemp, setTargetTemp] = useState(37.8);
   const [targetHum, setTargetHum] = useState(55.0);
   const [isHardware, setIsHardware] = useState(false);
   const [sensorType, setSensorType] = useState('simulated');
+  const [farmerProfile, setFarmerProfile] = useState({
+    nama_lemari: 'Tetasco 01',
+    nama_peternak: 'Peternak Tetasco',
+    tetasco_id: 1,
+  });
 
   // Sinkronisasi data real-time dari backend lokal setiap 1.2 detik
   useEffect(() => {
     let isMounted = true;
+    let pollCount = 0;
+
     const fetchData = async () => {
       try {
-        const [sensor, acts] = await Promise.all([
-          getSensorData(),
-          getActuators(),
-        ]);
+        pollCount++;
+        // Ambil profil setiap 5x polling (~6 detik)
+        const promises = [getSensorData(), getActuators()];
+        if (pollCount % 5 === 1) {
+          promises.push(getFarmerProfile());
+        }
+
+        const [sensor, acts, profile] = await Promise.all(promises);
         if (!isMounted) return;
+
+        if (profile) {
+          setFarmerProfile(prev => ({ ...prev, ...profile }));
+        }
+
         if (sensor) {
           if (sensor.temperature !== undefined) setTempVal(sensor.temperature);
           if (sensor.humidity !== undefined) setHumVal(sensor.humidity);
@@ -192,13 +212,30 @@ const DasborUtama = () => {
           if (sensor.is_hardware !== undefined) setIsHardware(sensor.is_hardware);
           if (sensor.sensor !== undefined) setSensorType(sensor.sensor);
         }
+
+        // KUNCI STABILITAS SLIDER: Hanya perbarui state dari polling jika tidak ada aksi manual dalam 2.5 detik terakhir
+        const now = Date.now();
+        const guardTime = 2500; // ms
+
         if (acts) {
-          if (acts.lamp_1 !== undefined) setLampu1(acts.lamp_1);
-          if (acts.lamp_2 !== undefined) setLampu2(acts.lamp_2);
-          if (acts.fan !== undefined) setKipas(acts.fan);
-          if (acts.mist_maker !== undefined) setPelembab(acts.mist_maker);
-          if (acts.uv_light !== undefined) setSinarUV(acts.uv_light);
-          if (acts.motor !== undefined) setRakGerak(acts.motor);
+          if (acts.lamp_1 !== undefined && (now - (lastActionTimeRef.current['lamp_1'] || 0) > guardTime)) {
+            setLampu1(acts.lamp_1);
+          }
+          if (acts.lamp_2 !== undefined && (now - (lastActionTimeRef.current['lamp_2'] || 0) > guardTime)) {
+            setLampu2(acts.lamp_2);
+          }
+          if (acts.fan !== undefined && (now - (lastActionTimeRef.current['fan'] || 0) > guardTime)) {
+            setKipas(acts.fan);
+          }
+          if (acts.mist_maker !== undefined && (now - (lastActionTimeRef.current['mist_maker'] || 0) > guardTime)) {
+            setPelembab(acts.mist_maker);
+          }
+          if (acts.uv_light !== undefined && (now - (lastActionTimeRef.current['uv_light'] || 0) > guardTime)) {
+            setSinarUV(acts.uv_light);
+          }
+          if (acts.motor !== undefined && (now - (lastActionTimeRef.current['motor'] || 0) > guardTime)) {
+            setRakGerak(acts.motor);
+          }
         }
       } catch (err) {
         // Safe failover
@@ -214,31 +251,37 @@ const DasborUtama = () => {
   }, []);
 
   const handleToggleLampu1 = async (val) => {
+    lastActionTimeRef.current['lamp_1'] = Date.now();
     setLampu1(val);
     await setActuator('lamp_1', val);
   };
 
   const handleToggleLampu2 = async (val) => {
+    lastActionTimeRef.current['lamp_2'] = Date.now();
     setLampu2(val);
     await setActuator('lamp_2', val);
   };
 
   const handleToggleFan = async (val) => {
+    lastActionTimeRef.current['fan'] = Date.now();
     setKipas(val);
     await setActuator('fan', val);
   };
 
   const handleToggleHumidifier = async (val) => {
+    lastActionTimeRef.current['mist_maker'] = Date.now();
     setPelembab(val);
     await setActuator('mist_maker', val);
   };
 
   const handleToggleUV = async (val) => {
+    lastActionTimeRef.current['uv_light'] = Date.now();
     setSinarUV(val);
     await setActuator('uv_light', val);
   };
 
   const handleToggleRak = async (val) => {
+    lastActionTimeRef.current['motor'] = Date.now();
     setRakGerak(val);
     await setActuator('motor', val);
   };
@@ -493,24 +536,28 @@ const DasborUtama = () => {
           </div>
         </div>
 
-        {/* BATCH AKTIF */}
+        {/* LEMARI & AKUN PETERNAK (1 Lemari = 1 Akun) */}
         <div
+          onClick={() => navigate('/profil')}
+          title="Klik untuk membuka profil peternak & lemari inkubator"
           style={{
-            background: 'linear-gradient(140deg, #22C55E 0%, #16A34A 60%, #15803D 100%)',
+            background: 'linear-gradient(140deg, #4F46E5 0%, #6366F1 55%, #8B5CF6 100%)',
             borderRadius: 18,
             padding: '12px 15px',
-            boxShadow: '0 6px 20px rgba(34,197,94,0.28)',
+            boxShadow: '0 6px 20px rgba(99,102,241,0.28)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease',
           }}
         >
           {/* Indonesian Batik Kawung Motif */}
           <div className="batik-overlay batik-overlay-white" />
 
-          {/* Background Icon — Halus & Lega */}
+          {/* Background Icon */}
           <span className="material-symbols-rounded" style={{
             position: 'absolute',
             right: 8,
@@ -522,7 +569,7 @@ const DasborUtama = () => {
             lineHeight: 1,
             userSelect: 'none',
           }}>
-            egg
+            badge
           </span>
 
           {/* 1. Atas: Header dengan Icon Badge */}
@@ -535,11 +582,11 @@ const DasborUtama = () => {
                 flexShrink: 0,
               }}>
                 <span className="material-symbols-rounded" style={{ fontSize: 14, color: '#FFFFFF' }}>
-                  layers
+                  person
                 </span>
               </div>
               <span style={{ fontSize: 11, fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                Batch Aktif
+                Lemari & Akun
               </span>
             </div>
             <span style={{
@@ -550,52 +597,56 @@ const DasborUtama = () => {
               border: '1px solid rgba(255,255,255,0.4)',
               whiteSpace: 'nowrap',
             }}>
-              Ayam Kampung
+              ID #{farmerProfile.tetasco_id || 1}
             </span>
           </div>
 
-          {/* 2. Tengah Vertikal: Nilai Jelas Terbaca */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, position: 'relative', zIndex: 1, my: 'auto' }}>
-            <span style={{
-              fontSize: 30,
+          {/* 2. Tengah: Nama Lemari & Nama Peternak */}
+          <div style={{ position: 'relative', zIndex: 1, my: 'auto' }}>
+            <div style={{
+              fontSize: 18,
               fontWeight: 900,
               color: '#FFFFFF',
-              lineHeight: 1.0,
-              fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: '-0.02em',
+              lineHeight: 1.15,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}>
-              Hari 7
-            </span>
-            <span style={{ fontSize: 14, fontWeight: 900, color: 'rgba(255,255,255,0.85)' }}>
-              / 21 Hari
-            </span>
-          </div>
-
-          {/* 3. Bawah: Progress Bar */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 900, color: '#FFFFFF' }}>
-                33.3% Selesai
-              </span>
-              <span style={{ fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.9)', fontFamily: "'JetBrains Mono', monospace" }}>
-                14 Hari Tersisa
-              </span>
+              {farmerProfile.nama_lemari || 'Tetasco 01'}
             </div>
             <div style={{
-              height: 6,
-              background: 'rgba(0,0,0,0.25)',
-              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.9)',
+              marginTop: 2,
+              whiteSpace: 'nowrap',
               overflow: 'hidden',
-              padding: 1,
+              textOverflow: 'ellipsis',
+            }}>
+              {farmerProfile.nama_peternak || 'Peternak Tetasco'}
+            </div>
+          </div>
+
+          {/* 3. Bawah: Status Pill 1 Lemari = 1 Akun */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(0,0,0,0.25)',
+              padding: '3px 9px', borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.25)',
             }}>
               <div style={{
-                width: '33.3%',
-                height: '100%',
-                background: '#FFFFFF',
-                borderRadius: 999,
-                boxShadow: '0 0 8px rgba(255,255,255,0.9)',
-                transition: 'width 0.4s ease',
+                width: 6, height: 6, borderRadius: '50%',
+                background: '#4ADE80',
+                boxShadow: '0 0 6px #4ADE80',
               }} />
+              <span style={{
+                fontSize: 9.5, fontWeight: 800,
+                color: '#FFFFFF',
+                letterSpacing: '0.03em',
+              }}>
+                1 Lemari · 1 Akun Peternak
+              </span>
             </div>
           </div>
         </div>

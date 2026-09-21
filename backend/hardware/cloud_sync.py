@@ -14,6 +14,7 @@ import logging
 import urllib.request
 import urllib.error
 from datetime import datetime
+from .profile_manager import profile_manager
 
 logger = logging.getLogger("CloudSync")
 
@@ -135,6 +136,21 @@ class CloudSyncManager:
             logger.warning("Gagal mengirim telemetri ke cloud: %s", e)
         return False
 
+    def fetch_cloud_account_info(self) -> dict:
+        """Mengambil data akun peternak & identitas lemari dari Cloud Server"""
+        tetasco_id = self.config["tetasco_id"]
+        url = f"{self.config['cloud_base_url']}/api/tetasco/{tetasco_id}"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Tetasco-RPi-Client/1.0"}, method="GET")
+            with urllib.request.urlopen(req, timeout=4) as resp:
+                if resp.getcode() == 200:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    profile_manager.sync_from_cloud(data)
+                    return data
+        except Exception:
+            pass
+        return None
+
     def fetch_cloud_device_states(self) -> dict:
         """Mengambil status perangkat yang diatur dari Cloud Dashboard"""
         tetasco_id = self.config["tetasco_id"]
@@ -161,6 +177,9 @@ class CloudSyncManager:
         self.is_online = True
         self.mode = "online"
 
+        # Sinkronkan data akun peternak
+        self.fetch_cloud_account_info()
+
         # Ambil data sensor terkini
         t, h = 27.0, 50.0
         if self.sensor_manager:
@@ -183,6 +202,9 @@ class CloudSyncManager:
                 if is_cloud_ok:
                     if not self.is_online:
                         logger.info("🌐 [KONEKSI PULIH] Terhubung ke Wi-Fi / Internet. Beralih ke MODE ONLINE.")
+                        # Ambil info akun peternak & lemari saat koneksi pulih
+                        self.fetch_cloud_account_info()
+
                     self.is_online = True
                     self.mode = "online"
 

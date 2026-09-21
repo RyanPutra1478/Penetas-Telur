@@ -11,6 +11,7 @@ from hardware.gpio_controller import gpio_controller
 from hardware.hydraulic_controller import hydraulic_controller
 from hardware.wifi_manager import wifi_manager
 from hardware.cloud_sync import cloud_sync
+from hardware.profile_manager import profile_manager
 from sensors.dht_sensor import sensor_manager
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
@@ -356,6 +357,22 @@ def set_cloud_config():
     """Memperbarui konfigurasi sinkronisasi cloud"""
     data = request.get_json(silent=True) or {}
     res = cloud_sync.update_config(data)
+    return jsonify(res)
+
+# -------------------------------------------------------------
+# Farmer & Cabinet Profile Endpoints (1 Lemari = 1 Akun)
+# -------------------------------------------------------------
+
+@app.route('/api/profile', methods=['GET'])
+def get_farmer_profile():
+    """Mendapatkan profil peternak dan identitas lemari inkubator"""
+    return jsonify(profile_manager.get_profile())
+
+@app.route('/api/profile', methods=['POST'])
+def update_farmer_profile():
+    """Memperbarui profil peternak secara persisten"""
+    data = request.get_json(silent=True) or {}
+    res = profile_manager.update_profile(data)
     return jsonify(res)
 
 # -------------------------------------------------------------
