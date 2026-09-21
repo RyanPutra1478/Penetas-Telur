@@ -55,8 +55,16 @@ if ! command -v chromium-browser >/dev/null 2>&1; then
     CHROMIUM_BIN="chromium"
 fi
 
+# Reset status crash agar tidak muncul popup "Restore pages"
+sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/' ~/.config/chromium/Default/Preferences 2>/dev/null || true
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/Default/Preferences 2>/dev/null || true
+sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/' ~/.config/chromium/"Profile 1"/Preferences 2>/dev/null || true
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/"Profile 1"/Preferences 2>/dev/null || true
+
 $CHROMIUM_BIN \
+    --kiosk \
     --start-fullscreen \
+    --password-store=basic \
     --noerrdialogs \
     --disable-infobars \
     --no-first-run \
@@ -70,3 +78,4 @@ $CHROMIUM_BIN \
     --window-size=1024,600 \
     --window-position=0,0 \
     http://127.0.0.1:5001
+
