@@ -512,6 +512,69 @@ def disconnect_wifi_endpoint():
     return jsonify(res)
 
 # -------------------------------------------------------------
+# Kamera CCTV & Streaming Endpoint (Proxy / Feed)
+# -------------------------------------------------------------
+CAMERA_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "hardware", "camera_config.json")
+
+def load_camera_config():
+    default_cfg = {
+        "camera_url": "http://192.168.1.44:8080/video_feed",
+        "enabled": True,
+        "label": "Kamera Lemari Penetas (CCTV)"
+    }
+    if os.path.exists(CAMERA_CONFIG_PATH):
+        try:
+            with open(CAMERA_CONFIG_PATH, "r", encoding="utf-8") as f:
+                return {**default_cfg, **json.load(f)}
+        except Exception:
+            pass
+    return default_cfg
+
+def save_camera_config(cfg):
+    try:
+        with open(CAMERA_CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception as e:
+        logger.warning("Gagal menyimpan camera_config: %s", e)
+
+camera_config = load_camera_config()
+
+@app.route('/api/camera/config', methods=['GET', 'POST'])
+def handle_camera_config():
+    global camera_config
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        if "camera_url" in data:
+            camera_config["camera_url"] = str(data["camera_url"]).strip()
+        if "enabled" in data:
+            camera_config["enabled"] = bool(data["enabled"])
+        if "label" in data:
+            camera_config["label"] = str(data["label"]).strip()
+        save_camera_config(camera_config)
+    return jsonify(camera_config)
+
+@app.route('/api/camera/stream')
+def camera_stream_proxy():
+    """Proxy MJPEG video feed dari CCTV / Simulator ke layar HMI"""
+    cam_url = camera_config.get("camera_url", "")
+    if not cam_url or not camera_config.get("enabled", True):
+        return jsonify({"error": "Camera tidak aktif atau URL belum diatur"}), 404
+
+    def _proxy_gen():
+        try:
+            req = urllib.request.Request(cam_url, headers={"User-Agent": "Tetasco-Proxy/1.0"})
+            with urllib.request.urlopen(req, timeout=5) as stream:
+                while True:
+                    chunk = stream.read(4096)
+                    if not chunk:
+                        break
+                    yield chunk
+        except Exception as e:
+            logger.warning("Gagal streaming dari kamera %s: %s", cam_url, e)
+
+    return Response(_proxy_gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# -------------------------------------------------------------
 # Static Web Server (Production Build HMI)
 # -------------------------------------------------------------
 

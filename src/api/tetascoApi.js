@@ -350,5 +350,34 @@ export async function updateFarmerProfile(data) {
   }
 }
 
+/**
+ * Mengambil konfigurasi stream CCTV
+ */
+export async function getCameraConfig() {
+  try {
+    const res = await fetch(`${API_BASE}/camera/config`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal membaca config kamera:', err.message);
+    return { camera_url: 'http://192.168.1.44:8080/video_feed', enabled: true };
+  }
+}
 
-
+/**
+ * Mengubah URL stream atau konfigurasi kamera CCTV
+ */
+export async function updateCameraConfig(data) {
+  try {
+    const res = await fetch(`${API_BASE}/camera/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[TetascoAPI] Gagal memperbarui config kamera:', err.message);
+    return null;
+  }
+}
